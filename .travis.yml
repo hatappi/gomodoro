@@ -1,0 +1,11 @@
+language: go
+install:
+    - go get github.com/laher/goxc
+deploy:
+    provider: script
+    script: sh script/travisci/deploy.sh
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+
