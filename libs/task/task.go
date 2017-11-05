@@ -21,7 +21,7 @@ func init() {
 	if err != nil {
 		homeDir = "/opt"
 	}
-	filePath = homeDir + "/.gomodoro/tasks.yml"
+	filePath = homeDir + "/.gomodoro/tasks.toml"
 }
 
 func GetNameList() ([]string, error) {
@@ -44,10 +44,10 @@ func Save(taskList []string) error {
 		return err
 	}
 	// if direcotry does'nt exist, create directory
-	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Dir(filePath), 0644); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(filePath, buf.Bytes(), os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(filePath, buf.Bytes(), 0644); err != nil {
 		return err
 	}
 	return nil
