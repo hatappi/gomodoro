@@ -20,7 +20,7 @@ $ gomodoro
 
 **1.Select task**  
 ※ add task when there is no task.  
-The cursor moves up by pressing `j`, and down by pressing `k`.  
+The cursor moves down by pressing `j`, and up by pressing `k`.  
 select `Enter`.
 
 **2.Repeat working and break**  
