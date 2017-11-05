@@ -1,6 +1,8 @@
 language: go
 install:
     - go get github.com/laher/goxc
+    - go get -u github.com/golang/dep/cmd/dep
+    - dep ensure
 deploy:
     provider: script
     script: sh script/travisci/deploy.sh
