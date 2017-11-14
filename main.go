@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hatappi/gomodoro/config"
+	"github.com/hatappi/gomodoro/libs/beep"
 	"github.com/hatappi/gomodoro/libs/notification"
 	"github.com/hatappi/gomodoro/libs/selector"
 	"github.com/hatappi/gomodoro/libs/task"
@@ -81,10 +82,18 @@ func main() {
 				go toggl.PostTimeEntry(conf.Toggl, timerClient.TaskName, start, timerClient.Duration)
 			}
 			// notify
-			err := notification.NotifyDesktop("Gomodoro", "Finish!")
-			if err != nil {
-				panic(err)
-			}
+			go func() {
+				err := beep.Beep()
+				if err != nil {
+					panic(err)
+				}
+			}()
+			go func() {
+				err := notification.NotifyDesktop("Gomodoro", "Finish!")
+				if err != nil {
+					panic(err)
+				}
+			}()
 			timerClient.WaitForNext()
 			cnt += 1
 			timerClient.SetRemainSec(getTimerSec(cnt))
