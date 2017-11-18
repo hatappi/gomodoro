@@ -1,5 +1,6 @@
 language: go
 install:
+    - apt-get install -y libasound2-dev
     - go get github.com/laher/goxc
     - go get -u github.com/golang/dep/cmd/dep
     - go get -u github.com/jteeuwen/go-bindata/...
