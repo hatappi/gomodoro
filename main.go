@@ -1,17 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"flag"
-	"fmt"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/hatappi/gomodoro/config"
+	TaskSelectHandler "github.com/hatappi/gomodoro/handler/selection/task"
 	"github.com/hatappi/gomodoro/libs/beep"
 	"github.com/hatappi/gomodoro/libs/notification"
-	"github.com/hatappi/gomodoro/libs/selector"
 	"github.com/hatappi/gomodoro/libs/task"
 	"github.com/hatappi/gomodoro/libs/timer"
 	"github.com/hatappi/gomodoro/libs/toggl"
@@ -51,27 +49,16 @@ func main() {
 		panic(err)
 	}
 
-	selectTask := ""
-
-	if len(tasks) > 0 {
-		selectTask, err = selector.Task(tasks)
-		if err != nil {
-			panic(err)
-		}
+	selectTask, err := TaskSelectHandler.Get(tasks)
+	if err != nil {
+		panic(err)
 	}
-	if selectTask == "" {
-		fmt.Print("Please Input New Task > ")
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		selectTask = scanner.Text()
-		err := task.Save(append(tasks, selectTask))
-		if err != nil {
-			panic(err)
-		}
+	if !selectTask.IsSet {
+		os.Exit(0)
 	}
 
 	cnt := 1
-	timerClient = timer.NewTimer(selectTask, getTimerSec(cnt))
+	timerClient = timer.NewTimer(selectTask.Name, getTimerSec(cnt))
 	go func() {
 		// main loop
 		for {

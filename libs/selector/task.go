@@ -5,10 +5,13 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/hatappi/gomodoro/libs/models/task"
 	"github.com/nsf/termbox-go"
 )
 
-func Task(lines []string) (string, error) {
+func Task(lines []string) (*task.Task, error) {
+	task := new(task.Task)
+
 	clearend := "\x1b[0K"
 	fillstart := ""
 	fillend := "\x1b[0K\x1b[0m"
@@ -70,11 +73,12 @@ func Task(lines []string) (string, error) {
 		ev := termbox.PollEvent()
 		switch ev.Key {
 		case termbox.KeyCtrlC:
-			return "", nil
+			return task, nil
 		case termbox.KeyEsc:
-			return "", nil
+			return task, nil
 		case termbox.KeyEnter:
-			return qlines[row], nil
+			task.SetName(qlines[row])
+			return task, nil
 		default:
 			switch ev.Ch {
 			case 106: // j
@@ -86,7 +90,8 @@ func Task(lines []string) (string, error) {
 					row--
 				}
 			case 110: // n
-				return "", nil
+				task.SetName("")
+				return task, nil
 			}
 		}
 	}
