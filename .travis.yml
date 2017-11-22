@@ -3,13 +3,7 @@ services:
     - docker
 deploy:
     provider: script
-    script: |
-      docker run \
-        -v `pwd`:/go/src/github.com/hatappi/gomodoro \
-        -w /go/src/github.com/hatappi/gomodoro \
-        hatappi/gomodoro-crosscompile \
-        sh script/travisci/build.sh && \
-      sh script/travisci/deploy.sh
+    script: docker run -v `pwd`:/go/src/github.com/hatappi/gomodoro -w /go/src/github.com/hatappi/gomodoro hatappi/gomodoro-crosscompile sh script/travisci/build.sh && sh script/travisci/deploy.sh
     skip_cleanup: true
     on:
       tags: true
