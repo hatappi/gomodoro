@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# darwin
+GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 CC=o64-clang go build -o pkg/gomodoro-darwin-amd64
+GOOS=darwin GOARCH=386 CGO_ENABLED=1 CC=o32-clang go build -o pkg/gomodoro-darwin-386
+# linux
+GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o pkg/gomodoro-linux-amd64
+GOOS=linux GOARCH=386 CGO_ENABLED=1 go build -o pkg/gomodoro-linux-386
+

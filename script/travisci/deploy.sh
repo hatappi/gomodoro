@@ -1,19 +1,14 @@
 #!/bin/sh -ex
 VERSION=`echo $TRAVIS_TAG | sed -e "s/v//g"`
 
+echo "*** Compression start ***"
+
+ls pkg | grep -v tar.gz | xargs -I{} tar -zcvf pkg/{}-${VERSION}.tar.gz pkg/{}
+
 echo "*** $VERSION deploy start ***"
 
-goxc \
-  -arch="386 amd64" \
-  -os="linux darwin" \
-  -+tasks=clean,compile,archive \
-  -o="{{.Dest}}{{.PS}}{{.Version}}{{.PS}}gomodoro-{{.Os}}-{{.Arch}}{{.Ext}}" \
-  -resources-exclude="LICENSE,README.md" \
-  -pv=$VERSION \
-  publish-github \
-  -owner=hatappi \
-  -repository=gomodoro \
-  -apikey=$GITHUB_TOKEN \
-  -include="*"
+export GITHUB_TOKEN=$GITHUB_TOKEN
+ghr $TRAVIS_TAG pkg/
 
-echo "*** $VERSION deploy end ***"
+echo "*** deploy end ***"
+
