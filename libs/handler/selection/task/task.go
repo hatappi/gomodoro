@@ -3,21 +3,20 @@ package task
 import (
 	"os"
 
-	taskModel "github.com/hatappi/gomodoro/libs/models/task"
+	"github.com/hatappi/gomodoro/libs/models/task"
 	"github.com/hatappi/gomodoro/libs/selector"
-	"github.com/hatappi/gomodoro/libs/task"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
 
-func Get(tasks []string) (*taskModel.Task, error) {
+func Get(taskList *task.TaskList) (*task.Task, error) {
 	var (
-		selectTask *taskModel.Task
+		selectTask *task.Task
 		err        error
 	)
 
-	if len(tasks) > 0 {
-		selectTask, err = selector.Task(tasks)
+	if len(taskList.NameList) > 0 {
+		selectTask, err = selector.Task(taskList.NameList)
 		if err != nil || !selectTask.IsSet {
 			return selectTask, err
 		}
@@ -29,7 +28,7 @@ func Get(tasks []string) (*taskModel.Task, error) {
 
 	newTaskName := createNewTask()
 	if newTaskName != "" {
-		err := task.Save(append(tasks, newTaskName))
+		err := taskList.Save(newTaskName)
 		if err != nil {
 			return selectTask, err
 		}

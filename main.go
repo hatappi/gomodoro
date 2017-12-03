@@ -11,7 +11,7 @@ import (
 	"github.com/hatappi/gomodoro/libs/beep"
 	TaskSelectHandler "github.com/hatappi/gomodoro/libs/handler/selection/task"
 	"github.com/hatappi/gomodoro/libs/notification"
-	"github.com/hatappi/gomodoro/libs/task"
+	"github.com/hatappi/gomodoro/libs/models/task"
 	"github.com/hatappi/gomodoro/libs/timer"
 	"github.com/hatappi/gomodoro/libs/toggl"
 	"github.com/mitchellh/go-homedir"
@@ -59,12 +59,12 @@ func init() {
 }
 
 func main() {
-	tasks, err := task.GetNameList()
+	taskList, err := task.GetNameList(conf.AppDir)
 	if err != nil {
 		panic(err)
 	}
 
-	selectTask, err := TaskSelectHandler.Get(tasks)
+	selectTask, err := TaskSelectHandler.Get(taskList)
 	if err != nil {
 		panic(err)
 	}
