@@ -27,6 +27,22 @@ func Get(tasks []string) (*taskModel.Task, error) {
 		return selectTask, nil
 	}
 
+	newTaskName := createNewTask()
+	if newTaskName != "" {
+		err := task.Save(append(tasks, newTaskName))
+		if err != nil {
+			return selectTask, err
+		}
+		selectTask.SetName(newTaskName)
+	}
+
+	if selectTask.Name == "" {
+		selectTask.IsSet = false
+	}
+	return selectTask, nil
+}
+
+func createNewTask() string {
 	termbox.Init()
 	defer os.Stdout.Write([]byte("\x1b[?25h\r\x1b[0J"))
 	newTaskName := []rune{}
@@ -42,20 +58,14 @@ func Get(tasks []string) (*taskModel.Task, error) {
 		ev := termbox.PollEvent()
 		switch ev.Key {
 		case termbox.KeyEsc:
-			selectTask.IsSet = false
-			return selectTask, nil
+			return ""
 		case termbox.KeySpace:
 			newTaskName = append(newTaskName, ' ')
 		case termbox.KeyEnter:
 			if len(newTaskName) == 0 {
 				continue
 			}
-			selectTask.Name = string(newTaskName)
-			err := task.Save(append(tasks, selectTask.Name))
-			if err != nil {
-				return selectTask, err
-			}
-			return selectTask, nil
+			return string(newTaskName)
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
 			if len(newTaskName) > 0 {
 				newTaskName = newTaskName[:len(newTaskName)-1]
@@ -65,5 +75,5 @@ func Get(tasks []string) (*taskModel.Task, error) {
 			newTaskName = append(newTaskName, ev.Ch)
 		}
 	}
-	return selectTask, err
+	return string(newTaskName)
 }
