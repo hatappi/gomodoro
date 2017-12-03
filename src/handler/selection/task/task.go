@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	taskModel "github.com/hatappi/gomodoro/libs/models/task"
-	"github.com/hatappi/gomodoro/libs/selector"
-	"github.com/hatappi/gomodoro/libs/task"
+	taskModel "github.com/hatappi/gomodoro/src/models/task"
+	"github.com/hatappi/gomodoro/src/selector"
+	"github.com/hatappi/gomodoro/src/task"
 )
 
 func Get(tasks []string) (*taskModel.Task, error) {

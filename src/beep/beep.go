@@ -7,7 +7,7 @@ import (
 
 	"github.com/hajimehoshi/go-mp3"
 	"github.com/hajimehoshi/oto"
-	"github.com/hatappi/gomodoro/libs/assets"
+	"github.com/hatappi/gomodoro/src/assets"
 )
 
 func Beep() error {

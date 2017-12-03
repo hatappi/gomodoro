@@ -4,11 +4,11 @@ depend:
 	go get -u github.com/jteeuwen/go-bindata/...
 	dep ensure -v
 bindata:
-	go-bindata -pkg assets -o libs/assets/assets.go assets/...
+	go-bindata -pkg assets -o src/assets/assets.go assets/...
 build:
 	go build -o dest/gomodoro cmd/gomodoro/gomodoro.go
 fmt:
-	go fmt $$(go list ./... | grep -v -e 'gomodoro\/libs\/assets\/' -e 'gomodoro\/vendor\/')
+	go fmt $$(go list ./... | grep -v -e 'gomodoro\/src\/assets\/' -e 'gomodoro\/vendor\/')
 run:
 	go run main.go
 build_crosscompile_image:

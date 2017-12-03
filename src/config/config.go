@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
-	"github.com/hatappi/gomodoro/libs/toggl/config"
+	"github.com/hatappi/gomodoro/src/toggl/config"
 )
 
 type Config struct {

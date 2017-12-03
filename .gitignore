@@ -3,5 +3,5 @@ vendor
 pkg
 
 # bindata
-libs/assets/assets.go
+src/assets/assets.go
 

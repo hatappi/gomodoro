@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/hatappi/gomodoro/libs/models/task"
+	"github.com/hatappi/gomodoro/src/models/task"
 	"github.com/nsf/termbox-go"
 )
 

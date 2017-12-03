@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hatappi/gomodoro/libs/drawer"
+	"github.com/hatappi/gomodoro/src/drawer"
 )
 
 type Timer struct {

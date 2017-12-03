@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hatappi/gomodoro/libs/toggl/config"
+	"github.com/hatappi/gomodoro/src/toggl/config"
 )
 
 const AppName = "gomodoro"
