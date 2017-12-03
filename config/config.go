@@ -6,7 +6,11 @@ import (
 )
 
 type Config struct {
-	Toggl *toggl.Config
+	Toggl         *toggl.Config
+	AppDir        string
+	LongBreakSec  int
+	ShortBreakSec int
+	WorkSec       int
 }
 
 func LoadConfig(path string) *Config {

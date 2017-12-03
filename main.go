@@ -2,15 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/hatappi/gomodoro/config"
-	TaskSelectHandler "github.com/hatappi/gomodoro/handler/selection/task"
 	"github.com/hatappi/gomodoro/libs/beep"
+	TaskSelectHandler "github.com/hatappi/gomodoro/libs/handler/selection/task"
+	"github.com/hatappi/gomodoro/libs/models/task"
 	"github.com/hatappi/gomodoro/libs/notification"
-	"github.com/hatappi/gomodoro/libs/task"
 	"github.com/hatappi/gomodoro/libs/timer"
 	"github.com/hatappi/gomodoro/libs/toggl"
 	"github.com/mitchellh/go-homedir"
@@ -20,7 +21,7 @@ import (
 var (
 	wg          sync.WaitGroup
 	timerClient *timer.Timer
-	configPath  string
+	conf        *config.Config
 	start       time.Time
 )
 
@@ -29,27 +30,41 @@ const (
 )
 
 func init() {
-	flag.StringVar(&configPath, "config", "", "config path")
-	flag.Parse()
-
-	if configPath == "" {
-		homeDir, err := homedir.Dir()
-		if err != nil {
-			panic(err)
-		}
-		configPath = homeDir + "/.gomodoro/config.toml"
-	}
-}
-
-func main() {
-	conf := config.LoadConfig(configPath)
-
-	tasks, err := task.GetNameList()
+	homeDir, err := homedir.Dir()
 	if err != nil {
 		panic(err)
 	}
 
-	selectTask, err := TaskSelectHandler.Get(tasks)
+	confPath := flag.String("c", fmt.Sprintf("%s/.gomodoro/config.toml", homeDir), "config path")
+	appDir := flag.String("a", fmt.Sprintf("%s/.gomodoro", homeDir), "application directory")
+	longBreakSec := flag.Int("l", 15*60, "long break sec")
+	shortBreakSec := flag.Int("s", 5*60, "short break sec")
+	workSec := flag.Int("w", 25*60, "work sec")
+	flag.Parse()
+
+	conf = config.LoadConfig(*confPath)
+
+	if conf.AppDir == "" {
+		conf.AppDir = *appDir
+	}
+	if conf.LongBreakSec == 0 {
+		conf.LongBreakSec = *longBreakSec
+	}
+	if conf.ShortBreakSec == 0 {
+		conf.ShortBreakSec = *shortBreakSec
+	}
+	if conf.WorkSec == 0 {
+		conf.WorkSec = *workSec
+	}
+}
+
+func main() {
+	taskList, err := task.GetNameList(conf.AppDir)
+	if err != nil {
+		panic(err)
+	}
+
+	selectTask, err := TaskSelectHandler.Get(taskList)
 	if err != nil {
 		panic(err)
 	}
@@ -113,12 +128,12 @@ func getTimerSec(cnt int) int {
 	setNum := cnt / 2
 	if setNum != 0 && cnt%2 == 0 && setNum%longBreakSetInterval == 0 {
 		// long break
-		return 15 * 60
+		return conf.LongBreakSec
 	} else if cnt%2 == 0 {
 		// short break
-		return 5 * 60
+		return conf.ShortBreakSec
 	} else {
 		// work
-		return 25 * 60
+		return conf.WorkSec
 	}
 }
