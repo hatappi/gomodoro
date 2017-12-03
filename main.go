@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/hatappi/gomodoro/config"
-	TaskSelectHandler "github.com/hatappi/gomodoro/handler/selection/task"
 	"github.com/hatappi/gomodoro/libs/beep"
+	TaskSelectHandler "github.com/hatappi/gomodoro/libs/handler/selection/task"
 	"github.com/hatappi/gomodoro/libs/notification"
 	"github.com/hatappi/gomodoro/libs/task"
 	"github.com/hatappi/gomodoro/libs/timer"
