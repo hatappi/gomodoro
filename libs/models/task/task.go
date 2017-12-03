@@ -20,7 +20,6 @@ func (t *Task) SetName(name string) {
 	t.IsSet = true
 }
 
-
 type TaskList struct {
 	NameList []string
 	FilePath string
