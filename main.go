@@ -1,139 +1,69 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"sync"
-	"time"
 
-	"github.com/hatappi/gomodoro/config"
-	"github.com/hatappi/gomodoro/libs/beep"
-	TaskSelectHandler "github.com/hatappi/gomodoro/libs/handler/selection/task"
-	"github.com/hatappi/gomodoro/libs/models/task"
-	"github.com/hatappi/gomodoro/libs/notification"
-	"github.com/hatappi/gomodoro/libs/timer"
-	"github.com/hatappi/gomodoro/libs/toggl"
+	"github.com/hatappi/gomodoro/commands"
 	"github.com/mitchellh/go-homedir"
-	"github.com/nsf/termbox-go"
+	"github.com/urfave/cli"
 )
 
 var (
-	wg          sync.WaitGroup
-	timerClient *timer.Timer
-	conf        *config.Config
-	start       time.Time
-)
-
-const (
-	longBreakSetInterval = 3
+	homeDir string
+	err     error
 )
 
 func init() {
-	homeDir, err := homedir.Dir()
+	homeDir, err = homedir.Dir()
 	if err != nil {
 		panic(err)
-	}
-
-	confPath := flag.String("c", fmt.Sprintf("%s/.gomodoro/config.toml", homeDir), "config path")
-	appDir := flag.String("a", fmt.Sprintf("%s/.gomodoro", homeDir), "application directory")
-	longBreakSec := flag.Int("l", 15*60, "long break sec")
-	shortBreakSec := flag.Int("s", 5*60, "short break sec")
-	workSec := flag.Int("w", 25*60, "work sec")
-	flag.Parse()
-
-	conf = config.LoadConfig(*confPath)
-
-	if conf.AppDir == "" {
-		conf.AppDir = *appDir
-	}
-	if conf.LongBreakSec == 0 {
-		conf.LongBreakSec = *longBreakSec
-	}
-	if conf.ShortBreakSec == 0 {
-		conf.ShortBreakSec = *shortBreakSec
-	}
-	if conf.WorkSec == 0 {
-		conf.WorkSec = *workSec
 	}
 }
 
 func main() {
-	taskList, err := task.GetNameList(conf.AppDir)
-	if err != nil {
-		panic(err)
+	app := cli.NewApp()
+	app.Name = "Gomodoro"
+	app.Usage = "Pomodoro Technique By Go"
+	app.Version = "0.2.0"
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "conf-path, c",
+			Value: fmt.Sprintf("%s/.gomodoro/config.toml", homeDir),
+			Usage: "gomodoro config path",
+		},
+		cli.StringFlag{
+			Name:  "app-dir, a",
+			Value: fmt.Sprintf("%s/.gomodoro", homeDir),
+			Usage: "application directory",
+		},
 	}
 
-	selectTask, err := TaskSelectHandler.Get(taskList)
-	if err != nil {
-		panic(err)
-	}
-	if !selectTask.IsSet {
-		os.Exit(0)
+	app.Commands = []cli.Command{
+		{
+			Name:  "start",
+			Usage: "pomodoro start",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "long-break-sec, l",
+					Value: 15 * 60,
+					Usage: "long break (s)",
+				},
+				cli.IntFlag{
+					Name:  "short-break-sec, s",
+					Value: 5 * 60,
+					Usage: "short break (s)",
+				},
+				cli.IntFlag{
+					Name:  "work-sec, w",
+					Value: 25 * 60,
+					Usage: "work (s)",
+				},
+			},
+			Action: commands.Start,
+		},
 	}
 
-	cnt := 1
-	timerClient = timer.NewTimer(selectTask.Name, getTimerSec(cnt))
-	go func() {
-		// main loop
-		for {
-			start = time.Now()
-			timerClient.Start()
-			// if work time
-			if cnt%2 == 1 {
-				go toggl.PostTimeEntry(conf.Toggl, timerClient.TaskName, start, timerClient.Duration)
-			}
-			// notify
-			go func() {
-				err := beep.Beep()
-				if err != nil {
-					panic(err)
-				}
-			}()
-			go func() {
-				err := notification.NotifyDesktop("Gomodoro", "Finish!")
-				if err != nil {
-					panic(err)
-				}
-			}()
-			timerClient.WaitForNext()
-			cnt += 1
-			timerClient.SetRemainSec(getTimerSec(cnt))
-		}
-	}()
-	go watiKey()
-	wg.Add(1)
-	wg.Wait()
-	timerClient.Close()
-	os.Exit(1)
-}
-
-func watiKey() {
-	for {
-		ev := termbox.PollEvent()
-		switch ev.Key {
-		case termbox.KeyCtrlC:
-			wg.Done()
-			return
-		case termbox.KeyEsc:
-			wg.Done()
-			return
-		case termbox.KeyEnter:
-			timerClient.Toggle()
-		}
-	}
-}
-
-func getTimerSec(cnt int) int {
-	setNum := cnt / 2
-	if setNum != 0 && cnt%2 == 0 && setNum%longBreakSetInterval == 0 {
-		// long break
-		return conf.LongBreakSec
-	} else if cnt%2 == 0 {
-		// short break
-		return conf.ShortBreakSec
-	} else {
-		// work
-		return conf.WorkSec
-	}
+	app.Run(os.Args)
 }
