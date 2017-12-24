@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -90,12 +92,32 @@ func Start(c *cli.Context) error {
 			timerClient.SetRemainSec(getTimerSec(cnt))
 		}
 	}()
-
+	go openSocket(c)
 	go watiKey()
 	wg.Add(1)
 	wg.Wait()
 	timerClient.Close()
 	return nil
+}
+
+func openSocket(c *cli.Context) {
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", c.GlobalString("bind"), c.GlobalInt("port")))
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			panic(err)
+		}
+		defer conn.Close()
+
+		min, sec := timerClient.GetRemainMinSec()
+		sendMsg := fmt.Sprintf("%02d:%02d", min, sec)
+		conn.Write([]byte(sendMsg))
+	}
 }
 
 func watiKey() {
