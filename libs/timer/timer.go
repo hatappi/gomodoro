@@ -37,13 +37,18 @@ func (t *Timer) Start() {
 		if !runnable {
 			runnable = <-ch
 		}
-		t.DrawerClient.Draw(t.RemainSec/60, t.RemainSec%60)
+		min, sec := t.GetRemainMinSec()
+		t.DrawerClient.Draw(min, sec)
 		time.Sleep(time.Second)
-		t.RemainSec -= 1
-		if t.RemainSec < 0 {
+		if t.RemainSec <= 0 {
 			return
 		}
+		t.RemainSec -= 1
 	}
+}
+
+func (t *Timer) GetRemainMinSec() (int, int) {
+	return t.RemainSec / 60, t.RemainSec % 60
 }
 
 func (t *Timer) WaitForNext() {
