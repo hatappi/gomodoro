@@ -11,6 +11,7 @@ func Remain(c *cli.Context) error {
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.GlobalString("bind"), c.GlobalInt("port")))
 	if err != nil {
 		if c.Bool("ignore-error") {
+			fmt.Printf("--:--")
 			return nil
 		}
 		return cli.NewExitError(err, 1)
@@ -22,11 +23,12 @@ func Remain(c *cli.Context) error {
 	_, err = conn.Read(reply)
 	if err != nil {
 		if c.Bool("ignore-error") {
+			fmt.Printf("--:--")
 			return nil
 		}
 		return cli.NewExitError(err, 1)
 	}
 
-	fmt.Printf("Gomodoro remain %s", reply)
+	fmt.Printf("%s", reply)
 	return nil
 }

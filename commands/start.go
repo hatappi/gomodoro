@@ -117,6 +117,7 @@ func openSocket(c *cli.Context) {
 		min, sec := timerClient.GetRemainMinSec()
 		sendMsg := fmt.Sprintf("%02d:%02d", min, sec)
 		conn.Write([]byte(sendMsg))
+		conn.Close()
 	}
 }
 
