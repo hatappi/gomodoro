@@ -8,7 +8,7 @@ import (
 )
 
 func Remain(c *cli.Context) error {
-	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", c.GlobalString("bind"), c.GlobalInt("port")))
+	conn, err := net.Dial("unix", c.GlobalString("socket-path"))
 	if err != nil {
 		if c.Bool("ignore-error") {
 			fmt.Printf("--:--")

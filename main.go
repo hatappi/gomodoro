@@ -39,12 +39,9 @@ func main() {
 			Usage: "application directory",
 		},
 		cli.StringFlag{
-			Name:  "bind, b",
-			Value: "0.0.0.0",
-		},
-		cli.IntFlag{
-			Name:  "port, p",
-			Value: 1991,
+			Name:  "socket-path, s",
+			Value: "/tmp/gomodoro.sock",
+			Usage: "gomodoro socket path",
 		},
 	}
 

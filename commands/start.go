@@ -48,6 +48,8 @@ func initConfig(c *cli.Context) {
 
 func Start(c *cli.Context) error {
 	initConfig(c)
+	socketPath := c.GlobalString("socket-path")
+	defer os.Remove(socketPath)
 
 	taskList, err := task.GetNameList(conf.AppDir)
 	if err != nil {
@@ -92,7 +94,7 @@ func Start(c *cli.Context) error {
 			timerClient.SetRemainSec(getTimerSec(cnt))
 		}
 	}()
-	go openSocket(c)
+	go openSocket(socketPath)
 	go watiKey()
 	wg.Add(1)
 	wg.Wait()
@@ -100,24 +102,25 @@ func Start(c *cli.Context) error {
 	return nil
 }
 
-func openSocket(c *cli.Context) {
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", c.GlobalString("bind"), c.GlobalInt("port")))
+func openSocket(socketPath string) {
+	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		panic(err)
 	}
-	defer listener.Close()
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			panic(err)
 		}
-		defer conn.Close()
 
-		min, sec := timerClient.GetRemainMinSec()
-		sendMsg := fmt.Sprintf("%02d:%02d", min, sec)
-		conn.Write([]byte(sendMsg))
-		conn.Close()
+		go func() {
+			defer conn.Close()
+
+			min, sec := timerClient.GetRemainMinSec()
+			sendMsg := fmt.Sprintf("%02d:%02d", min, sec)
+			conn.Write([]byte(sendMsg))
+		}()
 	}
 }
 
