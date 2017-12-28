@@ -14,8 +14,10 @@ https://github.com/hatappi/gomodoro/releases
 
 ## Usage
 
-```
-$ gomodoro
+### start command
+
+```bash
+$ gomodoro start
 ```
 
 **1.Select task**  
@@ -28,8 +30,27 @@ When remaining time runs out, please press any key.
 The next step begins.
 At this time only working time is recorded in [toggl](https://toggl.com/).
 
-## Option
-- config: gomodoro config path. default `~/.gomodoro/config.toml`
+#### options
+- `--long-break-sec value, -l value`:  long break (s) (default: 900)
+- `--short-break-sec value, -s value`: short break (s) (default: 300)
+- `--work-sec value, -w value`: work (s) (default: 1500)
+
+### remain command
+
+display remain time.
+
+````bash
+$ gomodoro remain
+````
+
+
+#### options
+- `--ignore-error, -i`: ignore errors
+
+## global options
+- `--conf-path value, -c value`: gomodoro config path (default: "~/.gomodoro/config.toml")
+- `--app-dir value, -a value`: application directory (default: "~/.gomodoro")
+- `--socket-path value, -s value`: gomodoro socket path (default: "/tmp/gomodoro.sock")
 
 ## Config
 
