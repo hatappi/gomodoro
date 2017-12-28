@@ -38,6 +38,11 @@ func main() {
 			Value: fmt.Sprintf("%s/.gomodoro", homeDir),
 			Usage: "application directory",
 		},
+		cli.StringFlag{
+			Name:  "socket-path, s",
+			Value: "/tmp/gomodoro.sock",
+			Usage: "gomodoro socket path",
+		},
 	}
 
 	app.Commands = []cli.Command{
@@ -62,6 +67,16 @@ func main() {
 				},
 			},
 			Action: commands.Start,
+		},
+		{
+			Name:  "remain",
+			Usage: "Get Remain",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name: "ignore-error, i",
+				},
+			},
+			Action: commands.Remain,
 		},
 	}
 

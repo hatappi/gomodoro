@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -46,6 +48,8 @@ func initConfig(c *cli.Context) {
 
 func Start(c *cli.Context) error {
 	initConfig(c)
+	socketPath := c.GlobalString("socket-path")
+	defer os.Remove(socketPath)
 
 	taskList, err := task.GetNameList(conf.AppDir)
 	if err != nil {
@@ -90,12 +94,34 @@ func Start(c *cli.Context) error {
 			timerClient.SetRemainSec(getTimerSec(cnt))
 		}
 	}()
-
+	go openSocket(socketPath)
 	go watiKey()
 	wg.Add(1)
 	wg.Wait()
 	timerClient.Close()
 	return nil
+}
+
+func openSocket(socketPath string) {
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			panic(err)
+		}
+
+		go func() {
+			defer conn.Close()
+
+			min, sec := timerClient.GetRemainMinSec()
+			sendMsg := fmt.Sprintf("%02d:%02d", min, sec)
+			conn.Write([]byte(sendMsg))
+		}()
+	}
 }
 
 func watiKey() {
