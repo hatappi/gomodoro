@@ -1,24 +1,27 @@
 package beep
 
 import (
-	"bytes"
 	"io"
 	"io/ioutil"
 
 	"github.com/hajimehoshi/go-mp3"
 	"github.com/hajimehoshi/oto"
-	"github.com/hatappi/gomodoro/libs/assets"
+	_ "github.com/hatappi/gomodoro/libs/assets/statik"
+	"github.com/rakyll/statik/fs"
 )
 
 func Beep() error {
-	// go-bindata
-	b, err := assets.Asset("assets/sounds/bell.mp3")
+	statikFS, err := fs.New()
 	if err != nil {
 		return err
 	}
 
-	r := bytes.NewReader(b)
-	c := ioutil.NopCloser(r)
+	b, err := statikFS.Open("/sounds/bell.mp3")
+	if err != nil {
+		return err
+	}
+
+	c := ioutil.NopCloser(b)
 	d, err := mp3.NewDecoder(c)
 	if err != nil {
 		return err

@@ -44,3 +44,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/nsf/termbox-go"
+
+[[constraint]]
+  name = "github.com/rakyll/statik"
+  version = "0.1.4"

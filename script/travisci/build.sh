@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
 make depend
-make bindata
+make build-assets
 rm -rf pkg
 bin/crosscompile
 

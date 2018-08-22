@@ -2,56 +2,107 @@
 
 
 [[projects]]
+  digest = "1:289dd4d7abfb3ad2b5f728fbe9b1d5c1bf7d265a3eb9ef92869af1f7baba4c7a"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
+  pruneopts = ""
   revision = "b26d9c308763d68093482582cea63d69be07a0f0"
   version = "v0.3.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:f1648d325872983461c860bc6641d8aaf8880f66856a5e0d9b39247556737d0d"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
+  pruneopts = ""
   revision = "444abdf920945de5d4a977b572bcc6c674d1e4eb"
 
 [[projects]]
   branch = "master"
+  digest = "1:e6823c78c9ab0ef1db8011992df46aae8e155be2640bbbd99b35f36182162ab4"
   name = "github.com/hajimehoshi/go-mp3"
-  packages = [".","internal/bits","internal/imdct"]
+  packages = [
+    ".",
+    "internal/bits",
+    "internal/imdct",
+  ]
+  pruneopts = ""
   revision = "84119c148001d072b353adb0988547d5c501a5e9"
 
 [[projects]]
   branch = "master"
+  digest = "1:f5baf84e6e38e3ad9415489e4cb392e0f69bb2be78b68ec038c257baf4805b3e"
   name = "github.com/hajimehoshi/oto"
-  packages = [".","internal/jni"]
+  packages = [
+    ".",
+    "internal/jni",
+  ]
+  pruneopts = ""
   revision = "6f9c251e924d95c4b939907ad332166d3ec14c4e"
 
 [[projects]]
+  digest = "1:81e673df85e765593a863f67cba4544cf40e8919590f04d67664940786c2b61a"
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
+  pruneopts = ""
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
   version = "v0.0.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:59d11e81d6fdd12a771321696bb22abdd9a94d26ac864787e98c9b419e428734"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
+  pruneopts = ""
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
   branch = "master"
+  digest = "1:6e61de1700bbf3fb3e23825ac7806caddd20e61f07677b640b13a5e3676c1baa"
   name = "github.com/nsf/termbox-go"
   packages = ["."]
+  pruneopts = ""
   revision = "aa4a75b1c20a2b03751b1a9f7e41d58bd6f71c43"
 
 [[projects]]
+  digest = "1:02c88d3223a9773378b00fd5fd8555e679de915235c86c2696b0f9446e6fa835"
+  name = "github.com/rakyll/statik"
+  packages = ["fs"]
+  pruneopts = ""
+  revision = "aa8a7b1baecd0f31a436bf7956fcdcc609a83035"
+  version = "v0.1.4"
+
+[[projects]]
+  digest = "1:e85837cb04b78f61688c6eba93ea9d14f60d611e2aaf8319999b1a60d2dafbfa"
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  pruneopts = ""
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
   branch = "master"
+  digest = "1:cb46278e3397cea699f02fafa9aad6af9ec9beb40da9f4c47ae85bf7e259192e"
   name = "golang.org/x/mobile"
-  packages = ["exp/audio/al","internal/mobileinit"]
+  packages = [
+    "exp/audio/al",
+    "internal/mobileinit",
+  ]
+  pruneopts = ""
   revision = "2a5bbaa217b81928ebbba5ab97e9a4e1449b69a7"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d4869cbc560ded95ec47af6ac9d08b9bd0757272e026f4370a5405497c71af32"
+  input-imports = [
+    "github.com/BurntSushi/toml",
+    "github.com/hajimehoshi/go-mp3",
+    "github.com/hajimehoshi/oto",
+    "github.com/mattn/go-runewidth",
+    "github.com/mitchellh/go-homedir",
+    "github.com/nsf/termbox-go",
+    "github.com/rakyll/statik/fs",
+    "github.com/urfave/cli",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
