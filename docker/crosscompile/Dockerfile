@@ -1,4 +1,4 @@
-FROM dockercore/golang-cross
+FROM dockercore/golang-cross:1.10.3
 MAINTAINER Yusaku Hatanaka (hatappi)
 
 # install amd64 packages

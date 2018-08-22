@@ -1,7 +1,7 @@
 depend:
 	go get -u github.com/tcnksm/ghr
 	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/rakyll/statik/...
+	go get -u github.com/rakyll/statik
 	dep ensure -v
 
 build-assets:
