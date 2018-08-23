@@ -72,23 +72,28 @@ func Start(c *cli.Context) error {
 		for {
 			start = time.Now()
 			timerClient.Start()
+
 			// if work time
 			if cnt%2 == 1 {
-				go toggl.PostTimeEntry(conf.Toggl, timerClient.TaskName, start, timerClient.Duration)
+				go toggl.PostTimeEntry(conf.Toggl, timerClient.TaskName, start, timerClient.ElapsedSec)
 			}
-			// notify
+
+			// beep
 			go func() {
 				err := beep.Beep()
 				if err != nil {
 					panic(err)
 				}
 			}()
+
+			// notify
 			go func() {
 				err := notification.NotifyDesktop("Gomodoro", "Finish!")
 				if err != nil {
 					panic(err)
 				}
 			}()
+
 			timerClient.WaitForNext()
 			cnt += 1
 			timerClient.SetRemainSec(getTimerSec(cnt))
@@ -136,6 +141,10 @@ func watiKey() {
 			return
 		case termbox.KeyEnter:
 			timerClient.Toggle()
+		default:
+			if ev.Ch == 101 { // e
+				timerClient.End()
+			}
 		}
 	}
 }

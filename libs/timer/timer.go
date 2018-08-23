@@ -10,7 +10,7 @@ import (
 type Timer struct {
 	TaskName     string
 	RemainSec    int
-	Duration     int
+	ElapsedSec   int
 	DrawerClient *drawer.Drawer
 }
 
@@ -21,10 +21,10 @@ var (
 
 func NewTimer(taskName string, remainSec int) *Timer {
 	return &Timer{
-		taskName,
-		remainSec,
-		remainSec,
-		drawer.NewDrawer(taskName),
+		TaskName:     taskName,
+		RemainSec:    remainSec,
+		ElapsedSec:   0,
+		DrawerClient: drawer.NewDrawer(taskName),
 	}
 }
 
@@ -43,8 +43,13 @@ func (t *Timer) Start() {
 		if t.RemainSec <= 0 {
 			return
 		}
+		t.ElapsedSec += 1
 		t.RemainSec -= 1
 	}
+}
+
+func (t *Timer) End() {
+	t.RemainSec = 0
 }
 
 func (t *Timer) GetRemainMinSec() (int, int) {
@@ -67,5 +72,4 @@ func (t *Timer) Toggle() {
 
 func (t *Timer) SetRemainSec(sec int) {
 	t.RemainSec = sec
-	t.Duration = sec
 }
