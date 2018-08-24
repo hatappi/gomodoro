@@ -39,7 +39,7 @@ func (d *Drawer) Close() {
 	termbox.Close()
 }
 
-func (d *Drawer) Draw(min, sec int) error {
+func (d *Drawer) Draw(min, sec int, color termbox.Attribute) error {
 	strMin = fmt.Sprintf("%02d", min)
 	strSec = fmt.Sprintf("%02d", sec)
 
@@ -65,11 +65,11 @@ func (d *Drawer) Draw(min, sec int) error {
 			return err
 		}
 		arr := Num2StrArray(num)
-		setCell(arr)
+		setCell(arr, color)
 	}
 
 	// draw separator
-	setCell(SeparatorStrArray())
+	setCell(SeparatorStrArray(), color)
 
 	// draw min
 	for _, i := range strings.Split(strSec, "") {
@@ -78,7 +78,7 @@ func (d *Drawer) Draw(min, sec int) error {
 			return err
 		}
 		arr := Num2StrArray(num)
-		setCell(arr)
+		setCell(arr, color)
 	}
 
 	// draw timer
@@ -110,7 +110,7 @@ func (d *Drawer) ClearMessage() {
 	termbox.Flush()
 }
 
-func setCell(arr []string) {
+func setCell(arr []string, color termbox.Attribute) {
 	x, y := firstX, firstY
 	for _, txt := range arr {
 		if txt == "\n" {
@@ -119,7 +119,7 @@ func setCell(arr []string) {
 			continue
 		}
 		if txt == "#" {
-			termbox.SetCell(x, y, ' ', termbox.ColorBlue, termbox.ColorBlue)
+			termbox.SetCell(x, y, ' ', color, color)
 		}
 		x += 1
 	}

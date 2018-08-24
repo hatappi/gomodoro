@@ -19,10 +19,12 @@ import (
 )
 
 var (
-	wg          sync.WaitGroup
-	timerClient *timer.Timer
-	conf        *config.Config
-	start       time.Time
+	wg           sync.WaitGroup
+	timerClient  *timer.Timer
+	conf         *config.Config
+	start        time.Time
+	taskList     *task.TaskList
+	keyInputStop bool
 )
 
 const (
@@ -51,7 +53,9 @@ func Start(c *cli.Context) error {
 	socketPath := c.GlobalString("socket-path")
 	defer os.Remove(socketPath)
 
-	taskList, err := task.GetNameList(conf.AppDir)
+	var err error
+
+	taskList, err = task.GetNameList(conf.AppDir)
 	if err != nil {
 		return err
 	}
@@ -94,8 +98,25 @@ func Start(c *cli.Context) error {
 				}
 			}()
 
-			timerClient.WaitForNext()
+			taskName := timerClient.WaitForNext()
 			cnt += 1
+			if cnt%2 == 1 {
+				timerClient.IsBreak = false
+			} else {
+				timerClient.IsBreak = true
+			}
+
+			if taskName == "" {
+				timerClient.DrawerClient.Close()
+				keyInputStop = true
+				selectTask, err := TaskSelectHandler.Get(taskList)
+				keyInputStop = false
+				if err != nil {
+					panic(err)
+				}
+				timerClient.SetNewDrawer(selectTask.Name)
+				timerClient.TaskName = selectTask.Name
+			}
 			timerClient.SetRemainSec(getTimerSec(cnt))
 		}
 	}()
@@ -139,11 +160,14 @@ func watiKey() {
 		case termbox.KeyEsc:
 			wg.Done()
 			return
-		case termbox.KeyEnter:
-			timerClient.Toggle()
 		default:
-			if ev.Ch == 101 { // e
-				timerClient.End()
+			if !keyInputStop {
+				if ev.Ch == 101 { // e
+					timerClient.End()
+				}
+				if ev.Ch == 115 {
+					timerClient.Toggle()
+				}
 			}
 		}
 	}
