@@ -2,6 +2,7 @@ language: go
 services:
     - docker
 script:
+  - make depend
   - make lint
 deploy:
     provider: script
