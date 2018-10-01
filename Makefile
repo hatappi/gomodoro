@@ -18,7 +18,7 @@ run:
 	go run main.go
 
 lint:
-	go list ./... | xargs golint
+	go list ./... | xargs golint -set_exit_status
 
 build_crosscompile_image:
 	docker build -t hatappi/gomodoro-crosscompile -f docker/crosscompile/Dockerfile .
