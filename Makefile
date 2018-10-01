@@ -16,6 +16,9 @@ fmt:
 run:
 	go run main.go
 
+lint:
+	go list ./... | xargs golint
+
 build_crosscompile_image:
 	docker build -t hatappi/gomodoro-crosscompile -f docker/crosscompile/Dockerfile .
 
