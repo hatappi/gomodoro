@@ -7,6 +7,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// Timer タイマー管理用の構造体
 type Timer struct {
 	TaskName     string
 	RemainSec    int
@@ -20,6 +21,7 @@ var (
 	ch       = make(chan bool)
 )
 
+// NewTimer Timer構造体の新規作成
 func NewTimer(taskName string, remainSec int) *Timer {
 	return &Timer{
 		TaskName:     taskName,

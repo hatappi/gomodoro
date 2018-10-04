@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Remain UNIX Socketを利用して残り時間を標準出力する
 func Remain(c *cli.Context) error {
 	conn, err := net.Dial("unix", c.GlobalString("socket-path"))
 	if err != nil {

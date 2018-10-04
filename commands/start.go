@@ -48,6 +48,7 @@ func initConfig(c *cli.Context) {
 	}
 }
 
+// Start cli start command
 func Start(c *cli.Context) error {
 	initConfig(c)
 	socketPath := c.GlobalString("socket-path")
