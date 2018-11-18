@@ -25,7 +25,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Gomodoro"
 	app.Usage = "Pomodoro Technique By Go"
-	app.Version = "0.2.0"
+	app.Version = "0.4.1"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
