@@ -4,3 +4,6 @@ pkg
 
 # statik
 libs/assets/statik/statik.go
+
+# direnv
+.envrc
