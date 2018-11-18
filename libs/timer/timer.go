@@ -105,4 +105,5 @@ func (t *Timer) IsRunnable() bool {
 
 func (t *Timer) SetRemainSec(sec int) {
 	t.RemainSec = sec
+	t.ElapsedSec = 0
 }
