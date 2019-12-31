@@ -32,7 +32,7 @@ jobs:
         run: make build
 
   lint:
-    name: Test
+    name: Lint
     needs:
       - Build
     runs-on: ubuntu-latest
@@ -59,6 +59,9 @@ jobs:
 
       - name: Get dependencies
         run: make dependencies
+
+      - name: Install lint tools
+        run: make install-lint
 
       - name: Lint
         run: make lint
