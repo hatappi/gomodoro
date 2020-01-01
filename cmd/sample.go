@@ -64,7 +64,7 @@ var sampleCmd = &cobra.Command{
 			c.DrawTimer(int(x), int(y)+2, int(mag), min, sec)
 
 			select {
-			case <-c.Quit:
+			case <-c.GetQuitChan():
 				return nil
 			case <-t.C:
 			}

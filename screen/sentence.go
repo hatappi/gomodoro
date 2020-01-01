@@ -6,7 +6,7 @@ import (
 )
 
 // DrawSentence is draw the sentence
-func (c *Client) DrawSentence(x, y, maxWidth int, str string) {
+func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string) {
 	str = adjustMessage(maxWidth, str)
 
 	style := tcell.StyleDefault

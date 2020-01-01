@@ -10,7 +10,7 @@ import (
 )
 
 // DrawTimer is draw the timer
-func (c *Client) DrawTimer(x, y, mag, min, sec int) {
+func (c *clientImpl) DrawTimer(x, y, mag, min, sec int) {
 	minStr := fmt.Sprintf("%02d", min)
 	secStr := fmt.Sprintf("%02d", sec)
 
