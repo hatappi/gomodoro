@@ -85,7 +85,7 @@ var sampleCmd = &cobra.Command{
 			y = math.Round(y + ((ch - (TIMER_HEIGHT * mag)) / 2))
 
 			s.Clear()
-			printSentence(s, int(x), int(y), "FDSAAFSA")
+			printSentence(s, int(x), int(y), int(TIMER_WIDTH*mag), "今年は令和2年です")
 			DrawTimer(s, int(x), int(y)+2, int(mag), min, sec)
 
 			select {
@@ -272,7 +272,18 @@ func draw(s tcell.Screen, t []string, w, h, x, y, mag int) {
 	s.Show()
 }
 
-func printSentence(s tcell.Screen, x, y int, str string) {
+func printSentence(s tcell.Screen, x, y, maxWidth int, str string) {
+	remain := (maxWidth - runewidth.StringWidth(str)) / 2
+	if remain >= 0 {
+		for remain > 0 {
+			str = " " + str
+			remain--
+		}
+	} else {
+		str = str[:maxWidth-3]
+		str += "..."
+	}
+
 	style := tcell.StyleDefault
 	i := 0
 	var deferred []rune
