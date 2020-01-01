@@ -1,3 +1,4 @@
+// Package screen is managed screen
 package screen
 
 import (
@@ -8,34 +9,35 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+// DrawTimer is draw the timer
 func (c *Client) DrawTimer(x, y, mag, min, sec int) {
 	minStr := fmt.Sprintf("%02d", min)
 	secStr := fmt.Sprintf("%02d", sec)
 
 	drawNumber(c.screen, x, y, mag, string(minStr[0]))
 
-	x += (number_width + whitespace_width) * mag
+	x += (numberWidth + whitespaceWidth) * mag
 	drawNumber(c.screen, x, y, mag, string(minStr[1]))
 
-	x += (number_width + whitespace_width) * mag
+	x += (numberWidth + whitespaceWidth) * mag
 	drawSeparater(c.screen, x, y, mag)
 
-	x += (separater_width + whitespace_width) * mag
+	x += (separaterWidth + whitespaceWidth) * mag
 	drawNumber(c.screen, x, y, mag, string(secStr[0]))
 
-	x += (number_width + whitespace_width) * mag
+	x += (numberWidth + whitespaceWidth) * mag
 	drawNumber(c.screen, x, y, mag, string(secStr[1]))
 }
 
 func drawNumber(s tcell.Screen, x, y, mag int, nStr string) {
 	n, _ := strconv.Atoi(nStr)
 	t := strings.Split(strings.Replace(numbers[n], "\n", "", -1), "")
-	draw(s, t, number_width, number_height, x, y, mag)
+	draw(s, t, numberWidth, numberHeight, x, y, mag)
 }
 
 func drawSeparater(s tcell.Screen, x, y, mag int) {
 	t := strings.Split(strings.Replace(separator, "\n", "", -1), "")
-	draw(s, t, separater_width, separater_height, x, y, mag)
+	draw(s, t, separaterWidth, separaterHeight, x, y, mag)
 }
 
 func draw(s tcell.Screen, t []string, w, h, x, y, mag int) {

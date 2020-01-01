@@ -56,11 +56,11 @@ var sampleCmd = &cobra.Command{
 				return err
 			}
 
-			x = math.Round(x + ((cw - (screen.TIMER_WIDTH * mag)) / 2))
-			y = math.Round(y + ((ch - (screen.TIMER_HEIGHT * mag)) / 2))
+			x = math.Round(x + ((cw - (screen.TimerWidth * mag)) / 2))
+			y = math.Round(y + ((ch - (screen.TimerHeight * mag)) / 2))
 
 			c.Clear()
-			c.DrawSentence(int(x), int(y), int(screen.TIMER_WIDTH*mag), "今年は令和2年です")
+			c.DrawSentence(int(x), int(y), int(screen.TimerWidth*mag), "今年は令和2年です")
 			c.DrawTimer(int(x), int(y)+2, int(mag), min, sec)
 
 			select {
@@ -69,7 +69,7 @@ var sampleCmd = &cobra.Command{
 			case <-t.C:
 			}
 
-			duration -= 1
+			duration--
 
 			if duration == 0 {
 				t.Stop()
@@ -84,8 +84,8 @@ func init() {
 }
 
 func getMagnification(w, h float64) (float64, error) {
-	x := math.Round(w / screen.TIMER_WIDTH)
-	y := math.Round(h / screen.TIMER_HEIGHT)
+	x := math.Round(w / screen.TimerWidth)
+	y := math.Round(h / screen.TimerHeight)
 	mag := math.Max(x, y)
 
 	for {
@@ -93,7 +93,7 @@ func getMagnification(w, h float64) (float64, error) {
 			return 0.0, errors.New("screen is small")
 		}
 
-		if w >= screen.TIMER_WIDTH*mag && h >= screen.TIMER_HEIGHT*mag {
+		if w >= screen.TimerWidth*mag && h >= screen.TimerHeight*mag {
 			break
 		}
 

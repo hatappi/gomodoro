@@ -1,16 +1,18 @@
 package screen
 
 const (
-	TIMER_WIDTH  = 21
-	TIMER_HEIGHT = 5
+	// TimerWidth is width timer
+	TimerWidth = 21
+	// TimerHeight is height timer
+	TimerHeight = 5
 
-	number_width  = 4
-	number_height = 5
+	numberWidth  = 4
+	numberHeight = 5
 
-	separater_width  = 1
-	separater_height = 5
+	separaterWidth  = 1
+	separaterHeight = 5
 
-	whitespace_width = 1
+	whitespaceWidth = 1
 )
 
 const separator = `

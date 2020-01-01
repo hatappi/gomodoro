@@ -4,12 +4,15 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+// Client include related screen
 type Client struct {
 	screen tcell.Screen
 
+	// Quit channel
 	Quit chan struct{}
 }
 
+// NewClient initilize Client
 func NewClient() (*Client, error) {
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -30,6 +33,7 @@ func NewClient() (*Client, error) {
 	}, nil
 }
 
+// Start screen
 func (c *Client) Start() {
 	go func() {
 		for {
@@ -48,14 +52,17 @@ func (c *Client) Start() {
 	}()
 }
 
+// ScreenSize get screen width and height
 func (c *Client) ScreenSize() (int, int) {
 	return c.screen.Size()
 }
 
+// Clear screen
 func (c *Client) Clear() {
 	c.screen.Clear()
 }
 
+// Finish screen
 func (c *Client) Finish() {
 	c.screen.Fini()
 }

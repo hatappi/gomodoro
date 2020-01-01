@@ -5,17 +5,9 @@ import (
 	runewidth "github.com/mattn/go-runewidth"
 )
 
+// DrawSentence is draw the sentence
 func (c *Client) DrawSentence(x, y, maxWidth int, str string) {
-	remain := (maxWidth - runewidth.StringWidth(str)) / 2
-	if remain >= 0 {
-		for remain > 0 {
-			str = " " + str
-			remain--
-		}
-	} else {
-		str = str[:maxWidth-3]
-		str += "..."
-	}
+	str = adjustMessage(maxWidth, str)
 
 	style := tcell.StyleDefault
 	i := 0
@@ -62,6 +54,20 @@ func (c *Client) DrawSentence(x, y, maxWidth int, str string) {
 	}
 	if len(deferred) != 0 {
 		c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
-		i += dwidth
 	}
+}
+
+func adjustMessage(maxWidth int, str string) string {
+	remain := (maxWidth - runewidth.StringWidth(str)) / 2
+	if remain >= 0 {
+		for remain > 0 {
+			str = " " + str
+			remain--
+		}
+	} else {
+		str = str[:maxWidth-3]
+		str += "..."
+	}
+
+	return str
 }
