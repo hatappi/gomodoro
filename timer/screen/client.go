@@ -15,12 +15,14 @@ type Client interface {
 	DrawTimer(x, y, mag, min, sec int)
 
 	GetQuitChan() chan struct{}
+	GetPauseChan() chan interface{}
 }
 
 type clientImpl struct {
 	screen tcell.Screen
 
-	quit chan struct{}
+	quit  chan struct{}
+	pause chan interface{}
 }
 
 // NewClient initilize Client
@@ -41,11 +43,16 @@ func NewClient() (Client, error) {
 	return &clientImpl{
 		screen: s,
 		quit:   make(chan struct{}),
+		pause:  make(chan interface{}),
 	}, nil
 }
 
 func (c *clientImpl) GetQuitChan() chan struct{} {
 	return c.quit
+}
+
+func (c *clientImpl) GetPauseChan() chan interface{} {
+	return c.pause
 }
 
 // Start screen
@@ -56,9 +63,11 @@ func (c *clientImpl) Start() {
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
-				case tcell.KeyEscape, tcell.KeyEnter:
+				case tcell.KeyEscape, tcell.KeyCtrlC:
 					close(c.GetQuitChan())
 					return
+				case tcell.KeyEnter:
+					c.pause <- struct{}{}
 				}
 			case *tcell.EventResize:
 				c.screen.Sync()

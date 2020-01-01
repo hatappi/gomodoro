@@ -42,7 +42,7 @@ func drawSeparater(s tcell.Screen, x, y, mag int) {
 
 func draw(s tcell.Screen, t []string, w, h, x, y, mag int) {
 	st := tcell.StyleDefault
-	st = st.Background(tcell.ColorGreen)
+	st = st.Background(tcell.ColorRed)
 	gl := ' '
 
 	for row := 0; row < h; row++ {
