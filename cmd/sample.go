@@ -4,14 +4,12 @@ package cmd
 import (
 	"fmt"
 	"math"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
-	runewidth "github.com/mattn/go-runewidth"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/hatappi/gomodoro/screen"
 )
 
 // sampleCmd represents the sample command
@@ -28,42 +26,19 @@ var sampleCmd = &cobra.Command{
 			return fmt.Errorf("duration max value is 3600")
 		}
 
-		tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-		s, err := tcell.NewScreen()
+		c, err := screen.NewClient()
 		if err != nil {
 			return err
 		}
+		defer c.Finish()
 
-		if err = s.Init(); err != nil {
-			return err
-		}
-		defer s.Fini()
-
-		s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite))
-		s.Clear()
-
-		quit := make(chan struct{})
-		go func() {
-			for {
-				ev := s.PollEvent()
-				switch ev := ev.(type) {
-				case *tcell.EventKey:
-					switch ev.Key() {
-					case tcell.KeyEscape, tcell.KeyEnter:
-						close(quit)
-						return
-					}
-				case *tcell.EventResize:
-					s.Sync()
-				}
-			}
-		}()
+		c.Start()
 
 		t := time.NewTicker(1 * time.Second)
 		defer t.Stop()
 
 		for {
-			w, h := s.Size()
+			w, h := c.ScreenSize()
 
 			min := duration / 60
 			sec := duration % 60
@@ -81,15 +56,15 @@ var sampleCmd = &cobra.Command{
 				return err
 			}
 
-			x = math.Round(x + ((cw - (TIMER_WIDTH * mag)) / 2))
-			y = math.Round(y + ((ch - (TIMER_HEIGHT * mag)) / 2))
+			x = math.Round(x + ((cw - (screen.TIMER_WIDTH * mag)) / 2))
+			y = math.Round(y + ((ch - (screen.TIMER_HEIGHT * mag)) / 2))
 
-			s.Clear()
-			printSentence(s, int(x), int(y), int(TIMER_WIDTH*mag), "今年は令和2年です")
-			DrawTimer(s, int(x), int(y)+2, int(mag), min, sec)
+			c.Clear()
+			c.DrawSentence(int(x), int(y), int(screen.TIMER_WIDTH*mag), "今年は令和2年です")
+			c.DrawTimer(int(x), int(y)+2, int(mag), min, sec)
 
 			select {
-			case <-quit:
+			case <-c.Quit:
 				return nil
 			case <-t.C:
 			}
@@ -109,8 +84,8 @@ func init() {
 }
 
 func getMagnification(w, h float64) (float64, error) {
-	x := math.Round(w / TIMER_WIDTH)
-	y := math.Round(h / TIMER_HEIGHT)
+	x := math.Round(w / screen.TIMER_WIDTH)
+	y := math.Round(h / screen.TIMER_HEIGHT)
 	mag := math.Max(x, y)
 
 	for {
@@ -118,7 +93,7 @@ func getMagnification(w, h float64) (float64, error) {
 			return 0.0, errors.New("screen is small")
 		}
 
-		if w >= TIMER_WIDTH*mag && h >= TIMER_HEIGHT*mag {
+		if w >= screen.TIMER_WIDTH*mag && h >= screen.TIMER_HEIGHT*mag {
 			break
 		}
 
@@ -126,209 +101,4 @@ func getMagnification(w, h float64) (float64, error) {
 	}
 
 	return mag, nil
-}
-
-var separator = `
--
-#
--
-#
--
-`
-
-var numbers = []string{
-	`
-####
-#--#
-#--#
-#--#
-####
-	`,
-	`
----#
----#
----#
----#
----#
-`,
-	`
-####
----#
-####
-#---
-####
-`,
-	`
-####
----#
-####
----#
-####
-`,
-	`
-#-#-
-#-#-
-####
---#-
---#-
-`,
-	`
-####
-#---
-####
----#
-####
-`,
-	`
-#---
-#---
-####
-#--#
-####
-`,
-	`
-####
----#
----#
----#
----#
-`,
-	`
-####
-#--#
-####
-#--#
-####
-`,
-	`
-####
-#--#
-####
----#
-####
-`,
-}
-
-const (
-	TIMER_WIDTH  = 21
-	TIMER_HEIGHT = 5
-
-	number_width  = 4
-	number_height = 5
-
-	separater_width  = 1
-	separater_height = 5
-
-	whitespace_width = 1
-)
-
-func DrawTimer(s tcell.Screen, x, y, mag, min, sec int) {
-	minStr := fmt.Sprintf("%02d", min)
-	secStr := fmt.Sprintf("%02d", sec)
-
-	drawNumber(s, x, y, mag, string(minStr[0]))
-
-	x += (number_width + whitespace_width) * mag
-	drawNumber(s, x, y, mag, string(minStr[1]))
-
-	x += (number_width + whitespace_width) * mag
-	drawSeparater(s, x, y, mag)
-
-	x += (separater_width + whitespace_width) * mag
-	drawNumber(s, x, y, mag, string(secStr[0]))
-
-	x += (number_width + whitespace_width) * mag
-	drawNumber(s, x, y, mag, string(secStr[1]))
-}
-
-func drawNumber(s tcell.Screen, x, y, mag int, nStr string) {
-	n, _ := strconv.Atoi(nStr)
-	t := strings.Split(strings.Replace(numbers[n], "\n", "", -1), "")
-	draw(s, t, number_width, number_height, x, y, mag)
-}
-
-func drawSeparater(s tcell.Screen, x, y, mag int) {
-	t := strings.Split(strings.Replace(separator, "\n", "", -1), "")
-	draw(s, t, separater_width, separater_height, x, y, mag)
-}
-
-func draw(s tcell.Screen, t []string, w, h, x, y, mag int) {
-	st := tcell.StyleDefault
-	st = st.Background(tcell.ColorGreen)
-	gl := ' '
-
-	for row := 0; row < h; row++ {
-		for col := 0; col < w; col++ {
-			if t[(row*w)+(col)] == "#" {
-				for pRow := 0; pRow < mag; pRow++ {
-					for pCol := 0; pCol < mag; pCol++ {
-						s.SetCell(x+(col*mag)+pCol, y+(row*mag)+pRow, st, gl)
-					}
-				}
-			}
-		}
-	}
-
-	s.Show()
-}
-
-func printSentence(s tcell.Screen, x, y, maxWidth int, str string) {
-	remain := (maxWidth - runewidth.StringWidth(str)) / 2
-	if remain >= 0 {
-		for remain > 0 {
-			str = " " + str
-			remain--
-		}
-	} else {
-		str = str[:maxWidth-3]
-		str += "..."
-	}
-
-	style := tcell.StyleDefault
-	i := 0
-	var deferred []rune
-	dwidth := 0
-	zwj := false
-	for _, r := range str {
-		if r == '\u200d' {
-			if len(deferred) == 0 {
-				deferred = append(deferred, ' ')
-				dwidth = 1
-			}
-			deferred = append(deferred, r)
-			zwj = true
-			continue
-		}
-		if zwj {
-			deferred = append(deferred, r)
-			zwj = false
-			continue
-		}
-		switch runewidth.RuneWidth(r) {
-		case 0:
-			if len(deferred) == 0 {
-				deferred = append(deferred, ' ')
-				dwidth = 1
-			}
-		case 1:
-			if len(deferred) != 0 {
-				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
-				i += dwidth
-			}
-			deferred = nil
-			dwidth = 1
-		case 2:
-			if len(deferred) != 0 {
-				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
-				i += dwidth
-			}
-			deferred = nil
-			dwidth = 2
-		}
-		deferred = append(deferred, r)
-	}
-	if len(deferred) != 0 {
-		s.SetContent(x+i, y, deferred[0], deferred[1:], style)
-		i += dwidth
-	}
 }
