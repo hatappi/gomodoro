@@ -69,10 +69,12 @@ var sampleCmd = &cobra.Command{
 			sec := duration % 60
 
 			x := float64(w) / 16
-			y := float64(h) * 3 / 16
+			y := float64(h) / 16
 
+			printLine := 2.0
 			cw := float64(w) * 14 / 16
-			ch := float64(h) * 12 / 16
+			ch := float64(h) * 14 / 16
+			ch -= printLine
 
 			mag, err := getMagnification(cw, ch)
 			if err != nil {
@@ -83,8 +85,8 @@ var sampleCmd = &cobra.Command{
 			y = math.Round(y + ((ch - (TIMER_HEIGHT * mag)) / 2))
 
 			s.Clear()
-			printSentence(s, int(x), int(float64(h)*2/16), "FADFA")
-			DrawTimer(s, int(x), int(y), int(mag), min, sec)
+			printSentence(s, int(x), int(y), "FDSAAFSA")
+			DrawTimer(s, int(x), int(y)+2, int(mag), min, sec)
 
 			select {
 			case <-quit:
