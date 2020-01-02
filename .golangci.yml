@@ -83,7 +83,7 @@ linters-settings:
     # exclude: /path/to/file.txt
 
   funlen:
-    lines: 60
+    lines: 70
     statements: 40
 
   govet:
