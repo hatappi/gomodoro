@@ -1,4 +1,4 @@
-// Package
+// Package timer countdown duration
 package timer
 
 import (
@@ -11,25 +11,28 @@ import (
 	"github.com/hatappi/gomodoro/timer/screen"
 )
 
+// Timer interface
 type Timer interface {
 	Run(int) error
 	Stop()
 }
 
-type TimerImpl struct {
+type timerImpl struct {
 	ticker       *time.Ticker
 	screenClient screen.Client
 	stopped      bool
 }
 
+// NewTimer initilize Timer
 func NewTimer(c screen.Client) Timer {
-	return &TimerImpl{
+	return &timerImpl{
 		ticker:       nil,
 		screenClient: c,
 	}
 }
 
-func (t *TimerImpl) Run(duration int) error {
+// Run timer
+func (t *timerImpl) Run(duration int) error {
 	drawFn := func(duration int, title string, opts ...screen.DrawOption) error {
 		w, h := t.screenClient.ScreenSize()
 
@@ -95,12 +98,14 @@ func (t *TimerImpl) Run(duration int) error {
 	}
 }
 
-func (t *TimerImpl) Start() {
+// Start timer
+func (t *timerImpl) Start() {
 	t.stopped = false
 	t.ticker = time.NewTicker(1 * time.Second)
 }
 
-func (t *TimerImpl) Stop() {
+// Stop timer
+func (t *timerImpl) Stop() {
 	t.stopped = true
 	t.ticker.Stop()
 }

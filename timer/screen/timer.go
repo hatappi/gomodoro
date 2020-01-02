@@ -9,12 +9,15 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+// DrawSetting for setting of drawing
 type DrawSetting struct {
 	BackgroundColor tcell.Color
 }
 
+// DrawOption for optoin of drawing
 type DrawOption func(*DrawSetting)
 
+// WithBackgroundColor set BackgroundColor
 func WithBackgroundColor(color tcell.Color) DrawOption {
 	return func(ds *DrawSetting) {
 		ds.BackgroundColor = color
