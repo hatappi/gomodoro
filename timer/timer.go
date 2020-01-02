@@ -1,3 +1,4 @@
+// Package
 package timer
 
 import (
@@ -6,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/gdamore/tcell"
 	"github.com/hatappi/gomodoro/timer/screen"
 )
 
@@ -28,8 +30,7 @@ func NewTimer(c screen.Client) Timer {
 }
 
 func (t *TimerImpl) Run(duration int) error {
-	t.Start()
-	for {
+	drawFn := func(duration int, title string, opts ...screen.DrawOption) error {
 		w, h := t.screenClient.ScreenSize()
 
 		min := duration / 60
@@ -52,9 +53,21 @@ func (t *TimerImpl) Run(duration int) error {
 		y = math.Round(y + ((ch - (screen.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
-		t.screenClient.DrawSentence(int(x), int(y), int(screen.TimerWidth*mag), "今年は令和2年です")
-		t.screenClient.DrawTimer(int(x), int(y)+2, int(mag), min, sec)
+		t.screenClient.DrawSentence(int(x), int(y), int(screen.TimerWidth*mag), title)
+		t.screenClient.DrawTimer(int(x), int(y)+2, int(mag), min, sec, opts...)
 
+		return nil
+	}
+
+	title := "今年は令和2年です!!"
+
+	err := drawFn(duration, title)
+	if err != nil {
+		return err
+	}
+	t.Start()
+	for {
+		var opts []screen.DrawOption
 		select {
 		case <-t.screenClient.GetQuitChan():
 			return nil
@@ -62,13 +75,19 @@ func (t *TimerImpl) Run(duration int) error {
 			if t.stopped {
 				t.Start()
 			} else {
+				opts = []screen.DrawOption{
+					screen.WithBackgroundColor(tcell.ColorDarkCyan),
+				}
 				t.Stop()
-				continue
 			}
 		case <-t.ticker.C:
+			duration--
 		}
 
-		duration--
+		err := drawFn(duration, title, opts...)
+		if err != nil {
+			return err
+		}
 
 		if duration == 0 {
 			t.Stop()

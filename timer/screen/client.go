@@ -12,7 +12,7 @@ type Client interface {
 	Finish()
 
 	DrawSentence(x, y, maxWidth int, str string)
-	DrawTimer(x, y, mag, min, sec int)
+	DrawTimer(x, y, mag, min, sec int, opts ...DrawOption)
 
 	GetQuitChan() chan struct{}
 	GetPauseChan() chan interface{}
