@@ -19,13 +19,15 @@ type Client interface {
 
 	GetQuitChan() chan struct{}
 	GetPauseChan() chan interface{}
+	GetForceFinishChan() chan interface{}
 }
 
 type clientImpl struct {
 	screen tcell.Screen
 
-	quit  chan struct{}
-	pause chan interface{}
+	quit        chan struct{}
+	pause       chan interface{}
+	forceFinish chan interface{}
 
 	pollEventStarted bool
 }
@@ -34,9 +36,10 @@ type clientImpl struct {
 func NewClient(s tcell.Screen) (Client, error) {
 
 	return &clientImpl{
-		screen: s,
-		quit:   make(chan struct{}),
-		pause:  make(chan interface{}),
+		screen:      s,
+		quit:        make(chan struct{}),
+		pause:       make(chan interface{}),
+		forceFinish: make(chan interface{}),
 	}, nil
 }
 
@@ -46,6 +49,10 @@ func (c *clientImpl) GetQuitChan() chan struct{} {
 
 func (c *clientImpl) GetPauseChan() chan interface{} {
 	return c.pause
+}
+
+func (c *clientImpl) GetForceFinishChan() chan interface{} {
+	return c.forceFinish
 }
 
 // Start screen
@@ -66,6 +73,10 @@ func (c *clientImpl) StartPollEvent() {
 					return
 				case tcell.KeyEnter:
 					c.pause <- struct{}{}
+				case tcell.KeyRune:
+					if ev.Rune() == rune(101) { // e
+						c.forceFinish <- struct{}{}
+					}
 				}
 			case *tcell.EventResize:
 				c.screen.Sync()

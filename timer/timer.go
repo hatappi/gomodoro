@@ -94,6 +94,8 @@ func (t *timerImpl) Run(duration int) error {
 		case <-t.screenClient.GetQuitChan():
 			t.quit = true
 			return nil
+		case <-t.screenClient.GetForceFinishChan():
+			duration = 0
 		case <-t.screenClient.GetPauseChan():
 			if t.stopped {
 				t.Start()
