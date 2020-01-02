@@ -6,8 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hatappi/gomodoro/timer"
-	"github.com/hatappi/gomodoro/timer/screen"
+	"github.com/hatappi/gomodoro/pomodoro"
 )
 
 // sampleCmd represents the sample command
@@ -24,16 +23,15 @@ var sampleCmd = &cobra.Command{
 			return fmt.Errorf("duration max value is 3600")
 		}
 
-		c, err := screen.NewClient()
+		p, err := pomodoro.NewPomodoro(
+			pomodoro.WithWorkSec(duration),
+		)
 		if err != nil {
 			return err
 		}
-		defer c.Finish()
+		defer p.Finish()
 
-		c.Start()
-
-		t := timer.NewTimer(c)
-		err = t.Run(duration)
+		err = p.Start()
 		if err != nil {
 			return err
 		}

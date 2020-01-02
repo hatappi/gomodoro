@@ -15,12 +15,14 @@ import (
 type Timer interface {
 	Run(int) error
 	Stop()
+	IsQuit() bool
 }
 
 type timerImpl struct {
 	ticker       *time.Ticker
 	screenClient screen.Client
 	stopped      bool
+	quit         bool
 }
 
 // NewTimer initilize Timer
@@ -29,6 +31,10 @@ func NewTimer(c screen.Client) Timer {
 		ticker:       nil,
 		screenClient: c,
 	}
+}
+
+func (t *timerImpl) IsQuit() bool {
+	return t.quit
 }
 
 // Run timer
@@ -73,6 +79,7 @@ func (t *timerImpl) Run(duration int) error {
 		var opts []screen.DrawOption
 		select {
 		case <-t.screenClient.GetQuitChan():
+			t.quit = true
 			return nil
 		case <-t.screenClient.GetPauseChan():
 			if t.stopped {
@@ -94,6 +101,7 @@ func (t *timerImpl) Run(duration int) error {
 
 		if duration == 0 {
 			t.Stop()
+			return nil
 		}
 	}
 }
