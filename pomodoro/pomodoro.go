@@ -70,6 +70,11 @@ func NewPomodoro(options ...PomodoroOption) (Pomodoro, error) {
 func (p *pomodoroImpl) Start() error {
 	loopCnt := 1
 	for {
+		if loopCnt%2 == 0 {
+			p.timer.ChangeFontColor(tcell.ColorBlue)
+		} else {
+			p.timer.ChangeFontColor(tcell.ColorGreen)
+		}
 		p.timerScreenClient.StartPollEvent()
 		err := p.timer.Run(p.getDuration(loopCnt))
 		if err != nil {
@@ -82,7 +87,7 @@ func (p *pomodoroImpl) Start() error {
 
 		w, _ := p.screen.Size()
 		// TODO: ここからtimerScreenClientを呼んでるのは微妙なのでなおす
-		p.timerScreenClient.DrawSentence(0, 0, w, "Pleaes press Enter Button")
+		p.timerScreenClient.DrawSentence(0, 0, w, "Pleaes press Enter Button", screen.WithBackgroundColor(tcell.ColorRed))
 
 	L:
 		for {

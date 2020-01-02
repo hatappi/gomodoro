@@ -14,7 +14,7 @@ type Client interface {
 	Clear()
 	Finish()
 
-	DrawSentence(x, y, maxWidth int, str string)
+	DrawSentence(x, y, maxWidth int, str string, opts ...DrawOption)
 	DrawTimer(x, y, mag, min, sec int, opts ...DrawOption)
 
 	GetQuitChan() chan struct{}

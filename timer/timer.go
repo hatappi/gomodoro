@@ -16,6 +16,8 @@ type Timer interface {
 	Run(int) error
 	Stop()
 	IsQuit() bool
+
+	ChangeFontColor(tcell.Color)
 }
 
 type timerImpl struct {
@@ -23,18 +25,27 @@ type timerImpl struct {
 	screenClient screen.Client
 	stopped      bool
 	quit         bool
+
+	fontColor      tcell.Color
+	pauseFontColor tcell.Color
 }
 
 // NewTimer initilize Timer
 func NewTimer(c screen.Client) Timer {
 	return &timerImpl{
-		ticker:       nil,
-		screenClient: c,
+		ticker:         nil,
+		screenClient:   c,
+		fontColor:      tcell.ColorGreen,
+		pauseFontColor: tcell.ColorDarkOrange,
 	}
 }
 
 func (t *timerImpl) IsQuit() bool {
 	return t.quit
+}
+
+func (t *timerImpl) ChangeFontColor(c tcell.Color) {
+	t.fontColor = c
 }
 
 // Run timer
@@ -70,13 +81,15 @@ func (t *timerImpl) Run(duration int) error {
 
 	title := "今年は令和2年です!!"
 
-	err := drawFn(duration, title)
+	err := drawFn(duration, title, screen.WithBackgroundColor(t.fontColor))
 	if err != nil {
 		return err
 	}
 	t.Start()
 	for {
-		var opts []screen.DrawOption
+		opts := []screen.DrawOption{
+			screen.WithBackgroundColor(t.fontColor),
+		}
 		select {
 		case <-t.screenClient.GetQuitChan():
 			t.quit = true
@@ -86,7 +99,7 @@ func (t *timerImpl) Run(duration int) error {
 				t.Start()
 			} else {
 				opts = []screen.DrawOption{
-					screen.WithBackgroundColor(tcell.ColorDarkCyan),
+					screen.WithBackgroundColor(t.pauseFontColor),
 				}
 				t.Stop()
 			}

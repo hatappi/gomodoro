@@ -8,10 +8,14 @@ import (
 )
 
 // DrawSentence is draw the sentence
-func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string) {
+func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string, opts ...DrawOption) {
 	str = adjustMessage(maxWidth, str)
 
 	style := tcell.StyleDefault
+	for _, opt := range opts {
+		style = opt(style)
+	}
+
 	i := 0
 	var deferred []rune
 	dwidth := 0
