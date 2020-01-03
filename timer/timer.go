@@ -21,6 +21,7 @@ type Timer interface {
 }
 
 type timerImpl struct {
+	title        string
 	ticker       *time.Ticker
 	screenClient screen.Client
 	stopped      bool
@@ -31,8 +32,9 @@ type timerImpl struct {
 }
 
 // NewTimer initilize Timer
-func NewTimer(c screen.Client) Timer {
+func NewTimer(c screen.Client, title string) Timer {
 	return &timerImpl{
+		title:          title,
 		ticker:         nil,
 		screenClient:   c,
 		fontColor:      tcell.ColorGreen,
@@ -79,9 +81,7 @@ func (t *timerImpl) Run(duration int) error {
 		return nil
 	}
 
-	title := "今年は令和2年です!!"
-
-	err := drawFn(duration, title, screen.WithBackgroundColor(t.fontColor))
+	err := drawFn(duration, t.title, screen.WithBackgroundColor(t.fontColor))
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (t *timerImpl) Run(duration int) error {
 			duration--
 		}
 
-		err := drawFn(duration, title, opts...)
+		err := drawFn(duration, t.title, opts...)
 		if err != nil {
 			return err
 		}

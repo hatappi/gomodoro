@@ -3,6 +3,7 @@ package pomodoro
 
 import (
 	"github.com/gdamore/tcell"
+	"github.com/hatappi/gomodoro/task"
 	"github.com/hatappi/gomodoro/timer"
 	"github.com/hatappi/gomodoro/timer/screen"
 )
@@ -48,6 +49,8 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorDarkSlateGray).Background(tcell.ColorWhite))
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
+	taskName := task.CreateNewTask(s)
+
 	c, err := screen.NewClient(s)
 	if err != nil {
 		return nil, err
@@ -58,7 +61,7 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 		shortBreakSec:     DefaultShortBreakSec,
 		longBreakSec:      DefaultLongBreakSec,
 		timerScreenClient: c,
-		timer:             timer.NewTimer(c),
+		timer:             timer.NewTimer(c, taskName),
 		screen:            s,
 	}
 
