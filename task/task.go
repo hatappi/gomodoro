@@ -2,15 +2,42 @@
 package task
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell"
 
 	"github.com/hatappi/gomodoro/task/screen"
 )
 
+// Task represents task
 type Task struct {
+	Name string
 }
 
-func CreateNewTask(s tcell.Screen) string {
+// Tasks is array of Task
+type Tasks []*Task
+
+// GetTaskNames gets task names in array
+func (ts Tasks) GetTaskNames() []string {
+	var tn []string
+	for _, t := range ts {
+		tn = append(tn, t.Name)
+	}
+
+	return tn
+}
+
+// GetTask get tasks name
+func GetTask(s tcell.Screen) string {
 	c := screen.NewClient(s)
-	return c.SelectTask([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"})
+
+	var tasks Tasks
+	for i := 0; i < 50; i++ {
+		t := &Task{
+			Name: fmt.Sprintf("Task %d", i),
+		}
+		tasks = append(tasks, t)
+	}
+
+	return c.SelectTask(tasks.GetTaskNames())
 }

@@ -1,3 +1,4 @@
+// Package screen provide screen management for task
 package screen
 
 import (
@@ -9,6 +10,7 @@ import (
 	runewidth "github.com/mattn/go-runewidth"
 )
 
+// Client represents management Task function
 type Client interface {
 	CreateTask() string
 	SelectTask([]string) string
@@ -25,6 +27,7 @@ func NewClient(s tcell.Screen) Client {
 	}
 }
 
+// SelectTask gets task
 func (c *clientImpl) SelectTask(tasks []string) string {
 	var tasksWithIndex []string
 	for i, t := range tasks {
@@ -97,6 +100,10 @@ func (c *clientImpl) SelectTask(tasks []string) string {
 				}
 			}
 		case *tcell.EventResize:
+			// reset
+			i = 0
+			offset = 0
+
 			c.screen.Sync()
 		}
 	}

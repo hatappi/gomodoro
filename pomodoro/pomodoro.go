@@ -49,7 +49,7 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorDarkSlateGray).Background(tcell.ColorWhite))
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
-	taskName := task.CreateNewTask(s)
+	taskName := task.GetTask(s)
 
 	c, err := screen.NewClient(s)
 	if err != nil {
