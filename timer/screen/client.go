@@ -1,49 +1,44 @@
 package screen
 
 import (
+	"time"
+
 	"github.com/gdamore/tcell"
 )
 
 // Client include related screen
 type Client interface {
-	Start()
+	StartPollEvent()
+	StopPollEvent()
 	ScreenSize() (int, int)
 	Clear()
 	Finish()
 
-	DrawSentence(x, y, maxWidth int, str string)
+	DrawSentence(x, y, maxWidth int, str string, opts ...DrawOption)
 	DrawTimer(x, y, mag, min, sec int, opts ...DrawOption)
 
 	GetQuitChan() chan struct{}
 	GetPauseChan() chan interface{}
+	GetForceFinishChan() chan interface{}
 }
 
 type clientImpl struct {
 	screen tcell.Screen
 
-	quit  chan struct{}
-	pause chan interface{}
+	quit        chan struct{}
+	pause       chan interface{}
+	forceFinish chan interface{}
+
+	pollEventStarted bool
 }
 
 // NewClient initilize Client
-func NewClient() (Client, error) {
-	s, err := tcell.NewScreen()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = s.Init(); err != nil {
-		return nil, err
-	}
-
-	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorDarkSlateGray).Background(tcell.ColorWhite))
-
-	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-
+func NewClient(s tcell.Screen) (Client, error) {
 	return &clientImpl{
-		screen: s,
-		quit:   make(chan struct{}),
-		pause:  make(chan interface{}),
+		screen:      s,
+		quit:        make(chan struct{}),
+		pause:       make(chan interface{}),
+		forceFinish: make(chan interface{}),
 	}, nil
 }
 
@@ -55,9 +50,18 @@ func (c *clientImpl) GetPauseChan() chan interface{} {
 	return c.pause
 }
 
+func (c *clientImpl) GetForceFinishChan() chan interface{} {
+	return c.forceFinish
+}
+
 // Start screen
-func (c *clientImpl) Start() {
+func (c *clientImpl) StartPollEvent() {
+	if c.pollEventStarted {
+		return
+	}
+
 	go func() {
+		c.pollEventStarted = true
 		for {
 			ev := c.screen.PollEvent()
 			switch ev := ev.(type) {
@@ -68,12 +72,29 @@ func (c *clientImpl) Start() {
 					return
 				case tcell.KeyEnter:
 					c.pause <- struct{}{}
+				case tcell.KeyRune:
+					if ev.Rune() == rune(101) { // e
+						c.forceFinish <- struct{}{}
+					}
 				}
 			case *tcell.EventResize:
 				c.screen.Sync()
+			case *finishPollEvent:
+				return
 			}
 		}
 	}()
+}
+
+type finishPollEvent struct{}
+
+func (fpe *finishPollEvent) When() time.Time {
+	return time.Now()
+}
+
+func (c *clientImpl) StopPollEvent() {
+	c.pollEventStarted = false
+	c.screen.PostEventWait(&finishPollEvent{})
 }
 
 // ScreenSize get screen width and height

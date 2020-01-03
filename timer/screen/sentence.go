@@ -1,15 +1,21 @@
 package screen
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
 // DrawSentence is draw the sentence
-func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string) {
-	str = adjustMessage(maxWidth, str)
+func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOption) {
+	str = adjustMessage(width, str)
 
 	style := tcell.StyleDefault
+	for _, opt := range opts {
+		style = opt(style)
+	}
+
 	i := 0
 	var deferred []rune
 	dwidth := 0
@@ -55,17 +61,18 @@ func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string) {
 	if len(deferred) != 0 {
 		c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
 	}
+
+	c.screen.Show()
 }
 
-func adjustMessage(maxWidth int, str string) string {
-	remain := (maxWidth - runewidth.StringWidth(str)) / 2
+func adjustMessage(width int, str string) string {
+	remain := (width - runewidth.StringWidth(str)) / 2
 	if remain >= 0 {
-		for remain > 0 {
-			str = " " + str
-			remain--
-		}
+		s := strings.Repeat(" ", remain)
+		e := strings.Repeat(" ", width-runewidth.StringWidth(str)-remain)
+		str = s + str + e
 	} else {
-		str = str[:maxWidth-3]
+		str = str[:width-3]
 		str += "..."
 	}
 
