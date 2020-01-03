@@ -1,3 +1,4 @@
+// Package pomodoro Option
 package pomodoro
 
 // Option pomodoro option
