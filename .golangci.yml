@@ -84,7 +84,7 @@ linters-settings:
 
   funlen:
     lines: 70
-    statements: 40
+    statements: 60
 
   govet:
     # report about shadowed variables
@@ -297,6 +297,9 @@ issues:
     - linters:
         - lll
       source: "^//go:generate "
+
+    - path: pomodoro/pomodoro.go
+      text: "singleCaseSwitch: should rewrite switch statement to if statement"
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

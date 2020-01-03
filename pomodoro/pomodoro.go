@@ -8,14 +8,15 @@ import (
 )
 
 const (
-	//DefaultWorkSec       = 1500
-	//DefaultShortBreakSec = 300
-	//DefaultLongBreakSec  = 900
-	DefaultWorkSec       = 10
-	DefaultShortBreakSec = 3
-	DefaultLongBreakSec  = 6
+	// DefaultWorkSec default working second
+	DefaultWorkSec = 1500
+	// DefaultShortBreakSec default short break second
+	DefaultShortBreakSec = 300
+	// DefaultLongBreakSec default long break second
+	DefaultLongBreakSec = 900
 )
 
+// Pomodoro interface
 type Pomodoro interface {
 	Start() error
 	Stop()
@@ -33,7 +34,8 @@ type pomodoroImpl struct {
 	timer             timer.Timer
 }
 
-func NewPomodoro(options ...PomodoroOption) (Pomodoro, error) {
+// NewPomodoro initilize Pomodoro
+func NewPomodoro(options ...Option) (Pomodoro, error) {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		return nil, err
@@ -87,7 +89,13 @@ func (p *pomodoroImpl) Start() error {
 
 		w, _ := p.screen.Size()
 		// TODO: ここからtimerScreenClientを呼んでるのは微妙なのでなおす
-		p.timerScreenClient.DrawSentence(0, 0, w, "Please press Enter button for continue", screen.WithBackgroundColor(tcell.ColorRed))
+		p.timerScreenClient.DrawSentence(
+			0,
+			0,
+			w,
+			"Please press Enter button for continue",
+			screen.WithBackgroundColor(tcell.ColorRed),
+		)
 
 	L:
 		for {
@@ -115,11 +123,13 @@ func (p *pomodoroImpl) Finish() {
 
 func (p *pomodoroImpl) getDuration(cnt int) int {
 	setNum := cnt / 2
-	if setNum != 0 && cnt%2 == 0 && setNum%3 == 0 {
+
+	switch {
+	case setNum != 0 && cnt%2 == 0 && setNum%3 == 0:
 		return p.longBreakSec
-	} else if cnt%2 == 0 {
+	case cnt%2 == 0:
 		return p.shortBreakSec
-	} else {
+	default:
 		return p.workSec
 	}
 }

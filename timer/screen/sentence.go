@@ -8,8 +8,8 @@ import (
 )
 
 // DrawSentence is draw the sentence
-func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string, opts ...DrawOption) {
-	str = adjustMessage(maxWidth, str)
+func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOption) {
+	str = adjustMessage(width, str)
 
 	style := tcell.StyleDefault
 	for _, opt := range opts {
@@ -65,14 +65,14 @@ func (c *clientImpl) DrawSentence(x, y, maxWidth int, str string, opts ...DrawOp
 	c.screen.Show()
 }
 
-func adjustMessage(maxWidth int, str string) string {
-	remain := (maxWidth - runewidth.StringWidth(str)) / 2
+func adjustMessage(width int, str string) string {
+	remain := (width - runewidth.StringWidth(str)) / 2
 	if remain >= 0 {
 		s := strings.Repeat(" ", remain)
-		e := strings.Repeat(" ", maxWidth-runewidth.StringWidth(str)-remain)
+		e := strings.Repeat(" ", width-runewidth.StringWidth(str)-remain)
 		str = s + str + e
 	} else {
-		str = str[:maxWidth-3]
+		str = str[:width-3]
 		str += "..."
 	}
 

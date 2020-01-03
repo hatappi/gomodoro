@@ -34,7 +34,6 @@ type clientImpl struct {
 
 // NewClient initilize Client
 func NewClient(s tcell.Screen) (Client, error) {
-
 	return &clientImpl{
 		screen:      s,
 		quit:        make(chan struct{}),

@@ -1,18 +1,24 @@
 package pomodoro
 
-type PomodoroOption func(*pomodoroImpl)
+// Option pomodoro option
+type Option func(*pomodoroImpl)
 
-func WithWorkSec(s int) PomodoroOption {
+// WithWorkSec set WorkSec
+func WithWorkSec(s int) Option {
 	return func(p *pomodoroImpl) {
 		p.workSec = s
 	}
 }
-func WithShortBreakSec(s int) PomodoroOption {
+
+// WithShortBreakSec set ShortBreakSec
+func WithShortBreakSec(s int) Option {
 	return func(p *pomodoroImpl) {
 		p.shortBreakSec = s
 	}
 }
-func WithLongBreakSec(s int) PomodoroOption {
+
+// WithLongBreakSec set LongBreakSec
+func WithLongBreakSec(s int) Option {
 	return func(p *pomodoroImpl) {
 		p.longBreakSec = s
 	}
