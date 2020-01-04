@@ -27,8 +27,6 @@ type Pomodoro interface {
 }
 
 type pomodoroImpl struct {
-	screen tcell.Screen
-
 	workSec       int
 	shortBreakSec int
 	longBreakSec  int
@@ -55,7 +53,6 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 		longBreakSec:  DefaultLongBreakSec,
 		screenClient:  c,
 		timer:         timer.NewTimer(c, taskName),
-		screen:        s,
 	}
 
 	for _, opt := range options {
@@ -67,6 +64,7 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 
 func (p *pomodoroImpl) Start() error {
 	loopCnt := 1
+	defer p.screenClient.StopPollEvent()
 	for {
 		if loopCnt%2 == 0 {
 			p.timer.ChangeFontColor(tcell.ColorBlue)
@@ -77,18 +75,17 @@ func (p *pomodoroImpl) Start() error {
 		if err != nil {
 			return err
 		}
-		defer p.screenClient.StopPollEvent()
 		if p.timer.IsQuit() {
 			return nil
 		}
 
-		w, h := p.screen.Size()
+		w, h := p.screenClient.ScreenSize()
 		draw.Sentence(
-			p.screen,
+			p.screenClient.GetScreen(),
 			0,
 			h-1,
 			w,
-			"Please press Enter button for continue",
+			"(Enter): continue / (c): change task",
 			true,
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
@@ -99,6 +96,12 @@ func (p *pomodoroImpl) Start() error {
 				break L
 			case <-p.screenClient.GetCancelChan():
 				return nil
+			case r := <-p.screenClient.GetRuneChan():
+				if r == rune(99) { // c
+					p.screenClient.Clear()
+					p.timer.SetTitle(task.GetTask(p.screenClient))
+					break L
+				}
 			}
 		}
 		loopCnt++

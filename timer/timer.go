@@ -17,6 +17,7 @@ type Timer interface {
 	Run(int) error
 	Stop()
 	IsQuit() bool
+	SetTitle(string)
 
 	ChangeFontColor(tcell.Color)
 }
@@ -41,6 +42,10 @@ func NewTimer(c screen.Client, title string) Timer {
 		fontColor:      tcell.ColorGreen,
 		pauseFontColor: tcell.ColorDarkOrange,
 	}
+}
+
+func (t *timerImpl) SetTitle(title string) {
+	t.title = title
 }
 
 func (t *timerImpl) IsQuit() bool {
