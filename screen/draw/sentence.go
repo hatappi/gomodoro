@@ -7,8 +7,8 @@ import (
 	runewidth "github.com/mattn/go-runewidth"
 )
 
-// DrawSentence is draw the sentence
-func DrawSentence(s tcell.Screen, x, y, width int, str string, opts ...Option) int {
+// Sentence is draw the sentence
+func Sentence(s tcell.Screen, x, y, width int, str string, opts ...Option) int {
 	str = adjustMessage(width, str)
 
 	style := tcell.StyleDefault

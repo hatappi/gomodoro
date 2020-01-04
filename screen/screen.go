@@ -1,9 +1,11 @@
+// Package screen represents screen
 package screen
 
 import (
 	"github.com/gdamore/tcell"
 )
 
+// NewScreen initilize screen
 func NewScreen() (tcell.Screen, error) {
 	s, err := tcell.NewScreen()
 	if err != nil {

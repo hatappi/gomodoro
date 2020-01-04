@@ -9,8 +9,8 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-// DrawTimer is draw the timer
-func DrawTimer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
+// Timer is draw the timer
+func Timer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
 	minStr := fmt.Sprintf("%02d", min)
 	secStr := fmt.Sprintf("%02d", sec)
 

@@ -41,6 +41,9 @@ type pomodoroImpl struct {
 // NewPomodoro initilize Pomodoro
 func NewPomodoro(options ...Option) (Pomodoro, error) {
 	s, err := screen.NewScreen()
+	if err != nil {
+		return nil, err
+	}
 
 	taskName := task.GetTask(s)
 
@@ -84,7 +87,7 @@ func (p *pomodoroImpl) Start() error {
 		}
 
 		w, h := p.screen.Size()
-		draw.DrawSentence(
+		draw.Sentence(
 			p.screen,
 			0,
 			h-1,

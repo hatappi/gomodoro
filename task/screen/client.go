@@ -52,7 +52,7 @@ func (c *clientImpl) SelectTask(tasks []string) string {
 			if d := w - tw; d > 0 {
 				t += strings.Repeat(" ", d)
 			}
-			_ = draw.DrawSentence(c.screen, 0, y, w, t, opts...)
+			_ = draw.Sentence(c.screen, 0, y, w, t, opts...)
 		}
 
 		ev := c.screen.PollEvent()
@@ -116,7 +116,7 @@ func (c *clientImpl) CreateTask() string {
 		msg := fmt.Sprintf("Please Input New Task Name >%s", string(newTaskName))
 		w, _ := c.screen.Size()
 		c.screen.Clear()
-		x := draw.DrawSentence(c.screen, 0, 0, w, msg)
+		x := draw.Sentence(c.screen, 0, 0, w, msg)
 
 		gl := ' '
 		st := tcell.StyleDefault

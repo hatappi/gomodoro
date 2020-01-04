@@ -78,9 +78,9 @@ func (t *timerImpl) Run(duration int) error {
 		y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
-		draw.DrawSentence(s, int(x), int(y), int(draw.TimerWidth*mag), title)
-		draw.DrawTimer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
-		draw.DrawSentence(
+		draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title)
+		draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
+		draw.Sentence(
 			s,
 			0,
 			h-1,
