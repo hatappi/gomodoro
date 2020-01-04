@@ -3,9 +3,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/pomodoro"
 )
 
@@ -22,6 +24,15 @@ var sampleCmd = &cobra.Command{
 		if duration > 3600 {
 			return fmt.Errorf("duration max value is 3600")
 		}
+
+		logfile, err := os.OpenFile("/tmp/gomodoro.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			return err
+		}
+		logger.SetOutput(logfile)
+		logger.SetLogLevel(logger.DebugLevel)
+
+		logger.Infof("sample start")
 
 		p, err := pomodoro.NewPomodoro(
 			pomodoro.WithWorkSec(duration),
