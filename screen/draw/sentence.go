@@ -8,8 +8,10 @@ import (
 )
 
 // Sentence is draw the sentence
-func Sentence(s tcell.Screen, x, y, width int, str string, opts ...Option) int {
-	str = adjustMessage(width, str)
+func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts ...Option) int {
+	if centered {
+		str = adjustMessage(width, str)
+	}
 
 	style := tcell.StyleDefault
 	for _, opt := range opts {

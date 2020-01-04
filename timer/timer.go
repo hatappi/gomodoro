@@ -78,7 +78,7 @@ func (t *timerImpl) Run(duration int) error {
 		y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
-		draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title)
+		draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title, true)
 		draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
 		draw.Sentence(
 			s,
@@ -86,6 +86,7 @@ func (t *timerImpl) Run(duration int) error {
 			h-1,
 			w,
 			"(e): end timer / (Enter): stop start timer",
+			true,
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
 
