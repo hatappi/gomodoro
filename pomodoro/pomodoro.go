@@ -90,11 +90,11 @@ func (p *pomodoroImpl) Start() error {
 			return nil
 		}
 
-		w, _ := p.screen.Size()
+		w, h := p.screen.Size()
 		// TODO: ここからtimerScreenClientを呼んでるのは微妙なのでなおす
 		p.timerScreenClient.DrawSentence(
 			0,
-			0,
+			h-1,
 			w,
 			"Please press Enter button for continue",
 			screen.WithBackgroundColor(tcell.ColorRed),

@@ -71,8 +71,8 @@ func (t *timerImpl) Run(duration int) error {
 			return err
 		}
 
-		x = math.Round(x + ((cw - (screen.TimerWidth * mag)) / 2))
-		y = math.Round(y + ((ch - (screen.TimerHeight * mag)) / 2))
+		x = math.Trunc(x + ((cw - (screen.TimerWidth * mag)) / 2))
+		y = math.Trunc(y + ((ch - (screen.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
 		t.screenClient.DrawSentence(int(x), int(y), int(screen.TimerWidth*mag), title)
