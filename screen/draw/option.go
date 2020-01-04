@@ -13,3 +13,10 @@ func WithBackgroundColor(color tcell.Color) Option {
 		return s.Background(color)
 	}
 }
+
+// WithBackgroundColor set BackgroundColor
+func WithForegroundColor(color tcell.Color) Option {
+	return func(s tcell.Style) tcell.Style {
+		return s.Foreground(color)
+	}
+}

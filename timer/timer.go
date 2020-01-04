@@ -53,6 +53,8 @@ func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 
 // Run timer
 func (t *timerImpl) Run(duration int) error {
+	s := t.screenClient.GetScreen()
+
 	drawFn := func(duration int, title string, opts ...draw.Option) error {
 		w, h := t.screenClient.ScreenSize()
 
@@ -76,8 +78,16 @@ func (t *timerImpl) Run(duration int) error {
 		y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
-		draw.DrawSentence(t.screenClient.GetScreen(), int(x), int(y), int(draw.TimerWidth*mag), title)
-		draw.DrawTimer(t.screenClient.GetScreen(), int(x), int(y)+2, int(mag), min, sec, opts...)
+		draw.DrawSentence(s, int(x), int(y), int(draw.TimerWidth*mag), title)
+		draw.DrawTimer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
+		draw.DrawSentence(
+			s,
+			0,
+			h-1,
+			w,
+			"(e): end timer / (Enter): stop start timer",
+			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		)
 
 		return nil
 	}

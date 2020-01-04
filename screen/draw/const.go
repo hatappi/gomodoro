@@ -1,5 +1,9 @@
 package draw
 
+import (
+	"github.com/gdamore/tcell"
+)
+
 const (
 	// TimerWidth is width timer
 	TimerWidth = 21
@@ -13,6 +17,9 @@ const (
 	separaterHeight = 5
 
 	whitespaceWidth = 1
+
+	// StatusBarBackgroundColor status bar background color
+	StatusBarBackgroundColor = tcell.ColorBlack
 )
 
 const separator = `

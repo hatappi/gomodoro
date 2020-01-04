@@ -90,7 +90,7 @@ func (p *pomodoroImpl) Start() error {
 			h-1,
 			w,
 			"Please press Enter button for continue",
-			draw.WithBackgroundColor(tcell.ColorRed),
+			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
 
 	L:
