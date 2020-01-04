@@ -1,5 +1,5 @@
-// Package screen is managed screen
-package screen
+// Package draw is managed screen
+package draw
 
 import (
 	"fmt"
@@ -9,53 +9,38 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-// DrawSetting for setting of drawing
-type DrawSetting struct {
-	BackgroundColor tcell.Color
-}
-
-// DrawOption for optoin of drawing
-type DrawOption func(tcell.Style) tcell.Style
-
-// WithBackgroundColor set BackgroundColor
-func WithBackgroundColor(color tcell.Color) DrawOption {
-	return func(s tcell.Style) tcell.Style {
-		return s.Background(color)
-	}
-}
-
 // DrawTimer is draw the timer
-func (c *clientImpl) DrawTimer(x, y, mag, min, sec int, opts ...DrawOption) {
+func DrawTimer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
 	minStr := fmt.Sprintf("%02d", min)
 	secStr := fmt.Sprintf("%02d", sec)
 
-	drawNumber(c.screen, x, y, mag, string(minStr[0]), opts...)
+	drawNumber(s, x, y, mag, string(minStr[0]), opts...)
 
 	x += (numberWidth + whitespaceWidth) * mag
-	drawNumber(c.screen, x, y, mag, string(minStr[1]), opts...)
+	drawNumber(s, x, y, mag, string(minStr[1]), opts...)
 
 	x += (numberWidth + whitespaceWidth) * mag
-	drawSeparater(c.screen, x, y, mag, opts...)
+	drawSeparater(s, x, y, mag, opts...)
 
 	x += (separaterWidth + whitespaceWidth) * mag
-	drawNumber(c.screen, x, y, mag, string(secStr[0]), opts...)
+	drawNumber(s, x, y, mag, string(secStr[0]), opts...)
 
 	x += (numberWidth + whitespaceWidth) * mag
-	drawNumber(c.screen, x, y, mag, string(secStr[1]), opts...)
+	drawNumber(s, x, y, mag, string(secStr[1]), opts...)
 }
 
-func drawNumber(s tcell.Screen, x, y, mag int, nStr string, opts ...DrawOption) {
+func drawNumber(s tcell.Screen, x, y, mag int, nStr string, opts ...Option) {
 	n, _ := strconv.Atoi(nStr)
 	t := strings.Split(strings.Replace(numbers[n], "\n", "", -1), "")
 	draw(s, t, numberWidth, numberHeight, x, y, mag, opts...)
 }
 
-func drawSeparater(s tcell.Screen, x, y, mag int, opts ...DrawOption) {
+func drawSeparater(s tcell.Screen, x, y, mag int, opts ...Option) {
 	t := strings.Split(strings.Replace(separator, "\n", "", -1), "")
 	draw(s, t, separaterWidth, separaterHeight, x, y, mag, opts...)
 }
 
-func draw(s tcell.Screen, t []string, w, h, x, y, mag int, opts ...DrawOption) {
+func draw(s tcell.Screen, t []string, w, h, x, y, mag int, opts ...Option) {
 	st := tcell.StyleDefault
 	st = st.Background(tcell.ColorGreen)
 	for _, opt := range opts {

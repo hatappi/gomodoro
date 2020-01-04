@@ -1,4 +1,4 @@
-package screen
+package draw
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 )
 
 // DrawSentence is draw the sentence
-func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOption) {
+func DrawSentence(s tcell.Screen, x, y, width int, str string, opts ...Option) int {
 	str = adjustMessage(width, str)
 
 	style := tcell.StyleDefault
@@ -43,14 +43,14 @@ func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOptio
 			}
 		case 1:
 			if len(deferred) != 0 {
-				c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
+				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 				i += dwidth
 			}
 			deferred = nil
 			dwidth = 1
 		case 2:
 			if len(deferred) != 0 {
-				c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
+				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 				i += dwidth
 			}
 			deferred = nil
@@ -59,10 +59,11 @@ func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOptio
 		deferred = append(deferred, r)
 	}
 	if len(deferred) != 0 {
-		c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
+		s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 	}
 
-	c.screen.Show()
+	s.Show()
+	return x + i + dwidth
 }
 
 func adjustMessage(width int, str string) string {

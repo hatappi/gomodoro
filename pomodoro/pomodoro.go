@@ -3,9 +3,12 @@ package pomodoro
 
 import (
 	"github.com/gdamore/tcell"
+
+	"github.com/hatappi/gomodoro/screen"
+	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/task"
 	"github.com/hatappi/gomodoro/timer"
-	"github.com/hatappi/gomodoro/timer/screen"
+	timerScreen "github.com/hatappi/gomodoro/timer/screen"
 )
 
 const (
@@ -31,27 +34,17 @@ type pomodoroImpl struct {
 	shortBreakSec int
 	longBreakSec  int
 
-	timerScreenClient screen.Client
+	timerScreenClient timerScreen.Client
 	timer             timer.Timer
 }
 
 // NewPomodoro initilize Pomodoro
 func NewPomodoro(options ...Option) (Pomodoro, error) {
-	s, err := tcell.NewScreen()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = s.Init(); err != nil {
-		return nil, err
-	}
-
-	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorDarkSlateGray).Background(tcell.ColorWhite))
-	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
+	s, err := screen.NewScreen()
 
 	taskName := task.GetTask(s)
 
-	c, err := screen.NewClient(s)
+	c, err := timerScreen.NewClient(s)
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +84,13 @@ func (p *pomodoroImpl) Start() error {
 		}
 
 		w, h := p.screen.Size()
-		// TODO: ここからtimerScreenClientを呼んでるのは微妙なのでなおす
-		p.timerScreenClient.DrawSentence(
+		draw.DrawSentence(
+			p.screen,
 			0,
 			h-1,
 			w,
 			"Please press Enter button for continue",
-			screen.WithBackgroundColor(tcell.ColorRed),
+			draw.WithBackgroundColor(tcell.ColorRed),
 		)
 
 	L:

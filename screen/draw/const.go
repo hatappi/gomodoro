@@ -1,4 +1,4 @@
-package screen
+package draw
 
 const (
 	// TimerWidth is width timer
