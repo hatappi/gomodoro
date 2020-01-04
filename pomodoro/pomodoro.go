@@ -8,7 +8,6 @@ import (
 	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/task"
 	"github.com/hatappi/gomodoro/timer"
-	timerScreen "github.com/hatappi/gomodoro/timer/screen"
 )
 
 const (
@@ -34,8 +33,8 @@ type pomodoroImpl struct {
 	shortBreakSec int
 	longBreakSec  int
 
-	timerScreenClient timerScreen.Client
-	timer             timer.Timer
+	screenClient screen.Client
+	timer        timer.Timer
 }
 
 // NewPomodoro initilize Pomodoro
@@ -47,18 +46,15 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 
 	taskName := task.GetTask(s)
 
-	c, err := timerScreen.NewClient(s)
-	if err != nil {
-		return nil, err
-	}
+	c := screen.NewClient(s)
 
 	p := &pomodoroImpl{
-		workSec:           DefaultWorkSec,
-		shortBreakSec:     DefaultShortBreakSec,
-		longBreakSec:      DefaultLongBreakSec,
-		timerScreenClient: c,
-		timer:             timer.NewTimer(c, taskName),
-		screen:            s,
+		workSec:       DefaultWorkSec,
+		shortBreakSec: DefaultShortBreakSec,
+		longBreakSec:  DefaultLongBreakSec,
+		screenClient:  c,
+		timer:         timer.NewTimer(c, taskName),
+		screen:        s,
 	}
 
 	for _, opt := range options {
@@ -76,12 +72,12 @@ func (p *pomodoroImpl) Start() error {
 		} else {
 			p.timer.ChangeFontColor(tcell.ColorGreen)
 		}
-		p.timerScreenClient.StartPollEvent()
+		p.screenClient.StartPollEvent()
 		err := p.timer.Run(p.getDuration(loopCnt))
 		if err != nil {
 			return err
 		}
-		p.timerScreenClient.StopPollEvent()
+		defer p.screenClient.StopPollEvent()
 		if p.timer.IsQuit() {
 			return nil
 		}
@@ -95,18 +91,13 @@ func (p *pomodoroImpl) Start() error {
 			"Please press Enter button for continue",
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
-
 	L:
 		for {
-			ev := p.screen.PollEvent()
-			switch ev := ev.(type) {
-			case *tcell.EventKey:
-				switch ev.Key() {
-				case tcell.KeyEnter:
-					break L
-				case tcell.KeyEscape, tcell.KeyCtrlC:
-					return nil
-				}
+			select {
+			case <-p.screenClient.GetEnterChan():
+				break L
+			case <-p.screenClient.GetCancelChan():
+				return nil
 			}
 		}
 		loopCnt++
@@ -117,7 +108,7 @@ func (p *pomodoroImpl) Stop() {
 }
 
 func (p *pomodoroImpl) Finish() {
-	p.timerScreenClient.Finish()
+	p.screenClient.Finish()
 }
 
 func (p *pomodoroImpl) getDuration(cnt int) int {

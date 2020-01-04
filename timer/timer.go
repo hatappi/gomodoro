@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/gdamore/tcell"
+	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
-	"github.com/hatappi/gomodoro/timer/screen"
 )
 
 // Timer interface
@@ -102,12 +102,14 @@ func (t *timerImpl) Run(duration int) error {
 			draw.WithBackgroundColor(t.fontColor),
 		}
 		select {
-		case <-t.screenClient.GetQuitChan():
+		case <-t.screenClient.GetCancelChan():
 			t.quit = true
 			return nil
-		case <-t.screenClient.GetForceFinishChan():
-			duration = 0
-		case <-t.screenClient.GetPauseChan():
+		case r := <-t.screenClient.GetRuneChan():
+			if r == rune(101) { // e
+				duration = 0
+			}
+		case <-t.screenClient.GetEnterChan():
 			if t.stopped {
 				t.Start()
 			} else {
