@@ -44,9 +44,10 @@ func NewPomodoro(options ...Option) (Pomodoro, error) {
 		return nil, err
 	}
 
-	taskName := task.GetTask(s)
-
 	c := screen.NewClient(s)
+	c.StartPollEvent()
+
+	taskName := task.GetTask(c)
 
 	p := &pomodoroImpl{
 		workSec:       DefaultWorkSec,
@@ -72,7 +73,6 @@ func (p *pomodoroImpl) Start() error {
 		} else {
 			p.timer.ChangeFontColor(tcell.ColorGreen)
 		}
-		p.screenClient.StartPollEvent()
 		err := p.timer.Run(p.getDuration(loopCnt))
 		if err != nil {
 			return err
@@ -89,6 +89,7 @@ func (p *pomodoroImpl) Start() error {
 			h-1,
 			w,
 			"Please press Enter button for continue",
+			true,
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
 	L:
