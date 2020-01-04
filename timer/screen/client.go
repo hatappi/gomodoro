@@ -1,3 +1,4 @@
+// Package screen management timer screen
 package screen
 
 import (
@@ -14,12 +15,11 @@ type Client interface {
 	Clear()
 	Finish()
 
-	DrawSentence(x, y, maxWidth int, str string, opts ...DrawOption)
-	DrawTimer(x, y, mag, min, sec int, opts ...DrawOption)
-
 	GetQuitChan() chan struct{}
 	GetPauseChan() chan interface{}
 	GetForceFinishChan() chan interface{}
+
+	GetScreen() tcell.Screen
 }
 
 type clientImpl struct {
@@ -40,6 +40,10 @@ func NewClient(s tcell.Screen) (Client, error) {
 		pause:       make(chan interface{}),
 		forceFinish: make(chan interface{}),
 	}, nil
+}
+
+func (c *clientImpl) GetScreen() tcell.Screen {
+	return c.screen
 }
 
 func (c *clientImpl) GetQuitChan() chan struct{} {

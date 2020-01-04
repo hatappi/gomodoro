@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell"
+	"github.com/hatappi/gomodoro/screen/draw"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
@@ -41,17 +42,17 @@ func (c *clientImpl) SelectTask(tasks []string) string {
 		limit := int(math.Min(float64(offset+h), float64(len(tasks))))
 
 		for y, t := range tasksWithIndex[offset:limit] {
-			opts := []DrawOption{}
+			opts := []draw.Option{}
 			if y == i {
-				opts = []DrawOption{
-					WithBackgroundColor(tcell.ColorBlue),
+				opts = []draw.Option{
+					draw.WithBackgroundColor(tcell.ColorBlue),
 				}
 			}
 			tw := runewidth.StringWidth(t)
 			if d := w - tw; d > 0 {
 				t += strings.Repeat(" ", d)
 			}
-			_ = c.DrawSentence(0, y, w, t, opts...)
+			_ = draw.Sentence(c.screen, 0, y, w, t, opts...)
 		}
 
 		ev := c.screen.PollEvent()
@@ -115,7 +116,7 @@ func (c *clientImpl) CreateTask() string {
 		msg := fmt.Sprintf("Please Input New Task Name >%s", string(newTaskName))
 		w, _ := c.screen.Size()
 		c.screen.Clear()
-		x := c.DrawSentence(0, 0, w, msg)
+		x := draw.Sentence(c.screen, 0, 0, w, msg)
 
 		gl := ' '
 		st := tcell.StyleDefault
@@ -142,61 +143,4 @@ func (c *clientImpl) CreateTask() string {
 			c.screen.Sync()
 		}
 	}
-}
-
-func (c *clientImpl) DrawSentence(x, y, width int, str string, opts ...DrawOption) int {
-	style := tcell.StyleDefault
-	for _, opt := range opts {
-		style = opt(style)
-	}
-
-	i := 0
-	var deferred []rune
-	dwidth := 0
-	zwj := false
-	for _, r := range str {
-		if r == '\u200d' {
-			if len(deferred) == 0 {
-				deferred = append(deferred, ' ')
-				dwidth = 1
-			}
-			deferred = append(deferred, r)
-			zwj = true
-			continue
-		}
-		if zwj {
-			deferred = append(deferred, r)
-			zwj = false
-			continue
-		}
-		switch runewidth.RuneWidth(r) {
-		case 0:
-			if len(deferred) == 0 {
-				deferred = append(deferred, ' ')
-				dwidth = 1
-			}
-		case 1:
-			if len(deferred) != 0 {
-				c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
-				i += dwidth
-			}
-			deferred = nil
-			dwidth = 1
-		case 2:
-			if len(deferred) != 0 {
-				c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
-				i += dwidth
-			}
-			deferred = nil
-			dwidth = 2
-		}
-		deferred = append(deferred, r)
-	}
-	if len(deferred) != 0 {
-		c.screen.SetContent(x+i, y, deferred[0], deferred[1:], style)
-	}
-
-	c.screen.Show()
-
-	return x + i + dwidth
 }

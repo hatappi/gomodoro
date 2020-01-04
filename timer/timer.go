@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/gdamore/tcell"
+	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/timer/screen"
 )
 
@@ -52,7 +53,9 @@ func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 
 // Run timer
 func (t *timerImpl) Run(duration int) error {
-	drawFn := func(duration int, title string, opts ...screen.DrawOption) error {
+	s := t.screenClient.GetScreen()
+
+	drawFn := func(duration int, title string, opts ...draw.Option) error {
 		w, h := t.screenClient.ScreenSize()
 
 		min := duration / 60
@@ -71,24 +74,32 @@ func (t *timerImpl) Run(duration int) error {
 			return err
 		}
 
-		x = math.Trunc(x + ((cw - (screen.TimerWidth * mag)) / 2))
-		y = math.Trunc(y + ((ch - (screen.TimerHeight * mag)) / 2))
+		x = math.Trunc(x + ((cw - (draw.TimerWidth * mag)) / 2))
+		y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
 
 		t.screenClient.Clear()
-		t.screenClient.DrawSentence(int(x), int(y), int(screen.TimerWidth*mag), title)
-		t.screenClient.DrawTimer(int(x), int(y)+2, int(mag), min, sec, opts...)
+		draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title)
+		draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
+		draw.Sentence(
+			s,
+			0,
+			h-1,
+			w,
+			"(e): end timer / (Enter): stop start timer",
+			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		)
 
 		return nil
 	}
 
-	err := drawFn(duration, t.title, screen.WithBackgroundColor(t.fontColor))
+	err := drawFn(duration, t.title, draw.WithBackgroundColor(t.fontColor))
 	if err != nil {
 		return err
 	}
 	t.Start()
 	for {
-		opts := []screen.DrawOption{
-			screen.WithBackgroundColor(t.fontColor),
+		opts := []draw.Option{
+			draw.WithBackgroundColor(t.fontColor),
 		}
 		select {
 		case <-t.screenClient.GetQuitChan():
@@ -100,8 +111,8 @@ func (t *timerImpl) Run(duration int) error {
 			if t.stopped {
 				t.Start()
 			} else {
-				opts = []screen.DrawOption{
-					screen.WithBackgroundColor(t.pauseFontColor),
+				opts = []draw.Option{
+					draw.WithBackgroundColor(t.pauseFontColor),
 				}
 				t.Stop()
 			}
@@ -134,8 +145,8 @@ func (t *timerImpl) Stop() {
 }
 
 func getMagnification(w, h float64) (float64, error) {
-	x := math.Round(w / screen.TimerWidth)
-	y := math.Round(h / screen.TimerHeight)
+	x := math.Round(w / draw.TimerWidth)
+	y := math.Round(h / draw.TimerHeight)
 	mag := math.Max(x, y)
 
 	for {
@@ -143,7 +154,7 @@ func getMagnification(w, h float64) (float64, error) {
 			return 0.0, errors.New("screen is small")
 		}
 
-		if w >= screen.TimerWidth*mag && h >= screen.TimerHeight*mag {
+		if w >= draw.TimerWidth*mag && h >= draw.TimerHeight*mag {
 			break
 		}
 
