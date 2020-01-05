@@ -5,9 +5,11 @@ import (
 	"math"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/gdamore/tcell"
+	"golang.org/x/xerrors"
+
+	"github.com/hatappi/gomodoro/errors"
+	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 )
@@ -16,7 +18,6 @@ import (
 type Timer interface {
 	Run(int) error
 	Stop()
-	IsQuit() bool
 	SetTitle(string)
 
 	ChangeFontColor(tcell.Color)
@@ -27,7 +28,6 @@ type timerImpl struct {
 	ticker       *time.Ticker
 	screenClient screen.Client
 	stopped      bool
-	quit         bool
 
 	fontColor      tcell.Color
 	pauseFontColor tcell.Color
@@ -48,10 +48,6 @@ func (t *timerImpl) SetTitle(title string) {
 	t.title = title
 }
 
-func (t *timerImpl) IsQuit() bool {
-	return t.quit
-}
-
 func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 	t.fontColor = c
 }
@@ -62,7 +58,6 @@ func (t *timerImpl) Run(duration int) error {
 
 	drawFn := func(duration int, title string, opts ...draw.Option) error {
 		w, h := t.screenClient.ScreenSize()
-
 		min := duration / 60
 		sec := duration % 60
 
@@ -98,25 +93,46 @@ func (t *timerImpl) Run(duration int) error {
 		return nil
 	}
 
-	err := drawFn(duration, t.title, draw.WithBackgroundColor(t.fontColor))
-	if err != nil {
-		return err
-	}
 	t.Start()
+	defer t.Stop()
+
+	opts := []draw.Option{
+		draw.WithBackgroundColor(t.fontColor),
+	}
+
 	for {
-		opts := []draw.Option{
-			draw.WithBackgroundColor(t.fontColor),
+		err := drawFn(duration, t.title, opts...)
+		logger.Infof("error %+v", err)
+		if err != nil {
+			if xerrors.Is(err, errors.ErrScreenSmall) {
+				t.screenClient.Clear()
+				w, h := t.screenClient.ScreenSize()
+				draw.Sentence(t.screenClient.GetScreen(), 0, h/2-1, w, "Please large screen", true)
+
+				select {
+				case <-t.ticker.C:
+				}
+				continue
+			}
+			return err
 		}
+
+		if duration == 0 {
+			return nil
+		}
+
 		select {
 		case <-t.screenClient.GetCancelChan():
-			t.quit = true
-			return nil
+			return errors.ErrCancel
 		case r := <-t.screenClient.GetRuneChan():
 			if r == rune(101) { // e
 				duration = 0
 			}
 		case <-t.screenClient.GetEnterChan():
 			if t.stopped {
+				opts = []draw.Option{
+					draw.WithBackgroundColor(t.fontColor),
+				}
 				t.Start()
 			} else {
 				opts = []draw.Option{
@@ -126,16 +142,6 @@ func (t *timerImpl) Run(duration int) error {
 			}
 		case <-t.ticker.C:
 			duration--
-		}
-
-		err := drawFn(duration, t.title, opts...)
-		if err != nil {
-			return err
-		}
-
-		if duration == 0 {
-			t.Stop()
-			return nil
 		}
 	}
 }
@@ -159,7 +165,7 @@ func getMagnification(w, h float64) (float64, error) {
 
 	for {
 		if mag < 1.0 {
-			return 0.0, errors.New("screen is small")
+			return 0.0, errors.ErrScreenSmall
 		}
 
 		if w >= draw.TimerWidth*mag && h >= draw.TimerHeight*mag {
