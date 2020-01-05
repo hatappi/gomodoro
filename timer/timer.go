@@ -9,7 +9,6 @@ import (
 	"golang.org/x/xerrors"
 
 	"github.com/hatappi/gomodoro/errors"
-	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 )
@@ -102,7 +101,6 @@ func (t *timerImpl) Run(duration int) error {
 
 	for {
 		err := drawFn(duration, t.title, opts...)
-		logger.Infof("error %+v", err)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrScreenSmall) {
 				t.screenClient.Clear()
@@ -111,8 +109,15 @@ func (t *timerImpl) Run(duration int) error {
 
 				select {
 				case <-t.ticker.C:
+					continue
+				case e := <-t.screenClient.GetEventChan():
+					switch e.(type) {
+					case screen.EventCancel:
+						return errors.ErrCancel
+					case screen.EventScreenResize:
+						continue
+					}
 				}
-				continue
 			}
 			return err
 		}
@@ -122,23 +127,26 @@ func (t *timerImpl) Run(duration int) error {
 		}
 
 		select {
-		case <-t.screenClient.GetCancelChan():
-			return errors.ErrCancel
-		case r := <-t.screenClient.GetRuneChan():
-			if r == rune(101) { // e
-				duration = 0
-			}
-		case <-t.screenClient.GetEnterChan():
-			if t.stopped {
-				opts = []draw.Option{
-					draw.WithBackgroundColor(t.fontColor),
+		case e := <-t.screenClient.GetEventChan():
+			switch e := e.(type) {
+			case screen.EventCancel:
+				return errors.ErrCancel
+			case screen.EventRune:
+				if rune(e) == rune(101) { // e
+					duration = 0
 				}
-				t.Start()
-			} else {
-				opts = []draw.Option{
-					draw.WithBackgroundColor(t.pauseFontColor),
+			case screen.EventEnter:
+				if t.stopped {
+					opts = []draw.Option{
+						draw.WithBackgroundColor(t.fontColor),
+					}
+					t.Start()
+				} else {
+					opts = []draw.Option{
+						draw.WithBackgroundColor(t.pauseFontColor),
+					}
+					t.Stop()
 				}
-				t.Stop()
 			}
 		case <-t.ticker.C:
 			duration--

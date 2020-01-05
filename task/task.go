@@ -71,12 +71,13 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 			_ = draw.Sentence(c.GetScreen(), 0, y, w, t, true, opts...)
 		}
 
-		select {
-		case <-c.GetCancelChan():
+		e := <-c.GetEventChan()
+		switch e := e.(type) {
+		case screen.EventCancel:
 			return "", errors.ErrCancel
-		case <-c.GetEnterChan():
+		case screen.EventEnter:
 			return tasks[offset+i], nil
-		case <-c.GetKeyDownChan():
+		case screen.EventKeyDown:
 			if offset+i == len(tasks)-1 {
 				continue
 			}
@@ -88,7 +89,7 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 				offset += h
 				i = 0
 			}
-		case <-c.GetKeyUpChan():
+		case screen.EventKeyUp:
 			if offset+i <= 0 {
 				continue
 			}
@@ -100,9 +101,9 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 				offset -= h
 				i = h - 1
 			}
-		case r := <-c.GetRuneChan():
+		case screen.EventRune:
 			s := c.GetScreen()
-			switch r {
+			switch rune(e) {
 			case rune(106): // j
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
 			case rune(107): // k
@@ -113,7 +114,7 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 					return t, nil
 				}
 			}
-		case <-c.GetResizeEventChan():
+		case screen.EventScreenResize:
 			// reset
 			i = 0
 			offset = 0
@@ -136,17 +137,18 @@ func createTask(c screen.Client) string {
 		s.SetCell(x, 0, st, gl)
 		s.Show()
 
-		select {
-		case <-c.GetCancelChan():
+		e := <-c.GetEventChan()
+		switch e := e.(type) {
+		case screen.EventCancel:
 			return ""
-		case <-c.GetEnterChan():
+		case screen.EventEnter:
 			return string(newTaskName)
-		case <-c.GetDelChan():
+		case screen.EventDelete:
 			if l := len(newTaskName); l > 0 {
 				newTaskName = newTaskName[:l-1]
 			}
-		case r := <-c.GetRuneChan():
-			newTaskName = append(newTaskName, r)
+		case screen.EventRune:
+			newTaskName = append(newTaskName, rune(e))
 		}
 	}
 }

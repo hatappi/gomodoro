@@ -1,3 +1,4 @@
+// Package errors represents gomodoro errors
 package errors
 
 import (
@@ -5,6 +6,8 @@ import (
 )
 
 var (
-	ErrCancel      = xerrors.New("cancel")
+	// ErrCancel cancel error
+	ErrCancel = xerrors.New("cancel")
+	// ErrScreenSmall screen is small error
 	ErrScreenSmall = xerrors.New("screen is small")
 )

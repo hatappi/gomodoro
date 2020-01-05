@@ -87,13 +87,14 @@ func (p *pomodoroImpl) Start() error {
 		)
 	L:
 		for {
-			select {
-			case <-p.screenClient.GetEnterChan():
+			e := <-p.screenClient.GetEventChan()
+			switch e := e.(type) {
+			case screen.EventEnter:
 				break L
-			case <-p.screenClient.GetCancelChan():
+			case screen.EventCancel:
 				return nil
-			case r := <-p.screenClient.GetRuneChan():
-				if r == rune(99) { // c
+			case screen.EventRune:
+				if rune(e) == rune(99) { // c
 					p.screenClient.Clear()
 					t, err := task.GetTask(p.screenClient)
 					if err != nil {
