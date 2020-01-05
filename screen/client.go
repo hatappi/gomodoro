@@ -8,6 +8,16 @@ import (
 	"github.com/hatappi/gomodoro/logger"
 )
 
+type Event interface{}
+
+type EventKeyUp struct{}
+type EventKeyDown struct{}
+type EventCancel struct{}
+type EventEnter struct{}
+type EventDelete struct{}
+type EventRune rune
+type EventScreenResize struct{}
+
 // Client include related screen
 type Client interface {
 	GetScreen() tcell.Screen
@@ -19,38 +29,20 @@ type Client interface {
 	StartPollEvent()
 	StopPollEvent()
 
-	GetCancelChan() chan interface{}
-	GetEnterChan() chan interface{}
-	GetDelChan() chan interface{}
-	GetRuneChan() chan rune
-	GetKeyDownChan() chan interface{}
-	GetKeyUpChan() chan interface{}
-	GetResizeEventChan() chan interface{}
+	GetEventChan() chan Event
 }
 
 type clientImpl struct {
 	screen tcell.Screen
 
-	cancelChan      chan interface{}
-	enterChan       chan interface{}
-	delChan         chan interface{}
-	runeChan        chan rune
-	keyDownChan     chan interface{}
-	keyUpChan       chan interface{}
-	resizeEventChan chan interface{}
+	eventChan chan Event
 }
 
 // NewClient initilize Client
 func NewClient(s tcell.Screen) Client {
 	return &clientImpl{
-		screen:          s,
-		cancelChan:      make(chan interface{}),
-		enterChan:       make(chan interface{}),
-		delChan:         make(chan interface{}),
-		runeChan:        make(chan rune),
-		keyDownChan:     make(chan interface{}),
-		keyUpChan:       make(chan interface{}),
-		resizeEventChan: make(chan interface{}),
+		screen:    s,
+		eventChan: make(chan Event),
 	}
 }
 
@@ -74,31 +66,35 @@ func (c *clientImpl) StartPollEvent() {
 	go func() {
 		for {
 			ev := c.screen.PollEvent()
+			logger.Debugf("event is %+v", ev)
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyEscape, tcell.KeyCtrlC:
-					c.cancelChan <- struct{}{}
+					c.eventChan <- EventCancel{}
 				case tcell.KeyEnter:
-					c.enterChan <- struct{}{}
+					c.eventChan <- EventEnter{}
 				case tcell.KeyBackspace, tcell.KeyBackspace2:
-					c.delChan <- struct{}{}
+					c.eventChan <- EventDelete{}
 				case tcell.KeyDown:
-					c.keyDownChan <- struct{}{}
+					c.eventChan <- EventKeyDown{}
 				case tcell.KeyUp:
-					c.keyUpChan <- struct{}{}
+					c.eventChan <- EventKeyUp{}
 				case tcell.KeyRune:
-					c.runeChan <- ev.Rune()
+					c.eventChan <- EventRune(ev.Rune())
 				}
 			case *tcell.EventResize:
 				c.screen.Sync()
-				c.resizeEventChan <- struct{}{}
+				c.eventChan <- EventScreenResize{}
 			case *finishPollEvent:
-				logger.Infof("%+v", ev)
 				return
 			}
 		}
 	}()
+}
+
+func (c *clientImpl) GetEventChan() chan Event {
+	return c.eventChan
 }
 
 type finishPollEvent struct{}
@@ -109,32 +105,4 @@ func (fpe *finishPollEvent) When() time.Time {
 
 func (c *clientImpl) StopPollEvent() {
 	c.screen.PostEventWait(&finishPollEvent{})
-}
-
-func (c *clientImpl) GetCancelChan() chan interface{} {
-	return c.cancelChan
-}
-
-func (c *clientImpl) GetEnterChan() chan interface{} {
-	return c.enterChan
-}
-
-func (c *clientImpl) GetDelChan() chan interface{} {
-	return c.delChan
-}
-
-func (c *clientImpl) GetRuneChan() chan rune {
-	return c.runeChan
-}
-
-func (c *clientImpl) GetKeyDownChan() chan interface{} {
-	return c.keyDownChan
-}
-
-func (c *clientImpl) GetKeyUpChan() chan interface{} {
-	return c.keyUpChan
-}
-
-func (c *clientImpl) GetResizeEventChan() chan interface{} {
-	return c.resizeEventChan
 }
