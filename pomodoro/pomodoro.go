@@ -36,33 +36,33 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(s tcell.Screen, options ...Option) (Pomodoro, error) {
+func NewPomodoro(s tcell.Screen, options ...Option) Pomodoro {
 	c := screen.NewClient(s)
 	c.StartPollEvent()
-
-	taskName, err := task.GetTask(c)
-	if err != nil {
-		return nil, err
-	}
 
 	p := &pomodoroImpl{
 		workSec:       DefaultWorkSec,
 		shortBreakSec: DefaultShortBreakSec,
 		longBreakSec:  DefaultLongBreakSec,
 		screenClient:  c,
-		timer:         timer.NewTimer(c, taskName),
+		timer:         timer.NewTimer(c),
 	}
 
 	for _, opt := range options {
 		opt(p)
 	}
 
-	return p, nil
+	return p
 }
 
 func (p *pomodoroImpl) Start() error {
+	taskName, err := task.GetTask(p.screenClient)
+	if err != nil {
+		return err
+	}
+	p.timer.SetTitle(taskName)
+
 	loopCnt := 1
-	defer p.screenClient.StopPollEvent()
 	for {
 		w, h := p.screenClient.ScreenSize()
 

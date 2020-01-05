@@ -33,9 +33,8 @@ type timerImpl struct {
 }
 
 // NewTimer initilize Timer
-func NewTimer(c screen.Client, title string) Timer {
+func NewTimer(c screen.Client) Timer {
 	return &timerImpl{
-		title:          title,
 		ticker:         nil,
 		screenClient:   c,
 		fontColor:      tcell.ColorGreen,
@@ -105,7 +104,7 @@ func (t *timerImpl) Run(duration int) error {
 			if xerrors.Is(err, errors.ErrScreenSmall) {
 				t.screenClient.Clear()
 				w, h := t.screenClient.ScreenSize()
-				draw.Sentence(t.screenClient.GetScreen(), 0, h/2-1, w, "Please large screen", true)
+				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please large screen", true)
 
 				select {
 				case <-t.ticker.C:
