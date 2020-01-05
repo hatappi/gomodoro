@@ -103,7 +103,6 @@ func (p *pomodoroImpl) Start() error {
 					p.timer.SetTitle(t)
 					break L
 				}
-
 			}
 		}
 		loopCnt++

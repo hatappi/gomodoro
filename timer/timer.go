@@ -109,8 +109,15 @@ func (t *timerImpl) Run(duration int) error {
 
 				select {
 				case <-t.ticker.C:
+					continue
+				case e := <-t.screenClient.GetEventChan():
+					switch e.(type) {
+					case screen.EventCancel:
+						return errors.ErrCancel
+					case screen.EventScreenResize:
+						continue
+					}
 				}
-				continue
 			}
 			return err
 		}

@@ -8,14 +8,28 @@ import (
 	"github.com/hatappi/gomodoro/logger"
 )
 
+// Event screen event
 type Event interface{}
 
+// EventKeyUp press keyup event
 type EventKeyUp struct{}
+
+// EventKeyDown press keydown event
 type EventKeyDown struct{}
+
+// EventCancel cancel event
 type EventCancel struct{}
+
+// EventEnter press Enter event
 type EventEnter struct{}
+
+// EventDelete delete event
 type EventDelete struct{}
+
+// EventRune press rune
 type EventRune rune
+
+// EventScreenResize resize screen Event
 type EventScreenResize struct{}
 
 // Client include related screen
