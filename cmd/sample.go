@@ -6,9 +6,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 
+	"github.com/hatappi/gomodoro/errors"
 	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/pomodoro"
+	"github.com/hatappi/gomodoro/screen"
 )
 
 // sampleCmd represents the sample command
@@ -33,17 +36,29 @@ var sampleCmd = &cobra.Command{
 		logger.SetLogLevel(logger.DebugLevel)
 
 		logger.Infof("sample start")
+		s, err := screen.NewScreen()
+		if err != nil {
+			return err
+		}
+		defer s.Fini()
 
 		p, err := pomodoro.NewPomodoro(
+			s,
 			pomodoro.WithWorkSec(duration),
 		)
 		if err != nil {
+			if xerrors.Is(err, errors.ErrCancel) {
+				return nil
+			}
 			return err
 		}
 		defer p.Finish()
 
 		err = p.Start()
 		if err != nil {
+			if xerrors.Is(err, errors.ErrCancel) {
+				return nil
+			}
 			return err
 		}
 

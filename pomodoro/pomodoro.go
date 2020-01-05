@@ -36,16 +36,14 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(options ...Option) (Pomodoro, error) {
-	s, err := screen.NewScreen()
-	if err != nil {
-		return nil, err
-	}
-
+func NewPomodoro(s tcell.Screen, options ...Option) (Pomodoro, error) {
 	c := screen.NewClient(s)
 	c.StartPollEvent()
 
-	taskName := task.GetTask(c)
+	taskName, err := task.GetTask(c)
+	if err != nil {
+		return nil, err
+	}
 
 	p := &pomodoroImpl{
 		workSec:       DefaultWorkSec,
@@ -66,6 +64,8 @@ func (p *pomodoroImpl) Start() error {
 	loopCnt := 1
 	defer p.screenClient.StopPollEvent()
 	for {
+		w, h := p.screenClient.ScreenSize()
+
 		if loopCnt%2 == 0 {
 			p.timer.ChangeFontColor(tcell.ColorBlue)
 		} else {
@@ -75,11 +75,7 @@ func (p *pomodoroImpl) Start() error {
 		if err != nil {
 			return err
 		}
-		if p.timer.IsQuit() {
-			return nil
-		}
 
-		w, h := p.screenClient.ScreenSize()
 		draw.Sentence(
 			p.screenClient.GetScreen(),
 			0,
@@ -99,7 +95,11 @@ func (p *pomodoroImpl) Start() error {
 			case r := <-p.screenClient.GetRuneChan():
 				if r == rune(99) { // c
 					p.screenClient.Clear()
-					p.timer.SetTitle(task.GetTask(p.screenClient))
+					t, err := task.GetTask(p.screenClient)
+					if err != nil {
+						return err
+					}
+					p.timer.SetTitle(t)
 					break L
 				}
 			}

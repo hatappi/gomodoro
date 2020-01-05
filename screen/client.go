@@ -74,7 +74,6 @@ func (c *clientImpl) StartPollEvent() {
 	go func() {
 		for {
 			ev := c.screen.PollEvent()
-			logger.Infof("%+v", ev)
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
@@ -95,6 +94,7 @@ func (c *clientImpl) StartPollEvent() {
 				c.screen.Sync()
 				c.resizeEventChan <- struct{}{}
 			case *finishPollEvent:
+				logger.Infof("%+v", ev)
 				return
 			}
 		}

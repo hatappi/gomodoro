@@ -9,6 +9,7 @@ import (
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 
+	"github.com/hatappi/gomodoro/errors"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 )
@@ -32,7 +33,7 @@ func (ts Tasks) GetTaskNames() []string {
 }
 
 // GetTask get task name
-func GetTask(c screen.Client) string {
+func GetTask(c screen.Client) (string, error) {
 	var tasks Tasks
 	for i := 0; i < 50; i++ {
 		t := &Task{
@@ -44,7 +45,7 @@ func GetTask(c screen.Client) string {
 	return selectTask(c, tasks.GetTaskNames())
 }
 
-func selectTask(c screen.Client, tasks []string) string {
+func selectTask(c screen.Client, tasks []string) (string, error) {
 	var tasksWithIndex []string
 	for i, t := range tasks {
 		tasksWithIndex = append(tasksWithIndex, fmt.Sprintf("%3d. %s", i+1, t))
@@ -72,9 +73,9 @@ func selectTask(c screen.Client, tasks []string) string {
 
 		select {
 		case <-c.GetCancelChan():
-			return ""
+			return "", errors.ErrCancel
 		case <-c.GetEnterChan():
-			return tasks[offset+i]
+			return tasks[offset+i], nil
 		case <-c.GetKeyDownChan():
 			if offset+i == len(tasks)-1 {
 				continue
@@ -109,7 +110,7 @@ func selectTask(c screen.Client, tasks []string) string {
 			case rune(110): // n
 				c.Clear()
 				if t := createTask(c); t != "" {
-					return t
+					return t, nil
 				}
 			}
 		case <-c.GetResizeEventChan():
