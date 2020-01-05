@@ -42,16 +42,10 @@ var sampleCmd = &cobra.Command{
 		}
 		defer s.Fini()
 
-		p, err := pomodoro.NewPomodoro(
+		p := pomodoro.NewPomodoro(
 			s,
 			pomodoro.WithWorkSec(duration),
 		)
-		if err != nil {
-			if xerrors.Is(err, errors.ErrCancel) {
-				return nil
-			}
-			return err
-		}
 		defer p.Finish()
 
 		err = p.Start()
