@@ -2,12 +2,13 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/xerrors"
 
+	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/errors"
 	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/pomodoro"
@@ -19,15 +20,6 @@ var sampleCmd = &cobra.Command{
 	Use:   "sample",
 	Short: "show sample",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		duration, err := cmd.Flags().GetInt("duration")
-		if err != nil {
-			return err
-		}
-
-		if duration > 3600 {
-			return fmt.Errorf("duration max value is 3600")
-		}
-
 		logfile, err := os.OpenFile("/tmp/gomodoro.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			return err
@@ -36,15 +28,25 @@ var sampleCmd = &cobra.Command{
 		logger.SetLogLevel(logger.DebugLevel)
 
 		logger.Infof("sample start")
+
+		config, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+		logger.Infof("config is %+v", config)
+
 		s, err := screen.NewScreen()
 		if err != nil {
 			return err
 		}
 		defer s.Fini()
 
+		pc := config.Pomodoro
 		p := pomodoro.NewPomodoro(
 			s,
-			pomodoro.WithWorkSec(duration),
+			pomodoro.WithWorkSec(pc.WorkSec),
+			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
+			pomodoro.WithLongBreakSec(pc.LongBreakSec),
 		)
 		defer p.Finish()
 
@@ -61,6 +63,14 @@ var sampleCmd = &cobra.Command{
 }
 
 func init() {
-	sampleCmd.Flags().IntP("duration", "d", 300, "duration of timer")
+	sampleCmd.Flags().IntP("work-sec", "w", 300, "work seconds")
+	_ = viper.BindPFlag("pomodoro.work_sec", sampleCmd.Flags().Lookup("work-sec"))
+
+	sampleCmd.Flags().IntP("short-break-sec", "s", 10, "short break seconds")
+	_ = viper.BindPFlag("pomodoro.short_break_sec", sampleCmd.Flags().Lookup("short-break-sec"))
+
+	sampleCmd.Flags().IntP("long-break-sec", "l", 20, "long break seconds")
+	_ = viper.BindPFlag("pomodoro.long_break_sec", sampleCmd.Flags().Lookup("long-break-sec"))
+
 	rootCmd.AddCommand(sampleCmd)
 }

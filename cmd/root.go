@@ -56,16 +56,14 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
+		home, err := homedir.Expand("~/.gomodoro")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".gomodoro" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".gomodoro")
+		viper.SetConfigName("config.yaml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
