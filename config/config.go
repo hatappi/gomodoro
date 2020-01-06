@@ -9,6 +9,7 @@ import (
 // Config config for gomodoro
 type Config struct {
 	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
+	LogFile  string         `mapstructure:"log_file"`
 }
 
 // PomodoroConfig config for pomodoro

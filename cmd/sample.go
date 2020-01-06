@@ -2,8 +2,6 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/xerrors"
@@ -20,13 +18,6 @@ var sampleCmd = &cobra.Command{
 	Use:   "sample",
 	Short: "show sample",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		logfile, err := os.OpenFile("/tmp/gomodoro.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-		if err != nil {
-			return err
-		}
-		logger.SetOutput(logfile)
-		logger.SetLogLevel(logger.DebugLevel)
-
 		logger.Infof("sample start")
 
 		config, err := config.GetConfig()
