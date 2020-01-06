@@ -63,13 +63,13 @@ var sampleCmd = &cobra.Command{
 }
 
 func init() {
-	sampleCmd.Flags().IntP("work-sec", "w", 300, "work seconds")
+	sampleCmd.Flags().IntP("work-sec", "w", 1500, "work seconds")
 	_ = viper.BindPFlag("pomodoro.work_sec", sampleCmd.Flags().Lookup("work-sec"))
 
-	sampleCmd.Flags().IntP("short-break-sec", "s", 10, "short break seconds")
+	sampleCmd.Flags().IntP("short-break-sec", "s", 300, "short break seconds")
 	_ = viper.BindPFlag("pomodoro.short_break_sec", sampleCmd.Flags().Lookup("short-break-sec"))
 
-	sampleCmd.Flags().IntP("long-break-sec", "l", 20, "long break seconds")
+	sampleCmd.Flags().IntP("long-break-sec", "l", 900, "long break seconds")
 	_ = viper.BindPFlag("pomodoro.long_break_sec", sampleCmd.Flags().Lookup("long-break-sec"))
 
 	rootCmd.AddCommand(sampleCmd)
