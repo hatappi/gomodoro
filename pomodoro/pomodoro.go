@@ -83,7 +83,7 @@ func (p *pomodoroImpl) Start() error {
 			0,
 			h-1,
 			w,
-			"(Enter): continue / (c): change task",
+			"(Enter): continue / (c): change task / (d): delete task",
 			true,
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)

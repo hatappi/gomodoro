@@ -25,6 +25,7 @@ type Task struct {
 // Tasks is array of Task
 type Tasks []*Task
 
+// Client task client
 type Client interface {
 	GetTask() (*Task, error)
 
@@ -34,6 +35,7 @@ type Client interface {
 	saveTasks(Tasks) error
 }
 
+// NewClient initilize Client
 func NewClient(c screen.Client, taskFile string) Client {
 	return &clientImpl{
 		taskFile:     taskFile,
@@ -180,6 +182,9 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 				err := c.saveTasks(tasks)
 				if err != nil {
 					return "", err
+				}
+				if len(tasks) == 0 {
+					return "", nil
 				}
 				c.screenClient.Clear()
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
