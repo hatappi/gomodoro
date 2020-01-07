@@ -32,11 +32,12 @@ type pomodoroImpl struct {
 	longBreakSec  int
 
 	screenClient screen.Client
+	taskClient   task.Client
 	timer        timer.Timer
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(s tcell.Screen, options ...Option) Pomodoro {
+func NewPomodoro(s tcell.Screen, taskFile string, options ...Option) Pomodoro {
 	c := screen.NewClient(s)
 	c.StartPollEvent()
 
@@ -45,6 +46,7 @@ func NewPomodoro(s tcell.Screen, options ...Option) Pomodoro {
 		shortBreakSec: DefaultShortBreakSec,
 		longBreakSec:  DefaultLongBreakSec,
 		screenClient:  c,
+		taskClient:    task.NewClient(c, taskFile),
 		timer:         timer.NewTimer(c),
 	}
 
@@ -56,11 +58,11 @@ func NewPomodoro(s tcell.Screen, options ...Option) Pomodoro {
 }
 
 func (p *pomodoroImpl) Start() error {
-	taskName, err := task.GetTask(p.screenClient)
+	task, err := p.taskClient.GetTask()
 	if err != nil {
 		return err
 	}
-	p.timer.SetTitle(taskName)
+	p.timer.SetTitle(task.Name)
 
 	loopCnt := 1
 	for {
@@ -81,7 +83,7 @@ func (p *pomodoroImpl) Start() error {
 			0,
 			h-1,
 			w,
-			"(Enter): continue / (c): change task",
+			"(Enter): continue / (c): change task / (d): delete task",
 			true,
 			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
 		)
@@ -96,11 +98,11 @@ func (p *pomodoroImpl) Start() error {
 			case screen.EventRune:
 				if rune(e) == rune(99) { // c
 					p.screenClient.Clear()
-					t, err := task.GetTask(p.screenClient)
+					t, err := p.taskClient.GetTask()
 					if err != nil {
 						return err
 					}
-					p.timer.SetTitle(t)
+					p.timer.SetTitle(t.Name)
 					break L
 				}
 			}

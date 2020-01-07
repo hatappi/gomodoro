@@ -3,11 +3,14 @@ package task
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
+	"gopkg.in/yaml.v2"
 
 	"github.com/hatappi/gomodoro/errors"
 	"github.com/hatappi/gomodoro/screen"
@@ -16,76 +19,138 @@ import (
 
 // Task represents task
 type Task struct {
-	Name string
+	Name string `yaml:"name"`
 }
 
 // Tasks is array of Task
 type Tasks []*Task
 
-// GetTaskNames gets task names in array
-func (ts Tasks) GetTaskNames() []string {
-	var tn []string
-	for _, t := range ts {
-		tn = append(tn, t.Name)
-	}
+// Client task client
+type Client interface {
+	GetTask() (*Task, error)
 
-	return tn
+	selectTaskName(tasks Tasks) (string, error)
+
+	loadTasks() (Tasks, error)
+	saveTasks(Tasks) error
 }
 
-// GetTask get task name
-func GetTask(c screen.Client) (string, error) {
-	var tasks Tasks
-	for i := 0; i < 50; i++ {
-		t := &Task{
-			Name: fmt.Sprintf("Task %d", i),
+// NewClient initilize Client
+func NewClient(c screen.Client, taskFile string) Client {
+	return &clientImpl{
+		taskFile:     taskFile,
+		screenClient: c,
+	}
+}
+
+type clientImpl struct {
+	taskFile     string
+	screenClient screen.Client
+}
+
+func (c *clientImpl) GetTask() (*Task, error) {
+	tasks, err := c.loadTasks()
+	if err != nil {
+		return nil, err
+	}
+
+	var name string
+
+	if len(tasks) > 0 {
+		name, err = c.selectTaskName(tasks)
+		if err != nil {
+			return nil, err
 		}
-		tasks = append(tasks, t)
 	}
 
-	return selectTask(c, tasks.GetTaskNames())
+	t := &Task{
+		Name: name,
+	}
+
+	if name == "" {
+		t.Name = createTaskName(c.screenClient)
+		tasks = append(tasks, t)
+		err = c.saveTasks(tasks)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return t, nil
 }
 
-func selectTask(c screen.Client, tasks []string) (string, error) {
-	var tasksWithIndex []string
-	for i, t := range tasks {
-		tasksWithIndex = append(tasksWithIndex, fmt.Sprintf("%3d. %s", i+1, t))
+func (c *clientImpl) loadTasks() (Tasks, error) {
+	t := Tasks{}
+
+	b, err := ioutil.ReadFile(c.taskFile)
+	if err != nil {
+		if _, ok := err.(*os.PathError); ok {
+			return t, nil
+		}
+
+		return nil, err
 	}
 
+	err = yaml.Unmarshal(b, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
+func (c *clientImpl) saveTasks(tasks Tasks) error {
+	d, err := yaml.Marshal(tasks)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(c.taskFile, d, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 	offset := 0
 	i := 0
 	for {
-		w, h := c.ScreenSize()
+		w, h := c.screenClient.ScreenSize()
 		limit := int(math.Min(float64(offset+h), float64(len(tasks))))
 
-		for y, t := range tasksWithIndex[offset:limit] {
+		for y, t := range tasks[offset:limit] {
+			name := fmt.Sprintf("%3d. %s", y+1, t.Name)
 			opts := []draw.Option{}
 			if y == i {
 				opts = []draw.Option{
 					draw.WithBackgroundColor(tcell.ColorBlue),
 				}
 			}
-			tw := runewidth.StringWidth(t)
+			tw := runewidth.StringWidth(name)
 			if d := w - tw; d > 0 {
-				t += strings.Repeat(" ", d)
+				name += strings.Repeat(" ", d)
 			}
-			_ = draw.Sentence(c.GetScreen(), 0, y, w, t, true, opts...)
+			_ = draw.Sentence(c.screenClient.GetScreen(), 0, y, w, name, true, opts...)
 		}
 
-		e := <-c.GetEventChan()
+		e := <-c.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
 			return "", errors.ErrCancel
 		case screen.EventEnter:
-			return tasks[offset+i], nil
+			return tasks[offset+i].Name, nil
 		case screen.EventKeyDown:
-			if offset+i == len(tasks)-1 {
+			if offset+i >= len(tasks)-1 {
+				i = len(tasks) - offset - 1
 				continue
 			}
 
 			if i < h-1 {
 				i++
 			} else {
-				c.Clear()
+				c.screenClient.Clear()
 				offset += h
 				i = 0
 			}
@@ -97,22 +162,32 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 			if i > 0 {
 				i--
 			} else {
-				c.Clear()
+				c.screenClient.Clear()
 				offset -= h
 				i = h - 1
 			}
 		case screen.EventRune:
-			s := c.GetScreen()
+			s := c.screenClient.GetScreen()
 			switch rune(e) {
 			case rune(106): // j
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
 			case rune(107): // k
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
 			case rune(110): // n
-				c.Clear()
-				if t := createTask(c); t != "" {
-					return t, nil
+				c.screenClient.Clear()
+				return "", nil
+			case rune(100): // d
+				si := offset + i
+				tasks = append(tasks[:si], tasks[si+1:]...)
+				err := c.saveTasks(tasks)
+				if err != nil {
+					return "", err
 				}
+				if len(tasks) == 0 {
+					return "", nil
+				}
+				c.screenClient.Clear()
+				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
 			}
 		case screen.EventScreenResize:
 			// reset
@@ -122,7 +197,7 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 	}
 }
 
-func createTask(c screen.Client) string {
+func createTaskName(c screen.Client) string {
 	newTaskName := []rune{}
 	s := c.GetScreen()
 	for {

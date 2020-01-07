@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
 	LogFile  string         `mapstructure:"log_file"`
+	TaskFile string         `mapstructure:"task_file"`
 }
 
 // PomodoroConfig config for pomodoro

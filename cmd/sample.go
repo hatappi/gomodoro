@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/xerrors"
@@ -24,7 +25,6 @@ var sampleCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		logger.Infof("config is %+v", config)
 
 		s, err := screen.NewScreen()
 		if err != nil {
@@ -35,6 +35,7 @@ var sampleCmd = &cobra.Command{
 		pc := config.Pomodoro
 		p := pomodoro.NewPomodoro(
 			s,
+			config.TaskFile,
 			pomodoro.WithWorkSec(pc.WorkSec),
 			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
 			pomodoro.WithLongBreakSec(pc.LongBreakSec),
@@ -62,6 +63,10 @@ func init() {
 
 	sampleCmd.Flags().IntP("long-break-sec", "l", 900, "long break seconds")
 	_ = viper.BindPFlag("pomodoro.long_break_sec", sampleCmd.Flags().Lookup("long-break-sec"))
+
+	home, _ := homedir.Expand("~/.gomodoro/tasks.yaml")
+	sampleCmd.Flags().StringP("task-file", "t", home, "task file path")
+	_ = viper.BindPFlag("task_file", sampleCmd.Flags().Lookup("task-file"))
 
 	rootCmd.AddCommand(sampleCmd)
 }
