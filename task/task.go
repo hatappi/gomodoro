@@ -3,20 +3,107 @@ package task
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
+	"gopkg.in/yaml.v2"
 
 	"github.com/hatappi/gomodoro/errors"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 )
 
+type Client interface {
+	GetTask() (*Task, error)
+
+	loadTasks() (Tasks, error)
+	saveTasks(Tasks) error
+}
+
+type clientImpl struct {
+	taskFile     string
+	screenClient screen.Client
+}
+
+func NewClient(c screen.Client, taskFile string) Client {
+	return &clientImpl{
+		taskFile:     taskFile,
+		screenClient: c,
+	}
+}
+
+func (c *clientImpl) GetTask() (*Task, error) {
+	tasks, err := c.loadTasks()
+	if err != nil {
+		return nil, err
+	}
+
+	var name string
+
+	if len(tasks) > 0 {
+		name, err = selectTaskName(c.screenClient, tasks.GetTaskNames())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	t := &Task{
+		Name: name,
+	}
+
+	if name == "" {
+		t.Name = createTaskName(c.screenClient)
+		tasks = append(tasks, t)
+		err = c.saveTasks(tasks)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return t, nil
+}
+
+func (c *clientImpl) loadTasks() (Tasks, error) {
+	t := Tasks{}
+
+	b, err := ioutil.ReadFile(c.taskFile)
+	if err != nil {
+		if _, ok := err.(*os.PathError); ok {
+			return t, nil
+		}
+
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(b, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
+func (c *clientImpl) saveTasks(tasks Tasks) error {
+	d, err := yaml.Marshal(tasks)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(c.taskFile, d, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Task represents task
 type Task struct {
-	Name string
+	Name string `yaml:"name"`
 }
 
 // Tasks is array of Task
@@ -32,20 +119,7 @@ func (ts Tasks) GetTaskNames() []string {
 	return tn
 }
 
-// GetTask get task name
-func GetTask(c screen.Client) (string, error) {
-	var tasks Tasks
-	for i := 0; i < 50; i++ {
-		t := &Task{
-			Name: fmt.Sprintf("Task %d", i),
-		}
-		tasks = append(tasks, t)
-	}
-
-	return selectTask(c, tasks.GetTaskNames())
-}
-
-func selectTask(c screen.Client, tasks []string) (string, error) {
+func selectTaskName(c screen.Client, tasks []string) (string, error) {
 	var tasksWithIndex []string
 	for i, t := range tasks {
 		tasksWithIndex = append(tasksWithIndex, fmt.Sprintf("%3d. %s", i+1, t))
@@ -110,9 +184,7 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
 			case rune(110): // n
 				c.Clear()
-				if t := createTask(c); t != "" {
-					return t, nil
-				}
+				return "", nil
 			}
 		case screen.EventScreenResize:
 			// reset
@@ -122,7 +194,7 @@ func selectTask(c screen.Client, tasks []string) (string, error) {
 	}
 }
 
-func createTask(c screen.Client) string {
+func createTaskName(c screen.Client) string {
 	newTaskName := []rune{}
 	s := c.GetScreen()
 	for {
