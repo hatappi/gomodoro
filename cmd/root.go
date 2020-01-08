@@ -4,6 +4,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -91,6 +92,11 @@ func initLog() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	}
+
+	if err = os.MkdirAll(filepath.Dir(p), 0750); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	logfile, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
