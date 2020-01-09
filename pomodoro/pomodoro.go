@@ -4,8 +4,6 @@ package pomodoro
 import (
 	"github.com/gdamore/tcell"
 
-	"github.com/hatappi/gomodoro/logger"
-	"github.com/hatappi/gomodoro/notify"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/task"
@@ -36,6 +34,8 @@ type pomodoroImpl struct {
 	screenClient screen.Client
 	taskClient   task.Client
 	timer        timer.Timer
+
+	completeFuncs []func(taskName string, isWorkTime bool, elapsedTime int)
 }
 
 // NewPomodoro initilize Pomodoro
@@ -70,22 +70,22 @@ func (p *pomodoroImpl) Start() error {
 	for {
 		w, h := p.screenClient.ScreenSize()
 
-		if loopCnt%2 == 0 {
-			p.timer.ChangeFontColor(tcell.ColorBlue)
-		} else {
+		isWorkTime := loopCnt%2 != 0
+
+		if isWorkTime {
 			p.timer.ChangeFontColor(tcell.ColorGreen)
+		} else {
+			p.timer.ChangeFontColor(tcell.ColorBlue)
 		}
-		err := p.timer.Run(p.getDuration(loopCnt))
+
+		elapsedTime, err := p.timer.Run(p.getDuration(loopCnt))
 		if err != nil {
 			return err
 		}
 
-		go func() {
-			err := notify.Notify("gomodoro", "phase is finished")
-			if err != nil {
-				logger.Warnf("failed to notify: %s", err)
-			}
-		}()
+		for _, cf := range p.completeFuncs {
+			go cf(p.timer.GetTitle(), isWorkTime, elapsedTime)
+		}
 
 		draw.Sentence(
 			p.screenClient.GetScreen(),

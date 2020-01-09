@@ -12,6 +12,7 @@ import (
 	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/pomodoro"
 	"github.com/hatappi/gomodoro/screen"
+	"github.com/hatappi/gomodoro/toggl"
 )
 
 // sampleCmd represents the sample command
@@ -33,12 +34,22 @@ var sampleCmd = &cobra.Command{
 		defer s.Fini()
 
 		pc := config.Pomodoro
-		p := pomodoro.NewPomodoro(
-			s,
-			config.TaskFile,
+		opts := []pomodoro.Option{
 			pomodoro.WithWorkSec(pc.WorkSec),
 			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
 			pomodoro.WithLongBreakSec(pc.LongBreakSec),
+			pomodoro.WithNotify(),
+		}
+
+		if config.Toggl.Enable() {
+			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
+			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
+		}
+
+		p := pomodoro.NewPomodoro(
+			s,
+			config.TaskFile,
+			opts...,
 		)
 		defer p.Finish()
 
