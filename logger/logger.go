@@ -18,6 +18,8 @@ type Level uint32
 const (
 	// ErrorLevel level
 	ErrorLevel Level = iota
+	// WarnLevel level
+	WarnLevel
 	// InfoLevel level
 	InfoLevel
 	// DebugLevel level
@@ -27,6 +29,11 @@ const (
 // Errorf output error log
 func Errorf(format string, args ...interface{}) {
 	std.Errorf(format, args...)
+}
+
+// Warnf output error log
+func Warnf(format string, args ...interface{}) {
+	std.Warnf(format, args...)
 }
 
 // Infof output info log
@@ -70,6 +77,15 @@ func (l *Logger) Errorf(format string, args ...interface{}) {
 	}
 	m := fmt.Sprintf(format, args...)
 	l.out.Printf("[ERROR]%s\n", m)
+}
+
+// Warnf output error log
+func (l *Logger) Warnf(format string, args ...interface{}) {
+	if l.LogLevel < WarnLevel {
+		return
+	}
+	m := fmt.Sprintf(format, args...)
+	l.out.Printf("[WARN]%s\n", m)
 }
 
 // Infof output info log
