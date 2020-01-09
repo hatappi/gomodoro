@@ -217,6 +217,9 @@ func createTaskName(c screen.Client) string {
 		case screen.EventCancel:
 			return ""
 		case screen.EventEnter:
+			if len(newTaskName) == 0 {
+				continue
+			}
 			return string(newTaskName)
 		case screen.EventDelete:
 			if l := len(newTaskName); l > 0 {
