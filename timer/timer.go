@@ -15,9 +15,10 @@ import (
 
 // Timer interface
 type Timer interface {
-	Run(int) error
+	Run(int) (int, error)
 	Stop()
 	SetTitle(string)
+	GetTitle() string
 
 	ChangeFontColor(tcell.Color)
 }
@@ -46,12 +47,16 @@ func (t *timerImpl) SetTitle(title string) {
 	t.title = title
 }
 
+func (t *timerImpl) GetTitle() string {
+	return t.title
+}
+
 func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 	t.fontColor = c
 }
 
 // Run timer
-func (t *timerImpl) Run(duration int) error {
+func (t *timerImpl) Run(duration int) (int, error) {
 	s := t.screenClient.GetScreen()
 
 	drawFn := func(duration int, title string, opts ...draw.Option) error {
@@ -98,6 +103,8 @@ func (t *timerImpl) Run(duration int) error {
 		draw.WithBackgroundColor(t.fontColor),
 	}
 
+	elapsedTime := 0
+
 	for {
 		err := drawFn(duration, t.title, opts...)
 		if err != nil {
@@ -112,24 +119,24 @@ func (t *timerImpl) Run(duration int) error {
 				case e := <-t.screenClient.GetEventChan():
 					switch e.(type) {
 					case screen.EventCancel:
-						return errors.ErrCancel
+						return elapsedTime, errors.ErrCancel
 					case screen.EventScreenResize:
 						continue
 					}
 				}
 			}
-			return err
+			return elapsedTime, err
 		}
 
 		if duration == 0 {
-			return nil
+			return elapsedTime, nil
 		}
 
 		select {
 		case e := <-t.screenClient.GetEventChan():
 			switch e := e.(type) {
 			case screen.EventCancel:
-				return errors.ErrCancel
+				return elapsedTime, errors.ErrCancel
 			case screen.EventRune:
 				if rune(e) == rune(101) { // e
 					duration = 0
@@ -149,6 +156,7 @@ func (t *timerImpl) Run(duration int) error {
 			}
 		case <-t.ticker.C:
 			duration--
+			elapsedTime++
 		}
 	}
 }
