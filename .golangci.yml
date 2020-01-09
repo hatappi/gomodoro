@@ -288,6 +288,12 @@ issues:
       linters:
         - gosec
 
+    - path: notify
+      text: "Subprocess launched with variable"
+      linters:
+        - gosec
+
+
     # Exclude some staticcheck messages
     - linters:
         - staticcheck

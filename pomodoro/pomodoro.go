@@ -4,6 +4,8 @@ package pomodoro
 import (
 	"github.com/gdamore/tcell"
 
+	"github.com/hatappi/gomodoro/logger"
+	"github.com/hatappi/gomodoro/notify"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/task"
@@ -77,6 +79,13 @@ func (p *pomodoroImpl) Start() error {
 		if err != nil {
 			return err
 		}
+
+		go func() {
+			err := notify.Notify("gomodoro", "phase is finished")
+			if err != nil {
+				logger.Warnf("failed to notify: %s", err)
+			}
+		}()
 
 		draw.Sentence(
 			p.screenClient.GetScreen(),
