@@ -1,4 +1,4 @@
-// Package cmd has sampleCmd defined
+// Package cmd has startCmd defined
 package cmd
 
 import (
@@ -9,19 +9,19 @@ import (
 
 	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/errors"
-	"github.com/hatappi/gomodoro/logger"
 	"github.com/hatappi/gomodoro/pomodoro"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/toggl"
 )
 
-// sampleCmd represents the sample command
-var sampleCmd = &cobra.Command{
-	Use:   "sample",
-	Short: "show sample",
+// startCmd represents the start command
+var startCmd = &cobra.Command{
+	Use: "start pomodoro",
+	Short: `start pomodoro.
+if you want to change work time, break time,
+please specify argument or config yaml.
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		logger.Infof("sample start")
-
 		config, err := config.GetConfig()
 		if err != nil {
 			return err
@@ -66,18 +66,18 @@ var sampleCmd = &cobra.Command{
 }
 
 func init() {
-	sampleCmd.Flags().IntP("work-sec", "w", 1500, "work seconds")
-	_ = viper.BindPFlag("pomodoro.work_sec", sampleCmd.Flags().Lookup("work-sec"))
+	startCmd.Flags().IntP("work-sec", "w", 1500, "work seconds")
+	_ = viper.BindPFlag("pomodoro.work_sec", startCmd.Flags().Lookup("work-sec"))
 
-	sampleCmd.Flags().IntP("short-break-sec", "s", 300, "short break seconds")
-	_ = viper.BindPFlag("pomodoro.short_break_sec", sampleCmd.Flags().Lookup("short-break-sec"))
+	startCmd.Flags().IntP("short-break-sec", "s", 300, "short break seconds")
+	_ = viper.BindPFlag("pomodoro.short_break_sec", startCmd.Flags().Lookup("short-break-sec"))
 
-	sampleCmd.Flags().IntP("long-break-sec", "l", 900, "long break seconds")
-	_ = viper.BindPFlag("pomodoro.long_break_sec", sampleCmd.Flags().Lookup("long-break-sec"))
+	startCmd.Flags().IntP("long-break-sec", "l", 900, "long break seconds")
+	_ = viper.BindPFlag("pomodoro.long_break_sec", startCmd.Flags().Lookup("long-break-sec"))
 
 	home, _ := homedir.Expand("~/.gomodoro/tasks.yaml")
-	sampleCmd.Flags().StringP("task-file", "t", home, "task file path")
-	_ = viper.BindPFlag("task_file", sampleCmd.Flags().Lookup("task-file"))
+	startCmd.Flags().StringP("task-file", "t", home, "task file path")
+	_ = viper.BindPFlag("task_file", startCmd.Flags().Lookup("task-file"))
 
-	rootCmd.AddCommand(sampleCmd)
+	rootCmd.AddCommand(startCmd)
 }
