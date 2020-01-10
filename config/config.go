@@ -27,6 +27,7 @@ type TogglConfig struct {
 	ProjectID int    `mapstructure:"project_id"`
 }
 
+// Enable confirm toggl client is enable
 func (tc TogglConfig) Enable() bool {
 	return tc.APIToken != "" && tc.ProjectID != 0
 }

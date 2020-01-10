@@ -83,7 +83,7 @@ linters-settings:
     # exclude: /path/to/file.txt
 
   funlen:
-    lines: 100
+    lines: 130
     statements: 60
 
   govet:
@@ -326,6 +326,3 @@ issues:
   # of integration: much better don't allow issues in new code.
   # Default is false.
   new: false
-
-  # Show only new issues created after git revision `REV`
-  new-from-rev: REV
