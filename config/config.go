@@ -1,23 +1,50 @@
+// Package config gomodoro configuration
 package config
 
 import (
-	"github.com/BurntSushi/toml"
-	"github.com/hatappi/gomodoro/libs/toggl/config"
+	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 )
 
+// Config config for gomodoro
 type Config struct {
-	Toggl         *toggl.Config
-	AppDir        string
-	LongBreakSec  int
-	ShortBreakSec int
-	WorkSec       int
+	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
+	Toggl    TogglConfig    `mapstructure:"toggl"`
+	LogFile  string         `mapstructure:"log_file"`
+	TaskFile string         `mapstructure:"task_file"`
 }
 
-func LoadConfig(path string) *Config {
-	var conf Config
+// PomodoroConfig config for pomodoro
+type PomodoroConfig struct {
+	WorkSec       int `mapstructure:"work_sec" validate:"gt=0,lte=3600"`
+	ShortBreakSec int `mapstructure:"short_break_sec" validate:"gt=0,lte=3600"`
+	LongBreakSec  int `mapstructure:"long_break_sec" validate:"gt=0,lte=3600"`
+}
 
-	if _, err := toml.DecodeFile(path, &conf); err != nil {
-		panic(err)
+// TogglConfig config for Toggl
+type TogglConfig struct {
+	APIToken  string `mapstructure:"api_token"`
+	ProjectID int    `mapstructure:"project_id"`
+}
+
+// Enable confirm toggl client is enable
+func (tc TogglConfig) Enable() bool {
+	return tc.APIToken != "" && tc.ProjectID != 0
+}
+
+// GetConfig get Config
+func GetConfig() (*Config, error) {
+	var c Config
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		return nil, err
 	}
-	return &conf
+
+	validate := validator.New()
+	err = validate.Struct(&c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }

@@ -1,23 +1,19 @@
-depend:
-	go get -u github.com/tcnksm/ghr
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/rakyll/statik
-	dep ensure -v
+GOLANGCI_LINT_VERSION=v1.22.2
+LINT_BIN_PATH:=$(shell go env GOPATH)
 
-build-assets:
-	statik -src=assets -dest=libs/assets
+GIT_HASH=$(shell git rev-parse --short HEAD)
+
+dependencies:
+	go mod download
+	go mod tidy
 
 build:
-	go build -o dest/gomodoro main.go
+	go build \
+	  -ldflags "-X github.com/hatappi/gomodoro/cmd.commit=${GIT_HASH}" \
+	  -o ./dist/gomodoro
 
-fmt:
-	go fmt $$(go list ./... | grep -v -e 'gomodoro\/libs\/assets\/' -e 'gomodoro\/vendor\/')
+install-lint:
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ${LINT_BIN_PATH} ${GOLANGCI_LINT_VERSION}
 
-run:
-	go run main.go
-
-build_crosscompile_image:
-	docker build -t hatappi/gomodoro-crosscompile -f docker/crosscompile/Dockerfile .
-
-push_crosscompile_image:
-	docker push hatappi/gomodoro-crosscompile
+lint:
+	${LINT_BIN_PATH}/golangci-lint run ./...
