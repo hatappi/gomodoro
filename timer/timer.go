@@ -15,10 +15,12 @@ import (
 
 // Timer interface
 type Timer interface {
-	Run(int) (int, error)
+	Run() (int, error)
 	Stop()
 	SetTitle(string)
 	GetTitle() string
+	SetDuration(sec int)
+	GetRemainSec() int
 
 	ChangeFontColor(tcell.Color)
 }
@@ -31,6 +33,8 @@ type timerImpl struct {
 
 	fontColor      tcell.Color
 	pauseFontColor tcell.Color
+
+	remainSec int
 }
 
 // NewTimer initilize Timer
@@ -51,12 +55,20 @@ func (t *timerImpl) GetTitle() string {
 	return t.title
 }
 
+func (t *timerImpl) SetDuration(d int) {
+	t.remainSec = d
+}
+
+func (t *timerImpl) GetRemainSec() int {
+	return t.remainSec
+}
+
 func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 	t.fontColor = c
 }
 
 // Run timer
-func (t *timerImpl) Run(duration int) (int, error) {
+func (t *timerImpl) Run() (int, error) {
 	s := t.screenClient.GetScreen()
 
 	drawFn := func(duration int, title string, opts ...draw.Option) error {
@@ -106,7 +118,7 @@ func (t *timerImpl) Run(duration int) (int, error) {
 	elapsedTime := 0
 
 	for {
-		err := drawFn(duration, t.title, opts...)
+		err := drawFn(t.remainSec, t.title, opts...)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrScreenSmall) {
 				t.screenClient.Clear()
@@ -128,7 +140,7 @@ func (t *timerImpl) Run(duration int) (int, error) {
 			return elapsedTime, err
 		}
 
-		if duration == 0 {
+		if t.remainSec == 0 {
 			return elapsedTime, nil
 		}
 
@@ -139,7 +151,7 @@ func (t *timerImpl) Run(duration int) (int, error) {
 				return elapsedTime, errors.ErrCancel
 			case screen.EventRune:
 				if rune(e) == rune(101) { // e
-					duration = 0
+					t.remainSec = 0
 				}
 			case screen.EventEnter:
 				if t.stopped {
@@ -155,7 +167,7 @@ func (t *timerImpl) Run(duration int) (int, error) {
 				}
 			}
 		case <-t.ticker.C:
-			duration--
+			t.remainSec--
 			elapsedTime++
 		}
 	}

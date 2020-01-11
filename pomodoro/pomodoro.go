@@ -78,7 +78,8 @@ func (p *pomodoroImpl) Start() error {
 			p.timer.ChangeFontColor(tcell.ColorBlue)
 		}
 
-		elapsedTime, err := p.timer.Run(p.getDuration(loopCnt))
+		p.timer.SetDuration(p.getDuration(loopCnt))
+		elapsedTime, err := p.timer.Run()
 		if err != nil {
 			return err
 		}
