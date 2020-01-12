@@ -18,7 +18,9 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use: "gomodoro",
+	Use:           "gomodoro",
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -37,6 +39,18 @@ func init() {
 
 	rootCmd.PersistentFlags().String("log-file", "", "log file (default is $HOME/.gomodoro/gomodoro.log)")
 	err := viper.BindPFlag("log_file", rootCmd.PersistentFlags().Lookup("log-file"))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	p, err := homedir.Expand("~/.gomodoro/gomodoro.sock")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	rootCmd.PersistentFlags().String("unix-domain-socket-path", p, "unix domain socket path")
+	err = viper.BindPFlag("unix_domain_socket_path", rootCmd.PersistentFlags().Lookup("unix-domain-socket-path"))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

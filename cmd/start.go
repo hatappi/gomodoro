@@ -52,7 +52,7 @@ please specify argument or config yaml.
 		defer p.Finish()
 
 		// unix domain socket server
-		server, err := unix.NewServer("/tmp/g.sock", p.GetTimer())
+		server, err := unix.NewServer(config.UnixDomainScoketPath, p.GetTimer())
 		if err != nil {
 			return err
 		}

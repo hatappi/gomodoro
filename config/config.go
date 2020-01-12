@@ -8,10 +8,11 @@ import (
 
 // Config config for gomodoro
 type Config struct {
-	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
-	Toggl    TogglConfig    `mapstructure:"toggl"`
-	LogFile  string         `mapstructure:"log_file"`
-	TaskFile string         `mapstructure:"task_file"`
+	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
+	Toggl                TogglConfig    `mapstructure:"toggl"`
+	LogFile              string         `mapstructure:"log_file"`
+	TaskFile             string         `mapstructure:"task_file"`
+	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
 }
 
 // PomodoroConfig config for pomodoro

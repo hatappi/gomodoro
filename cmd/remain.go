@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/net/unix"
 )
 
@@ -20,7 +21,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := unix.NewClient("/tmp/g.sock")
+		config, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		c, err := unix.NewClient(config.UnixDomainScoketPath)
 		if err != nil {
 			return err
 		}
