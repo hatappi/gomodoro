@@ -9,6 +9,7 @@ import (
 
 	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/errors"
+	"github.com/hatappi/gomodoro/net/unix"
 	"github.com/hatappi/gomodoro/pomodoro"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/toggl"
@@ -27,7 +28,7 @@ please specify argument or config yaml.
 		if err != nil {
 			return err
 		}
-
+		// pomodoro
 		s, err := screen.NewScreen()
 		if err != nil {
 			return err
@@ -47,12 +48,16 @@ please specify argument or config yaml.
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
-		p := pomodoro.NewPomodoro(
-			s,
-			config.TaskFile,
-			opts...,
-		)
+		p := pomodoro.NewPomodoro(s, config.TaskFile, opts...)
 		defer p.Finish()
+
+		// unix domain socket server
+		server, err := unix.NewServer(config.UnixDomainScoketPath, p.GetTimer())
+		if err != nil {
+			return err
+		}
+		defer server.Close()
+		go server.Serve()
 
 		err = p.Start()
 		if err != nil {

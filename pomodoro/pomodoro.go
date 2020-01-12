@@ -23,6 +23,9 @@ const (
 type Pomodoro interface {
 	Start() error
 	Stop()
+
+	GetTimer() timer.Timer
+
 	Finish()
 }
 
@@ -119,6 +122,10 @@ func (p *pomodoroImpl) Start() error {
 		}
 		loopCnt++
 	}
+}
+
+func (p *pomodoroImpl) GetTimer() timer.Timer {
+	return p.timer
 }
 
 func (p *pomodoroImpl) Stop() {
