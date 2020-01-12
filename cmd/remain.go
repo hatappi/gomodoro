@@ -15,22 +15,36 @@ var remainCmd = &cobra.Command{
 	Use:   "remain",
 	Short: "get remain time",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := config.GetConfig()
-		if err != nil {
-			return err
+		ie, e := cmd.Flags().GetBool("ignore-error")
+		if e != nil {
+			return e
 		}
 
-		c, err := unix.NewClient(config.UnixDomainScoketPath)
-		if err != nil {
-			return err
-		}
+		err := func() error {
+			config, err := config.GetConfig()
+			if err != nil {
+				return err
+			}
 
-		r, err := c.Get()
-		if err != nil {
-			return err
-		}
+			c, err := unix.NewClient(config.UnixDomainScoketPath)
+			if err != nil {
+				return err
+			}
 
-		fmt.Printf("%s", r.GetRemain())
+			r, err := c.Get()
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("%s", r.GetRemain())
+			return nil
+		}()
+		if err != nil {
+			if !ie {
+				return err
+			}
+			fmt.Printf("--:--")
+		}
 
 		return nil
 	},
@@ -38,4 +52,6 @@ var remainCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(remainCmd)
+
+	remainCmd.Flags().BoolP("ignore-error", "i", false, "ignore error")
 }
