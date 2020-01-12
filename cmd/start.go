@@ -16,8 +16,9 @@ import (
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
-	Use: "start pomodoro",
-	Short: `start pomodoro.
+	Use:   "start",
+	Short: "start pomodoro",
+	Long: `start pomodoro.
 if you want to change work time, break time,
 please specify argument or config yaml.
 	`,
