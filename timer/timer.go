@@ -69,45 +69,6 @@ func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 
 // Run timer
 func (t *timerImpl) Run() (int, error) {
-	s := t.screenClient.GetScreen()
-
-	drawFn := func(duration int, title string, opts ...draw.Option) error {
-		w, h := t.screenClient.ScreenSize()
-		min := duration / 60
-		sec := duration % 60
-
-		x := float64(w) / 16
-		y := float64(h) / 16
-
-		printLine := 2.0
-		cw := float64(w) * 14 / 16
-		ch := float64(h) * 14 / 16
-		ch -= printLine
-
-		mag, err := getMagnification(cw, ch)
-		if err != nil {
-			return err
-		}
-
-		x = math.Trunc(x + ((cw - (draw.TimerWidth * mag)) / 2))
-		y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
-
-		t.screenClient.Clear()
-		draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title, true)
-		draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
-		draw.Sentence(
-			s,
-			0,
-			h-1,
-			w,
-			"(e): end timer / (Enter): stop start timer",
-			true,
-			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
-		)
-
-		return nil
-	}
-
 	t.Start()
 	defer t.Stop()
 
@@ -118,7 +79,7 @@ func (t *timerImpl) Run() (int, error) {
 	elapsedTime := 0
 
 	for {
-		err := drawFn(t.remainSec, t.title, opts...)
+		err := t.drawTimer(t.remainSec, t.title, opts...)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrScreenSmall) {
 				t.screenClient.Clear()
@@ -183,6 +144,45 @@ func (t *timerImpl) Start() {
 func (t *timerImpl) Stop() {
 	t.stopped = true
 	t.ticker.Stop()
+}
+
+func (t *timerImpl) drawTimer(duration int, title string, opts ...draw.Option) error {
+	s := t.screenClient.GetScreen()
+
+	w, h := t.screenClient.ScreenSize()
+	min := duration / 60
+	sec := duration % 60
+
+	x := float64(w) / 16
+	y := float64(h) / 16
+
+	printLine := 2.0
+	cw := float64(w) * 14 / 16
+	ch := float64(h) * 14 / 16
+	ch -= printLine
+
+	mag, err := getMagnification(cw, ch)
+	if err != nil {
+		return err
+	}
+
+	x = math.Trunc(x + ((cw - (draw.TimerWidth * mag)) / 2))
+	y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
+
+	t.screenClient.Clear()
+	draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title, true)
+	draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
+	draw.Sentence(
+		s,
+		0,
+		h-1,
+		w,
+		"(e): end timer / (Enter): stop start timer",
+		true,
+		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+	)
+
+	return nil
 }
 
 func getMagnification(w, h float64) (float64, error) {
