@@ -17,3 +17,6 @@ install-lint:
 
 lint:
 	${LINT_BIN_PATH}/golangci-lint run ./...
+
+test:
+	@go test ./...
