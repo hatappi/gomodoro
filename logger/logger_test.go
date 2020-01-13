@@ -82,3 +82,81 @@ func TestWarnf(t *testing.T) {
 		})
 	}
 }
+
+func TestInfof(t *testing.T) {
+	cases := []struct {
+		name     string
+		logLevel Level
+		format   string
+		args     []interface{}
+		want     string
+	}{
+		{
+			name:     "success",
+			logLevel: InfoLevel,
+			format:   "test %s",
+			args:     []interface{}{"test"},
+			want:     "[INFO]test test\n",
+		},
+		{
+			name:     "logLevel is WarnLevel",
+			logLevel: WarnLevel,
+			format:   "test",
+			want:     "",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(tt *testing.T) {
+			buf := new(bytes.Buffer)
+			SetOutput(buf)
+			SetLogLevel(c.logLevel)
+			Infof(c.format, c.args...)
+
+			s := buf.String()
+
+			if s != c.want {
+				tt.Errorf("want: %s, got: %s", c.want, s)
+			}
+		})
+	}
+}
+
+func TestDebugf(t *testing.T) {
+	cases := []struct {
+		name     string
+		logLevel Level
+		format   string
+		args     []interface{}
+		want     string
+	}{
+		{
+			name:     "success",
+			logLevel: DebugLevel,
+			format:   "test %s",
+			args:     []interface{}{"test"},
+			want:     "[DEBUG]test test\n",
+		},
+		{
+			name:     "logLevel is InfoLevel",
+			logLevel: InfoLevel,
+			format:   "test",
+			want:     "",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(tt *testing.T) {
+			buf := new(bytes.Buffer)
+			SetOutput(buf)
+			SetLogLevel(c.logLevel)
+			Debugf(c.format, c.args...)
+
+			s := buf.String()
+
+			if s != c.want {
+				tt.Errorf("want: %s, got: %s", c.want, s)
+			}
+		})
+	}
+}
