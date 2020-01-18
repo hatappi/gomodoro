@@ -46,6 +46,9 @@ var initCmd = &cobra.Command{
 		t := template.Must(template.New("config").Parse(confTpl))
 
 		isStdout, err := cmd.Flags().GetBool("stdout")
+		if err != nil {
+			return err
+		}
 		if isStdout {
 			err = t.Execute(os.Stdout, conf)
 			if err != nil {
@@ -78,11 +81,13 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		confFile, err := os.OpenFile(confPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+		confFile, err := os.OpenFile(confPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			return err
 		}
-		defer confFile.Close()
+		defer func() {
+			_ = confFile.Close()
+		}()
 
 		err = t.Execute(confFile, conf)
 		if err != nil {
