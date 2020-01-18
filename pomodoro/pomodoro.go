@@ -4,19 +4,11 @@ package pomodoro
 import (
 	"github.com/gdamore/tcell"
 
+	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/screen"
 	"github.com/hatappi/gomodoro/screen/draw"
 	"github.com/hatappi/gomodoro/task"
 	"github.com/hatappi/gomodoro/timer"
-)
-
-const (
-	// DefaultWorkSec default working second
-	DefaultWorkSec = 1500
-	// DefaultShortBreakSec default short break second
-	DefaultShortBreakSec = 300
-	// DefaultLongBreakSec default long break second
-	DefaultLongBreakSec = 900
 )
 
 // Pomodoro interface
@@ -47,9 +39,9 @@ func NewPomodoro(s tcell.Screen, taskFile string, options ...Option) Pomodoro {
 	c.StartPollEvent()
 
 	p := &pomodoroImpl{
-		workSec:       DefaultWorkSec,
-		shortBreakSec: DefaultShortBreakSec,
-		longBreakSec:  DefaultLongBreakSec,
+		workSec:       config.DefaultWorkSec,
+		shortBreakSec: config.DefaultShortBreakSec,
+		longBreakSec:  config.DefaultLongBreakSec,
 		screenClient:  c,
 		taskClient:    task.NewClient(c, taskFile),
 		timer:         timer.NewTimer(c),

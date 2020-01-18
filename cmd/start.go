@@ -72,16 +72,16 @@ please specify argument or config yaml.
 }
 
 func init() {
-	startCmd.Flags().IntP("work-sec", "w", 1500, "work seconds")
+	startCmd.Flags().IntP("work-sec", "w", config.DefaultWorkSec, "work seconds")
 	_ = viper.BindPFlag("pomodoro.work_sec", startCmd.Flags().Lookup("work-sec"))
 
-	startCmd.Flags().IntP("short-break-sec", "s", 300, "short break seconds")
+	startCmd.Flags().IntP("short-break-sec", "s", config.DefaultShortBreakSec, "short break seconds")
 	_ = viper.BindPFlag("pomodoro.short_break_sec", startCmd.Flags().Lookup("short-break-sec"))
 
-	startCmd.Flags().IntP("long-break-sec", "l", 900, "long break seconds")
+	startCmd.Flags().IntP("long-break-sec", "l", config.DefaultLongBreakSec, "long break seconds")
 	_ = viper.BindPFlag("pomodoro.long_break_sec", startCmd.Flags().Lookup("long-break-sec"))
 
-	home, _ := homedir.Expand("~/.gomodoro/tasks.yaml")
+	home, _ := homedir.Expand(config.DefaultTaskFile)
 	startCmd.Flags().StringP("task-file", "t", home, "task file path")
 	_ = viper.BindPFlag("task_file", startCmd.Flags().Lookup("task-file"))
 

@@ -44,7 +44,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	p, err := homedir.Expand("~/.gomodoro/gomodoro.sock")
+	p, err := homedir.Expand(config.DefaultUnixDomainScoketPath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -63,14 +63,12 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		home, err := homedir.Expand("~/.gomodoro")
+		configPath, err := homedir.Expand("~/.gomodoro/config.yaml")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
-		viper.AddConfigPath(home)
-		viper.SetConfigName("config.yaml")
+		viper.SetConfigFile(configPath)
 	}
 
 	viper.SetEnvPrefix("GOMODORO")
@@ -81,15 +79,15 @@ func initConfig() {
 }
 
 func initLog() {
-	config, err := config.GetConfig()
+	conf, err := config.GetConfig()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	p := config.LogFile
+	p := conf.LogFile
 	if p == "" {
-		p, err = homedir.Expand("~/.gomodoro/gomodoro.log")
+		p, err = homedir.Expand(config.DefaultLogFile)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

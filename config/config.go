@@ -6,6 +6,22 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	// DefaultWorkSec default working second
+	DefaultWorkSec = 1500
+	// DefaultShortBreakSec default short break second
+	DefaultShortBreakSec = 300
+	// DefaultLongBreakSec default long break second
+	DefaultLongBreakSec = 900
+
+	// DefaultLogFile default log file path
+	DefaultLogFile = "~/.gomodoro/gomodoro.log"
+	// DefaultTaskFile default task file path
+	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
+	// DefaultUnixDomainScoketPath default unix domain socket file path
+	DefaultUnixDomainScoketPath = "~/.gomodoro/gomodoro.sock"
+)
+
 // Config config for gomodoro
 type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
