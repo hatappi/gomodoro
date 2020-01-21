@@ -40,6 +40,22 @@ func (c *Config) ExpandTaskFile() (string, error) {
 	return p, nil
 }
 
+func (c *Config) ExpandLogFile() (string, error) {
+	p, err := homedir.Expand(c.LogFile)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
+func (c *Config) ExpandUnixDomainSocketPath() (string, error) {
+	p, err := homedir.Expand(c.UnixDomainScoketPath)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
 // PomodoroConfig config for pomodoro
 type PomodoroConfig struct {
 	WorkSec       int `mapstructure:"work_sec" validate:"gt=0,lte=3600"`
