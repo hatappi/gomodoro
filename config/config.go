@@ -3,6 +3,7 @@ package config
 
 import (
 	"github.com/go-playground/validator/v10"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -29,6 +30,14 @@ type Config struct {
 	LogFile              string         `mapstructure:"log_file"`
 	TaskFile             string         `mapstructure:"task_file"`
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
+}
+
+func (c *Config) ExpandTaskFile() (string, error) {
+	p, err := homedir.Expand(c.TaskFile)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
 }
 
 // PomodoroConfig config for pomodoro
