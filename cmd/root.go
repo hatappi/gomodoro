@@ -87,11 +87,13 @@ func initLog() {
 
 	p := conf.LogFile
 	if p == "" {
-		p, err = homedir.Expand(config.DefaultLogFile)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		p = config.DefaultLogFile
+	}
+
+	p, err = homedir.Expand(p)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	if err = os.MkdirAll(filepath.Dir(p), 0750); err != nil {
