@@ -48,7 +48,12 @@ please specify argument or config yaml.
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
-		p := pomodoro.NewPomodoro(s, config.TaskFile, opts...)
+		tf, err := config.ExpandTaskFile()
+		if err != nil {
+			return err
+		}
+
+		p := pomodoro.NewPomodoro(s, tf, opts...)
 		defer p.Finish()
 
 		// unix domain socket server
