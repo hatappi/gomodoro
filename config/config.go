@@ -32,6 +32,7 @@ type Config struct {
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
 }
 
+// ExpandTaskFile get expand task file
 func (c *Config) ExpandTaskFile() (string, error) {
 	p, err := homedir.Expand(c.TaskFile)
 	if err != nil {
@@ -40,6 +41,7 @@ func (c *Config) ExpandTaskFile() (string, error) {
 	return p, nil
 }
 
+// ExpandLogFile get expand log file
 func (c *Config) ExpandLogFile() (string, error) {
 	p, err := homedir.Expand(c.LogFile)
 	if err != nil {
@@ -48,6 +50,7 @@ func (c *Config) ExpandLogFile() (string, error) {
 	return p, nil
 }
 
+// ExpandUnixDomainSocketPath get expand UnixDomainScoketPath
 func (c *Config) ExpandUnixDomainSocketPath() (string, error) {
 	p, err := homedir.Expand(c.UnixDomainScoketPath)
 	if err != nil {
