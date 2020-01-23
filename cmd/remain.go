@@ -26,7 +26,12 @@ var remainCmd = &cobra.Command{
 				return err
 			}
 
-			c, err := unix.NewClient(config.UnixDomainScoketPath)
+			udsp, err := config.ExpandUnixDomainSocketPath()
+			if err != nil {
+				return err
+			}
+
+			c, err := unix.NewClient(udsp)
 			if err != nil {
 				return err
 			}

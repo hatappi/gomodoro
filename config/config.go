@@ -3,7 +3,24 @@ package config
 
 import (
 	"github.com/go-playground/validator/v10"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+)
+
+const (
+	// DefaultWorkSec default working second
+	DefaultWorkSec = 1500
+	// DefaultShortBreakSec default short break second
+	DefaultShortBreakSec = 300
+	// DefaultLongBreakSec default long break second
+	DefaultLongBreakSec = 900
+
+	// DefaultLogFile default log file path
+	DefaultLogFile = "~/.gomodoro/gomodoro.log"
+	// DefaultTaskFile default task file path
+	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
+	// DefaultUnixDomainScoketPath default unix domain socket file path
+	DefaultUnixDomainScoketPath = "~/.gomodoro/gomodoro.sock"
 )
 
 // Config config for gomodoro
@@ -13,6 +30,33 @@ type Config struct {
 	LogFile              string         `mapstructure:"log_file"`
 	TaskFile             string         `mapstructure:"task_file"`
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
+}
+
+// ExpandTaskFile get expand task file
+func (c *Config) ExpandTaskFile() (string, error) {
+	p, err := homedir.Expand(c.TaskFile)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
+// ExpandLogFile get expand log file
+func (c *Config) ExpandLogFile() (string, error) {
+	p, err := homedir.Expand(c.LogFile)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
+// ExpandUnixDomainSocketPath get expand UnixDomainScoketPath
+func (c *Config) ExpandUnixDomainSocketPath() (string, error) {
+	p, err := homedir.Expand(c.UnixDomainScoketPath)
+	if err != nil {
+		return "", err
+	}
+	return p, nil
 }
 
 // PomodoroConfig config for pomodoro
