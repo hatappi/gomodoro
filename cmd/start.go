@@ -57,7 +57,12 @@ please specify argument or config yaml.
 		defer p.Finish()
 
 		// unix domain socket server
-		server, err := unix.NewServer(config.UnixDomainScoketPath, p.GetTimer())
+		udsp, err := config.ExpandUnixDomainSocketPath()
+		if err != nil {
+			return err
+		}
+
+		server, err := unix.NewServer(udsp, p.GetTimer())
 		if err != nil {
 			return err
 		}
