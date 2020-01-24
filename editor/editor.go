@@ -1,3 +1,4 @@
+// Package editor manage EDITOR
 package editor
 
 import (
@@ -7,6 +8,7 @@ import (
 	"os/exec"
 )
 
+// GetSliceText get slice text edited with editor
 func GetSliceText(initialText string) ([]string, error) {
 	tmpfile, err := ioutil.TempFile("", "tw")
 	if err != nil {
@@ -24,7 +26,7 @@ func GetSliceText(initialText string) ([]string, error) {
 		return nil, err
 	}
 
-	if err := openEditor(tmpfile.Name()); err != nil {
+	if err = openEditor(tmpfile.Name()); err != nil {
 		return nil, err
 	}
 
