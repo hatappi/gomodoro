@@ -15,8 +15,13 @@ const initialText = `# Please write one task per line`
 
 // addTaskCmd represents the addTask command
 var addTaskCmd = &cobra.Command{
-	Use:   "add-task",
+	Use:   "add-task TASK_NAME",
 	Short: "add task",
+	Long: `This command adds a task.
+Please specify the task name in the argument.
+if you doesn't specify task name, editor starts up.
+And add a task using the editor.
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := config.GetConfig()
 		if err != nil {
