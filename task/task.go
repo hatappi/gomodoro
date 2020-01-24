@@ -234,3 +234,28 @@ func createTaskName(c screen.Client) (string, error) {
 		}
 	}
 }
+
+// AddTask save task to file
+func AddTask(taskFile, name string) error {
+	if name == "" {
+		return xerrors.New("task name is empty")
+	}
+
+	c := &clientImpl{
+		taskFile: taskFile,
+	}
+
+	tasks, err := c.loadTasks()
+	if err != nil {
+		return err
+	}
+
+	tasks = append(tasks, &Task{Name: name})
+
+	err = c.saveTasks(tasks)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
