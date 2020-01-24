@@ -10,7 +10,7 @@ import (
 
 // GetSliceText get slice text edited with editor
 func GetSliceText(initialText string) ([]string, error) {
-	tmpfile, err := ioutil.TempFile("", "tw")
+	tmpfile, err := ioutil.TempFile("", "gomodoro")
 	if err != nil {
 		return nil, err
 	}
