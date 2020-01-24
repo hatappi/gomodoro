@@ -10,6 +10,7 @@ import (
 
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
+	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 
 	"github.com/hatappi/gomodoro/errors"
@@ -68,7 +69,10 @@ func (c *clientImpl) GetTask() (*Task, error) {
 	}
 
 	if name == "" {
-		t.Name = createTaskName(c.screenClient)
+		t.Name, err = createTaskName(c.screenClient)
+		if xerrors.Is(err, errors.ErrCancel) {
+			return nil, err
+		}
 		tasks = append(tasks, t)
 		err = c.saveTasks(tasks)
 		if err != nil {
@@ -197,7 +201,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 	}
 }
 
-func createTaskName(c screen.Client) string {
+func createTaskName(c screen.Client) (string, error) {
 	newTaskName := []rune{}
 	s := c.GetScreen()
 	for {
@@ -215,12 +219,12 @@ func createTaskName(c screen.Client) string {
 		e := <-c.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
-			return ""
+			return "", errors.ErrCancel
 		case screen.EventEnter:
 			if len(newTaskName) == 0 {
 				continue
 			}
-			return string(newTaskName)
+			return string(newTaskName), nil
 		case screen.EventDelete:
 			if l := len(newTaskName); l > 0 {
 				newTaskName = newTaskName[:l-1]
