@@ -122,7 +122,8 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 	i := 0
 	for {
 		w, h := c.screenClient.ScreenSize()
-		limit := int(math.Min(float64(offset+h), float64(len(tasks))))
+		selectedHeight := h - 1
+		limit := int(math.Min(float64(offset+selectedHeight), float64(len(tasks))))
 
 		for y, t := range tasks[offset:limit] {
 			name := fmt.Sprintf("%3d. %s", y+1, t.Name)
@@ -139,6 +140,16 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 			_ = draw.Sentence(c.screenClient.GetScreen(), 0, y, w, name, true, opts...)
 		}
 
+		draw.Sentence(
+			c.screenClient.GetScreen(),
+			0,
+			h-1,
+			w,
+			"(n): add new task / (d): delete task",
+			true,
+			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		)
+
 		e := <-c.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
@@ -151,11 +162,11 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 				continue
 			}
 
-			if i < h-1 {
+			if i < selectedHeight-1 {
 				i++
 			} else {
 				c.screenClient.Clear()
-				offset += h
+				offset += selectedHeight
 				i = 0
 			}
 		case screen.EventKeyUp:
@@ -167,8 +178,8 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 				i--
 			} else {
 				c.screenClient.Clear()
-				offset -= h
-				i = h - 1
+				offset -= selectedHeight
+				i = selectedHeight - 1
 			}
 		case screen.EventRune:
 			s := c.screenClient.GetScreen()
