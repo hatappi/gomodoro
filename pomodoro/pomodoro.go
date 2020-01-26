@@ -63,8 +63,6 @@ func (p *pomodoroImpl) Start() error {
 
 	loopCnt := 1
 	for {
-		w, h := p.screenClient.ScreenSize()
-
 		isWorkTime := loopCnt%2 != 0
 
 		if isWorkTime {
@@ -83,6 +81,7 @@ func (p *pomodoroImpl) Start() error {
 			go cf(p.timer.GetTitle(), isWorkTime, elapsedTime)
 		}
 
+		w, h := p.screenClient.ScreenSize()
 		draw.Sentence(
 			p.screenClient.GetScreen(),
 			0,
