@@ -68,11 +68,16 @@ func (c *clientImpl) GetTask() (*Task, error) {
 		Name: name,
 	}
 
-	if name == "" {
+	if t.Name == "" {
 		t.Name, err = createTaskName(c.screenClient)
 		if xerrors.Is(err, errors.ErrCancel) {
 			return nil, err
 		}
+		tasks, err = c.loadTasks()
+		if err != nil {
+			return nil, err
+		}
+
 		tasks = append(tasks, t)
 		err = c.saveTasks(tasks)
 		if err != nil {
