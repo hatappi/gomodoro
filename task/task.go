@@ -207,7 +207,11 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 					return "", nil
 				}
 				c.screenClient.Clear()
-				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
+
+				// when bottom task is deleted, key is up
+				if len(tasks) == i {
+					s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
+				}
 			}
 		case screen.EventScreenResize:
 			// reset
