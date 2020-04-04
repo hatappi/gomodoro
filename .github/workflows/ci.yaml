@@ -61,7 +61,7 @@ jobs:
         run: make dependencies
 
       - name: Install lint tools
-        run: make install-lint
+        run: make install-tools
 
       - name: Lint
         run: make lint

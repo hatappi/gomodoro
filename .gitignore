@@ -9,3 +9,6 @@ libs/assets/statik/statik.go
 .envrc
 
 dist/*
+
+bin/*
+!bin/.keep
