@@ -3,9 +3,11 @@ package cmd
 
 import (
 	"fmt"
+
+	"github.com/spf13/cobra"
+
 	"github.com/hatappi/gomodoro/config"
 	"github.com/hatappi/gomodoro/net/unix"
-	"github.com/spf13/cobra"
 )
 
 // remainCmd represents the remain command
