@@ -31,20 +31,19 @@ jobs:
       - name: Build
         run: make build
 
-  lint:
-    name: Lint
+  reviewdog:
+    name: Reviewdog
     needs:
       - Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.13
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.13
-        id: go
+      - uses: actions/checkout@v2
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+      - name: setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+        id: go
 
       - uses: actions/cache@v1
         id: cache
@@ -54,17 +53,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: confirm cache
-        run: echo "cache is ${{ steps.cache.outputs.cache-hit }}"
-
-      - name: Get dependencies
-        run: make dependencies
-
       - name: Install lint tools
         run: make install-tools
 
-      - name: Lint
-        run: make lint
+      - name: Run reviewdog
+        run: make reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEWDOG_ARGS: -reporter=github-check
 
   test:
     name: Test
