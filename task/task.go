@@ -114,7 +114,7 @@ func (c *clientImpl) saveTasks(tasks Tasks) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(c.taskFile, d, 0644)
+	err = ioutil.WriteFile(c.taskFile, d, 0600)
 	if err != nil {
 		return err
 	}
