@@ -10,7 +10,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/reviewdog/reviewdog v0.10.0
 	github.com/spf13/cobra v0.0.7
-	github.com/spf13/viper v1.6.3
+	github.com/spf13/viper v1.7.0
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	gopkg.in/yaml.v2 v2.3.0
 )
