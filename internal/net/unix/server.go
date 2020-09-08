@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/hatappi/gomodoro/logger"
-	"github.com/hatappi/gomodoro/timer"
+	"github.com/hatappi/gomodoro/internal/logger"
+	"github.com/hatappi/gomodoro/internal/timer"
 )
 
 // Response represents unix server response

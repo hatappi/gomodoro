@@ -13,9 +13,9 @@ import (
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 
-	"github.com/hatappi/gomodoro/errors"
-	"github.com/hatappi/gomodoro/screen"
-	"github.com/hatappi/gomodoro/screen/draw"
+	"github.com/hatappi/gomodoro/internal/errors"
+	"github.com/hatappi/gomodoro/internal/screen"
+	"github.com/hatappi/gomodoro/internal/screen/draw"
 )
 
 // Task represents task

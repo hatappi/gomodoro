@@ -4,11 +4,11 @@ package pomodoro
 import (
 	"github.com/gdamore/tcell"
 
-	"github.com/hatappi/gomodoro/config"
-	"github.com/hatappi/gomodoro/screen"
-	"github.com/hatappi/gomodoro/screen/draw"
-	"github.com/hatappi/gomodoro/task"
-	"github.com/hatappi/gomodoro/timer"
+	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/screen"
+	"github.com/hatappi/gomodoro/internal/screen/draw"
+	"github.com/hatappi/gomodoro/internal/task"
+	"github.com/hatappi/gomodoro/internal/timer"
 )
 
 // Pomodoro interface

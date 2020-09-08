@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 
-	"github.com/hatappi/gomodoro/logger"
+	"github.com/hatappi/gomodoro/internal/logger"
 )
 
 // Client represents unix server client

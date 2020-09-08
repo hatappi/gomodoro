@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/xerrors"
 
-	"github.com/hatappi/gomodoro/config"
-	"github.com/hatappi/gomodoro/errors"
-	"github.com/hatappi/gomodoro/net/unix"
-	"github.com/hatappi/gomodoro/pomodoro"
-	"github.com/hatappi/gomodoro/screen"
-	"github.com/hatappi/gomodoro/toggl"
+	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/errors"
+	"github.com/hatappi/gomodoro/internal/net/unix"
+	"github.com/hatappi/gomodoro/internal/pomodoro"
+	"github.com/hatappi/gomodoro/internal/screen"
+	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
 // startCmd represents the start command
