@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hatappi/gomodoro/config"
-	"github.com/hatappi/gomodoro/editor"
-	"github.com/hatappi/gomodoro/task"
+	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/editor"
+	"github.com/hatappi/gomodoro/internal/task"
 )
 
 const initialText = `# Please write one task per line`

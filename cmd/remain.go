@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hatappi/gomodoro/config"
-	"github.com/hatappi/gomodoro/net/unix"
+	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/net/unix"
 )
 
 // remainCmd represents the remain command
