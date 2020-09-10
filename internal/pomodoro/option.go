@@ -4,9 +4,9 @@ package pomodoro
 import (
 	"time"
 
-	"github.com/hatappi/gomodoro/logger"
-	"github.com/hatappi/gomodoro/notify"
-	"github.com/hatappi/gomodoro/toggl"
+	"github.com/hatappi/gomodoro/internal/logger"
+	"github.com/hatappi/gomodoro/internal/notify"
+	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
 // Option pomodoro option

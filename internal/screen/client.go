@@ -5,7 +5,7 @@ import (
 
 	"github.com/gdamore/tcell"
 
-	"github.com/hatappi/gomodoro/logger"
+	"github.com/hatappi/gomodoro/internal/logger"
 )
 
 // Event screen event
