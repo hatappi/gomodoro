@@ -108,12 +108,17 @@ func initLogger() {
 	}
 
 	level := zapcore.Level(0)
-	if err := level.UnmarshalText([]byte(conf.LogLevel)); err != nil {
+	if err = level.UnmarshalText([]byte(conf.LogLevel)); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to unmarshal level. %s\n", err)
 		os.Exit(1)
 	}
 
-	logger, err := log.New("gomodoro", log.WithOutputPaths([]string{p}), log.WithErrorOutputPaths([]string{p}), log.WithLevel(level))
+	logger, err := log.New(
+		"gomodoro",
+		log.WithOutputPaths([]string{p}),
+		log.WithErrorOutputPaths([]string{p}),
+		log.WithLevel(level),
+	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to init Logger. %s\n", err)
 		os.Exit(1)
