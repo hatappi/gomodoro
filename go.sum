@@ -290,6 +290,8 @@ github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2p
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hatappi/go-kit v0.0.2-0.20200911110206-6a64aaca1677 h1:jWr4IVTJOLWgIC7Drkv3kb8D8JreAv0THGZ3KZvU+to=
 github.com/hatappi/go-kit v0.0.2-0.20200911110206-6a64aaca1677/go.mod h1:RkTk5/MHclMDvtrof4SvtEolG0/dvLVbEdKhQfeWUco=
+github.com/hatappi/go-kit v0.0.2-0.20200911144304-47d59bdc664e h1:QyFkzJySJKa2zHLInzBui6t6QL1o2uMKkWHPq9a3VKg=
+github.com/hatappi/go-kit v0.0.2-0.20200911144304-47d59bdc664e/go.mod h1:RkTk5/MHclMDvtrof4SvtEolG0/dvLVbEdKhQfeWUco=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01 h1:HiJF8Mek+I7PY0Bm+SuhkwaAZSZP83sw6rrTMrgZ0io=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01/go.mod h1:1DWDZmeYf0LX30zscWb7K9rUMeirNeBMd5Dum+seUhc=
 github.com/haya14busa/go-checkstyle v0.0.0-20170303121022-5e9d09f51fa1/go.mod h1:RsN5RGgVYeXpcXNtWyztD5VIe7VNSEqpJvF2iEH7QvI=

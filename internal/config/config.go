@@ -28,6 +28,7 @@ type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
 	Toggl                TogglConfig    `mapstructure:"toggl"`
 	LogFile              string         `mapstructure:"log_file"`
+	LogLevel             string         `mapstructure:"log_level"`
 	TaskFile             string         `mapstructure:"task_file"`
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
 }

@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/golangci/golangci-lint v1.27.0
 	github.com/google/go-cmp v0.5.2 // indirect
-	github.com/hatappi/go-kit v0.0.2-0.20200911110206-6a64aaca1677
+	github.com/hatappi/go-kit v0.0.2-0.20200911144304-47d59bdc664e
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pwaller/goimports-update-ignore v0.0.0-20170215205638-d2c92f72b3de // indirect
