@@ -47,7 +47,7 @@ please specify argument or config yaml.
 
 		if config.Toggl.Enable() {
 			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
-			opts = append(opts, pomodoro.WithRecordToggl(ctx, togglClient))
+			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
 		tf, err := config.ExpandTaskFile()
@@ -74,7 +74,7 @@ please specify argument or config yaml.
 		defer server.Close()
 		go server.Serve(ctx)
 
-		err = p.Start()
+		err = p.Start(ctx)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrCancel) {
 				return nil

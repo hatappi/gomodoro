@@ -40,7 +40,7 @@ func WithLongBreakSec(s int) Option {
 // WithNotify notify and sound when time is finished
 func WithNotify(ctx context.Context) Option {
 	return func(p *pomodoroImpl) {
-		p.completeFuncs = append(p.completeFuncs, func(taskName string, isWorkTime bool, elapsedTime int) {
+		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
 			var message string
 			if isWorkTime {
 				message = "Finish work time"
@@ -57,9 +57,9 @@ func WithNotify(ctx context.Context) Option {
 }
 
 // WithRecordToggl record duration when work time is finished
-func WithRecordToggl(ctx context.Context, togglClient *toggl.Client) Option {
+func WithRecordToggl(togglClient *toggl.Client) Option {
 	return func(p *pomodoroImpl) {
-		p.completeFuncs = append(p.completeFuncs, func(taskName string, isWorkTime bool, elapsedTime int) {
+		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
 			if !isWorkTime {
 				return
 			}
