@@ -34,10 +34,7 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(s tcell.Screen, taskFile string, options ...Option) Pomodoro {
-	c := screen.NewClient(s)
-	c.StartPollEvent()
-
+func NewPomodoro(c screen.Client, taskFile string, options ...Option) Pomodoro {
 	p := &pomodoroImpl{
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,

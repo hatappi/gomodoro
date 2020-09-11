@@ -15,6 +15,8 @@ var remainCmd = &cobra.Command{
 	Use:   "remain",
 	Short: "get remain time",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+
 		ie, e := cmd.Flags().GetBool("ignore-error")
 		if e != nil {
 			return e
@@ -36,7 +38,7 @@ var remainCmd = &cobra.Command{
 				return err
 			}
 
-			r, err := c.Get()
+			r, err := c.Get(ctx)
 			if err != nil {
 				return err
 			}

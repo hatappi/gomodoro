@@ -24,6 +24,8 @@ if you want to change work time, break time,
 please specify argument or config yaml.
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+
 		config, err := config.GetConfig()
 		if err != nil {
 			return err
@@ -40,12 +42,12 @@ please specify argument or config yaml.
 			pomodoro.WithWorkSec(pc.WorkSec),
 			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
 			pomodoro.WithLongBreakSec(pc.LongBreakSec),
-			pomodoro.WithNotify(),
+			pomodoro.WithNotify(ctx),
 		}
 
 		if config.Toggl.Enable() {
 			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
-			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
+			opts = append(opts, pomodoro.WithRecordToggl(ctx, togglClient))
 		}
 
 		tf, err := config.ExpandTaskFile()
@@ -53,7 +55,10 @@ please specify argument or config yaml.
 			return err
 		}
 
-		p := pomodoro.NewPomodoro(s, tf, opts...)
+		c := screen.NewClient(s)
+		c.StartPollEvent(ctx)
+
+		p := pomodoro.NewPomodoro(c, tf, opts...)
 		defer p.Finish()
 
 		// unix domain socket server
@@ -67,7 +72,7 @@ please specify argument or config yaml.
 			return err
 		}
 		defer server.Close()
-		go server.Serve()
+		go server.Serve(ctx)
 
 		err = p.Start()
 		if err != nil {
