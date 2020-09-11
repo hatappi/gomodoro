@@ -24,6 +24,8 @@ if you want to change work time, break time,
 please specify argument or config yaml.
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+
 		config, err := config.GetConfig()
 		if err != nil {
 			return err
@@ -53,7 +55,10 @@ please specify argument or config yaml.
 			return err
 		}
 
-		p := pomodoro.NewPomodoro(s, tf, opts...)
+		c := screen.NewClient(s)
+		c.StartPollEvent(ctx)
+
+		p := pomodoro.NewPomodoro(c, tf, opts...)
 		defer p.Finish()
 
 		// unix domain socket server
@@ -67,9 +72,9 @@ please specify argument or config yaml.
 			return err
 		}
 		defer server.Close()
-		go server.Serve()
+		go server.Serve(ctx)
 
-		err = p.Start()
+		err = p.Start(ctx)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrCancel) {
 				return nil

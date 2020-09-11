@@ -2,16 +2,18 @@ package unix
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net"
 
-	"github.com/hatappi/gomodoro/internal/logger"
+	"github.com/hatappi/go-kit/log"
+	"go.uber.org/zap"
 )
 
 // Client represents unix server client
 type Client interface {
-	Get() (*Response, error)
+	Get(context.Context) (*Response, error)
 
 	Close()
 }
@@ -32,10 +34,10 @@ func NewClient(socketPath string) (Client, error) {
 	}, nil
 }
 
-func (c *clientImpl) Get() (*Response, error) {
+func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
 	b, err := ioutil.ReadAll(bufio.NewReader(c.conn))
 	if err != nil {
-		logger.Errorf("error is %+v", err)
+		log.FromContext(ctx).Error("failed to read connection", zap.Error(err))
 	}
 
 	r := &Response{}

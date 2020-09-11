@@ -2,9 +2,13 @@
 package pomodoro
 
 import (
+	"context"
 	"time"
 
-	"github.com/hatappi/gomodoro/internal/logger"
+	"go.uber.org/zap"
+
+	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/notify"
 	"github.com/hatappi/gomodoro/internal/toggl"
 )
@@ -36,7 +40,7 @@ func WithLongBreakSec(s int) Option {
 // WithNotify notify and sound when time is finished
 func WithNotify() Option {
 	return func(p *pomodoroImpl) {
-		p.completeFuncs = append(p.completeFuncs, func(taskName string, isWorkTime bool, elapsedTime int) {
+		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
 			var message string
 			if isWorkTime {
 				message = "Finish work time"
@@ -46,7 +50,7 @@ func WithNotify() Option {
 
 			err := notify.Notify("gomodoro", taskName+":"+message)
 			if err != nil {
-				logger.Warnf("failed to notify: %s", err)
+				log.FromContext(ctx).Warn("failed to notify", zap.Error(err))
 			}
 		})
 	}
@@ -55,15 +59,15 @@ func WithNotify() Option {
 // WithRecordToggl record duration when work time is finished
 func WithRecordToggl(togglClient *toggl.Client) Option {
 	return func(p *pomodoroImpl) {
-		p.completeFuncs = append(p.completeFuncs, func(taskName string, isWorkTime bool, elapsedTime int) {
+		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
 			if !isWorkTime {
 				return
 			}
 
 			s := time.Now().Add(-time.Duration(elapsedTime) * time.Second)
-			err := togglClient.PostTimeEntry(taskName, s, elapsedTime)
-			if err != nil {
-				logger.Warnf("failed to notify: %s", err)
+
+			if err := togglClient.PostTimeEntry(taskName, s, elapsedTime); err != nil {
+				log.FromContext(ctx).Warn("failed to record time to toggle", zap.Error(err))
 			}
 		})
 	}

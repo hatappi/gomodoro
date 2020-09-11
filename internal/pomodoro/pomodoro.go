@@ -2,6 +2,8 @@
 package pomodoro
 
 import (
+	"context"
+
 	"github.com/gdamore/tcell"
 
 	"github.com/hatappi/gomodoro/internal/config"
@@ -13,7 +15,7 @@ import (
 
 // Pomodoro interface
 type Pomodoro interface {
-	Start() error
+	Start(context.Context) error
 	Stop()
 
 	GetTimer() timer.Timer
@@ -30,14 +32,11 @@ type pomodoroImpl struct {
 	taskClient   task.Client
 	timer        timer.Timer
 
-	completeFuncs []func(taskName string, isWorkTime bool, elapsedTime int)
+	completeFuncs []func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int)
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(s tcell.Screen, taskFile string, options ...Option) Pomodoro {
-	c := screen.NewClient(s)
-	c.StartPollEvent()
-
+func NewPomodoro(c screen.Client, taskFile string, options ...Option) Pomodoro {
 	p := &pomodoroImpl{
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
@@ -54,7 +53,7 @@ func NewPomodoro(s tcell.Screen, taskFile string, options ...Option) Pomodoro {
 	return p
 }
 
-func (p *pomodoroImpl) Start() error {
+func (p *pomodoroImpl) Start(ctx context.Context) error {
 	task, err := p.taskClient.GetTask()
 	if err != nil {
 		return err
@@ -78,7 +77,7 @@ func (p *pomodoroImpl) Start() error {
 		}
 
 		for _, cf := range p.completeFuncs {
-			go cf(p.timer.GetTitle(), isWorkTime, elapsedTime)
+			go cf(ctx, p.timer.GetTitle(), isWorkTime, elapsedTime)
 		}
 
 		w, h := p.screenClient.ScreenSize()

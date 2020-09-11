@@ -2,12 +2,14 @@
 package unix
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
 
-	"github.com/hatappi/gomodoro/internal/logger"
+	"github.com/hatappi/go-kit/log"
 	"github.com/hatappi/gomodoro/internal/timer"
+	"go.uber.org/zap"
 )
 
 // Response represents unix server response
@@ -27,7 +29,7 @@ func (r *Response) GetRemain() string {
 
 // Server represents server
 type Server interface {
-	Serve()
+	Serve(context.Context)
 	Close()
 }
 
@@ -50,14 +52,14 @@ func NewServer(socketPath string, timer timer.Timer) (Server, error) {
 }
 
 // Serve start unix domain socket server
-func (c *serverImpl) Serve() {
+func (c *serverImpl) Serve(ctx context.Context) {
 	for {
 		conn, err := c.listener.Accept()
-		logger.Infof("accept")
 		if err != nil {
-			logger.Warnf("listener failed to accept. err: %+s", err)
+			log.FromContext(ctx).Warn("failed to accpect", zap.Error(err))
 			return
 		}
+		log.FromContext(ctx).Debug("accept request")
 
 		go func() {
 			defer func() {
@@ -72,13 +74,13 @@ func (c *serverImpl) Serve() {
 
 			b, err := json.Marshal(r)
 			if err != nil {
-				logger.Errorf("faield to marshal Response: %+v", err)
+				log.FromContext(ctx).Error("faield to marshal Response", zap.Error(err))
 				return
 			}
 
 			_, err = conn.Write(b)
 			if err != nil {
-				logger.Errorf("faield to write Response: %+v", err)
+				log.FromContext(ctx).Error("failed to write response", zap.Error(err))
 			}
 		}()
 	}

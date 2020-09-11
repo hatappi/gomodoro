@@ -1,11 +1,13 @@
 package screen
 
 import (
+	"context"
 	"time"
 
 	"github.com/gdamore/tcell"
+	"go.uber.org/zap"
 
-	"github.com/hatappi/gomodoro/internal/logger"
+	"github.com/hatappi/go-kit/log"
 )
 
 // Event screen event
@@ -40,7 +42,7 @@ type Client interface {
 	Clear()
 	Finish()
 
-	StartPollEvent()
+	StartPollEvent(context.Context)
 	StopPollEvent()
 
 	GetEventChan() chan Event
@@ -76,11 +78,11 @@ func (c *clientImpl) Finish() {
 	c.screen.Fini()
 }
 
-func (c *clientImpl) StartPollEvent() {
+func (c *clientImpl) StartPollEvent(ctx context.Context) {
 	go func() {
 		for {
 			ev := c.screen.PollEvent()
-			logger.Debugf("event is %+v", ev)
+			log.FromContext(ctx).Debug("receive event", zap.Any("event", ev))
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {
