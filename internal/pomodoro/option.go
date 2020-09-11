@@ -38,7 +38,7 @@ func WithLongBreakSec(s int) Option {
 }
 
 // WithNotify notify and sound when time is finished
-func WithNotify(ctx context.Context) Option {
+func WithNotify() Option {
 	return func(p *pomodoroImpl) {
 		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
 			var message string

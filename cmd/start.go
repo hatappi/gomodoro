@@ -42,7 +42,7 @@ please specify argument or config yaml.
 			pomodoro.WithWorkSec(pc.WorkSec),
 			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
 			pomodoro.WithLongBreakSec(pc.LongBreakSec),
-			pomodoro.WithNotify(ctx),
+			pomodoro.WithNotify(),
 		}
 
 		if config.Toggl.Enable() {
