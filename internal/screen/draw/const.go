@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	// TimerWidth is width timer
-	TimerWidth = 21
-	// TimerHeight is height timer
-	TimerHeight = 5
+	// TimerBaseWidth is base width of timer
+	TimerBaseWidth = 21
+	// TimerBaseHeight is base height of timer
+	TimerBaseHeight = 5
 
 	numberWidth  = 4
 	numberHeight = 5

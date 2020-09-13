@@ -30,18 +30,16 @@ please specify argument or config yaml.
 		if err != nil {
 			return err
 		}
-		// pomodoro
-		s, err := screen.NewScreen()
+
+		taskFile, err := config.ExpandTaskFile()
 		if err != nil {
 			return err
 		}
-		defer s.Fini()
 
-		pc := config.Pomodoro
 		opts := []pomodoro.Option{
-			pomodoro.WithWorkSec(pc.WorkSec),
-			pomodoro.WithShortBreakSec(pc.ShortBreakSec),
-			pomodoro.WithLongBreakSec(pc.LongBreakSec),
+			pomodoro.WithWorkSec(config.Pomodoro.WorkSec),
+			pomodoro.WithShortBreakSec(config.Pomodoro.ShortBreakSec),
+			pomodoro.WithLongBreakSec(config.Pomodoro.LongBreakSec),
 			pomodoro.WithNotify(),
 		}
 
@@ -50,15 +48,15 @@ please specify argument or config yaml.
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
-		tf, err := config.ExpandTaskFile()
+		terminalScreen, err := screen.NewScreen()
 		if err != nil {
 			return err
 		}
 
-		c := screen.NewClient(s)
-		c.StartPollEvent(ctx)
+		screenClient := screen.NewClient(terminalScreen)
+		screenClient.StartPollEvent(ctx)
 
-		p := pomodoro.NewPomodoro(c, tf, opts...)
+		p := pomodoro.NewPomodoro(screenClient, taskFile, opts...)
 		defer p.Finish()
 
 		// unix domain socket server
