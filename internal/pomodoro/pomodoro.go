@@ -71,7 +71,7 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 		}
 
 		p.timer.SetDuration(p.getDuration(loopCnt))
-		elapsedTime, err := p.timer.Run()
+		elapsedTime, err := p.timer.Run(ctx)
 		if err != nil {
 			return err
 		}
