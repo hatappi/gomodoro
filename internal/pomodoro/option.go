@@ -48,8 +48,7 @@ func WithNotify() Option {
 				message = "Finish brek time"
 			}
 
-			err := notify.Notify("gomodoro", taskName+":"+message)
-			if err != nil {
+			if err := notify.Notify("gomodoro", taskName+":"+message); err != nil {
 				log.FromContext(ctx).Warn("failed to notify", zap.Error(err))
 			}
 		})

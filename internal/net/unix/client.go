@@ -41,8 +41,7 @@ func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
 	}
 
 	r := &Response{}
-	err = json.Unmarshal(b, r)
-	if err != nil {
+	if err = json.Unmarshal(b, r); err != nil {
 		return nil, err
 	}
 
