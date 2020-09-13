@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell"
+	"go.uber.org/zap"
 	"golang.org/x/xerrors"
+
+	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
@@ -178,10 +181,16 @@ func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, o
 
 	x := int(math.Round(marginWidth + timerPaddingWidth))
 	y := int(math.Round(marginHeight + timerPaddingHeight))
+	log.FromContext(ctx).Debug("screen information",
+		zap.Int("x", x),
+		zap.Int("y", y),
+		zap.Float64("timerWidth", timerWidth),
+		zap.Float64("timerHeight", timerHeight),
+	)
 
 	t.screenClient.Clear()
 
-	draw.Sentence(s, x, y, int(draw.TimerBaseWidth*mag), title, true)
+	draw.Sentence(s, x, y, int(timerWidth), title, true)
 
 	min := duration / 60
 	sec := duration % 60
