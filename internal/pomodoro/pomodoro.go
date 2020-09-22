@@ -19,8 +19,6 @@ type Pomodoro interface {
 	Start(context.Context) error
 	Stop()
 
-	GetTimer() timer.Timer
-
 	Finish()
 }
 
@@ -37,14 +35,14 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(c screen.Client, taskFile string, options ...Option) Pomodoro {
+func NewPomodoro(screenClient screen.Client, timer timer.Timer, taskClient task.Client, options ...Option) Pomodoro {
 	p := &pomodoroImpl{
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
 		longBreakSec:  config.DefaultLongBreakSec,
-		screenClient:  c,
-		taskClient:    task.NewClient(c, taskFile),
-		timer:         timer.NewTimer(c),
+		screenClient:  screenClient,
+		taskClient:    taskClient,
+		timer:         timer,
 	}
 
 	for _, opt := range options {
@@ -87,10 +85,6 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 
 		loopCnt++
 	}
-}
-
-func (p *pomodoroImpl) GetTimer() timer.Timer {
-	return p.timer
 }
 
 func (p *pomodoroImpl) Stop() {

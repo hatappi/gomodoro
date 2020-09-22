@@ -12,6 +12,8 @@ import (
 	"github.com/hatappi/gomodoro/internal/net/unix"
 	"github.com/hatappi/gomodoro/internal/pomodoro"
 	"github.com/hatappi/gomodoro/internal/screen"
+	"github.com/hatappi/gomodoro/internal/task"
+	"github.com/hatappi/gomodoro/internal/timer"
 	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
@@ -56,7 +58,10 @@ please specify argument or config yaml.
 		screenClient := screen.NewClient(terminalScreen)
 		screenClient.StartPollEvent(ctx)
 
-		p := pomodoro.NewPomodoro(screenClient, taskFile, opts...)
+		timer := timer.NewTimer(screenClient)
+		taskClient := task.NewClient(screenClient, taskFile)
+
+		p := pomodoro.NewPomodoro(screenClient, timer, taskClient, opts...)
 		defer p.Finish()
 
 		// unix domain socket server
@@ -65,7 +70,7 @@ please specify argument or config yaml.
 			return err
 		}
 
-		server, err := unix.NewServer(udsp, p.GetTimer())
+		server, err := unix.NewServer(udsp, timer)
 		if err != nil {
 			return err
 		}
