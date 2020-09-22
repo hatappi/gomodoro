@@ -78,8 +78,7 @@ func (c *serverImpl) Serve(ctx context.Context) {
 				return
 			}
 
-			_, err = conn.Write(b)
-			if err != nil {
+			if _, err = conn.Write(b); err != nil {
 				log.FromContext(ctx).Error("failed to write response", zap.Error(err))
 			}
 		}()

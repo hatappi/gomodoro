@@ -7,6 +7,7 @@ import (
 	"github.com/gdamore/tcell"
 
 	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 	"github.com/hatappi/gomodoro/internal/task"
@@ -17,8 +18,6 @@ import (
 type Pomodoro interface {
 	Start(context.Context) error
 	Stop()
-
-	GetTimer() timer.Timer
 
 	Finish()
 }
@@ -36,14 +35,14 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(c screen.Client, taskFile string, options ...Option) Pomodoro {
+func NewPomodoro(screenClient screen.Client, timer timer.Timer, taskClient task.Client, options ...Option) Pomodoro {
 	p := &pomodoroImpl{
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
 		longBreakSec:  config.DefaultLongBreakSec,
-		screenClient:  c,
-		taskClient:    task.NewClient(c, taskFile),
-		timer:         timer.NewTimer(c),
+		screenClient:  screenClient,
+		taskClient:    taskClient,
+		timer:         timer,
 	}
 
 	for _, opt := range options {
@@ -71,7 +70,7 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 		}
 
 		p.timer.SetDuration(p.getDuration(loopCnt))
-		elapsedTime, err := p.timer.Run()
+		elapsedTime, err := p.timer.Run(ctx)
 		if err != nil {
 			return err
 		}
@@ -80,42 +79,12 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 			go cf(ctx, p.timer.GetTitle(), isWorkTime, elapsedTime)
 		}
 
-		w, h := p.screenClient.ScreenSize()
-		draw.Sentence(
-			p.screenClient.GetScreen(),
-			0,
-			h-1,
-			w,
-			"(Enter): continue / (c): change task / (d): delete task",
-			true,
-			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
-		)
-	L:
-		for {
-			e := <-p.screenClient.GetEventChan()
-			switch e := e.(type) {
-			case screen.EventEnter:
-				break L
-			case screen.EventCancel:
-				return nil
-			case screen.EventRune:
-				if rune(e) == rune(99) { // c
-					p.screenClient.Clear()
-					t, err := p.taskClient.GetTask()
-					if err != nil {
-						return err
-					}
-					p.timer.SetTitle(t.Name)
-					break L
-				}
-			}
+		if err := p.selectNextAction(); err != nil {
+			return err
 		}
+
 		loopCnt++
 	}
-}
-
-func (p *pomodoroImpl) GetTimer() timer.Timer {
-	return p.timer
 }
 
 func (p *pomodoroImpl) Stop() {
@@ -135,5 +104,41 @@ func (p *pomodoroImpl) getDuration(cnt int) int {
 		return p.shortBreakSec
 	default:
 		return p.workSec
+	}
+}
+
+// selectNextAction selects next action.
+// e.g create new task, use same task
+func (p *pomodoroImpl) selectNextAction() error {
+	w, h := p.screenClient.ScreenSize()
+	draw.Sentence(
+		p.screenClient.GetScreen(),
+		0,
+		h-1,
+		w,
+		"(Enter): continue / (c): change task / (d): delete task",
+		true,
+		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+	)
+
+	for {
+		e := <-p.screenClient.GetEventChan()
+		switch e := e.(type) {
+		case screen.EventEnter:
+			// use Same Task
+			return nil
+		case screen.EventCancel:
+			return errors.ErrCancel
+		case screen.EventRune:
+			if rune(e) == rune(99) { // c
+				p.screenClient.Clear()
+				t, err := p.taskClient.GetTask()
+				if err != nil {
+					return err
+				}
+				p.timer.SetTitle(t.Name)
+				return nil
+			}
+		}
 	}
 }

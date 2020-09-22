@@ -2,11 +2,15 @@
 package timer
 
 import (
+	"context"
 	"math"
 	"time"
 
 	"github.com/gdamore/tcell"
+	"go.uber.org/zap"
 	"golang.org/x/xerrors"
+
+	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
@@ -15,7 +19,7 @@ import (
 
 // Timer interface
 type Timer interface {
-	Run() (int, error)
+	Run(context.Context) (int, error)
 	Stop()
 	SetTitle(string)
 	GetTitle() string
@@ -68,7 +72,7 @@ func (t *timerImpl) ChangeFontColor(c tcell.Color) {
 }
 
 // Run timer
-func (t *timerImpl) Run() (int, error) {
+func (t *timerImpl) Run(ctx context.Context) (int, error) {
 	t.Start()
 	defer t.Stop()
 
@@ -79,7 +83,7 @@ func (t *timerImpl) Run() (int, error) {
 	elapsedTime := 0
 
 	for {
-		err := t.drawTimer(t.remainSec, t.title, opts...)
+		err := t.drawTimer(ctx, t.remainSec, t.title, opts...)
 		if err != nil {
 			if xerrors.Is(err, errors.ErrScreenSmall) {
 				t.screenClient.Clear()
@@ -146,37 +150,57 @@ func (t *timerImpl) Stop() {
 	t.ticker.Stop()
 }
 
-func (t *timerImpl) drawTimer(duration int, title string, opts ...draw.Option) error {
+func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, opts ...draw.Option) error {
 	s := t.screenClient.GetScreen()
 
-	w, h := t.screenClient.ScreenSize()
-	min := duration / 60
-	sec := duration % 60
+	screenWidth, screenHeight := t.screenClient.ScreenSize()
 
-	x := float64(w) / 16
-	y := float64(h) / 16
+	marginWidth := float64(screenWidth) / 16
+	marginHeight := float64(screenHeight) / 16
 
-	printLine := 2.0
-	cw := float64(w) * 14 / 16
-	ch := float64(h) * 14 / 16
-	ch -= printLine
+	// renderWidth subtracts left and right margin from screen width
+	renderWidth := float64(screenWidth) - (marginWidth * 2)
+	// renderHeight subtracts top and bottom margin from screen height
+	renderHeight := float64(screenHeight) - (marginHeight * 2)
 
-	mag, err := getMagnification(cw, ch)
+	// text height is 1, but add 1 to include margin
+	textHeight := 2
+
+	timerRenderWidth := renderWidth
+	timerRenderHeight := renderHeight - float64(textHeight)
+
+	mag, err := timerMagnification(timerRenderWidth, timerRenderHeight)
 	if err != nil {
 		return err
 	}
+	timerWidth := draw.TimerBaseWidth * mag
+	timerHeight := draw.TimerBaseHeight * mag
 
-	x = math.Trunc(x + ((cw - (draw.TimerWidth * mag)) / 2))
-	y = math.Trunc(y + ((ch - (draw.TimerHeight * mag)) / 2))
+	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2
+	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2
+
+	x := int(math.Round(marginWidth + timerPaddingWidth))
+	y := int(math.Round(marginHeight + timerPaddingHeight))
+	log.FromContext(ctx).Debug("screen information",
+		zap.Int("x", x),
+		zap.Int("y", y),
+		zap.Float64("timerWidth", timerWidth),
+		zap.Float64("timerHeight", timerHeight),
+	)
 
 	t.screenClient.Clear()
-	draw.Sentence(s, int(x), int(y), int(draw.TimerWidth*mag), title, true)
-	draw.Timer(s, int(x), int(y)+2, int(mag), min, sec, opts...)
+
+	draw.Sentence(s, x, y, int(timerWidth), title, true)
+
+	min := duration / 60
+	sec := duration % 60
+	draw.Timer(s, x, y+textHeight, int(mag), min, sec, opts...)
+
 	draw.Sentence(
 		s,
 		0,
-		h-1,
-		w,
+		screenWidth-1,
+		screenHeight,
 		"(e): end timer / (Enter): stop start timer",
 		true,
 		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
@@ -185,9 +209,9 @@ func (t *timerImpl) drawTimer(duration int, title string, opts ...draw.Option) e
 	return nil
 }
 
-func getMagnification(w, h float64) (float64, error) {
-	x := math.Round(w / draw.TimerWidth)
-	y := math.Round(h / draw.TimerHeight)
+func timerMagnification(w, h float64) (float64, error) {
+	x := math.Round(w / draw.TimerBaseWidth)
+	y := math.Round(h / draw.TimerBaseHeight)
 	mag := math.Max(x, y)
 
 	for {
@@ -195,7 +219,7 @@ func getMagnification(w, h float64) (float64, error) {
 			return 0.0, errors.ErrScreenSmall
 		}
 
-		if w >= draw.TimerWidth*mag && h >= draw.TimerHeight*mag {
+		if w >= draw.TimerBaseWidth*mag && h >= draw.TimerBaseHeight*mag {
 			break
 		}
 

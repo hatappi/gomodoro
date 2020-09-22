@@ -21,8 +21,7 @@ func GetSliceText(initialText string) ([]string, error) {
 		_ = tmpfile.Close()
 	}()
 
-	_, err = tmpfile.Write([]byte(initialText))
-	if err != nil {
+	if _, err = tmpfile.Write([]byte(initialText)); err != nil {
 		return nil, err
 	}
 
