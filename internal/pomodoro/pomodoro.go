@@ -7,6 +7,7 @@ import (
 	"github.com/gdamore/tcell"
 
 	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 	"github.com/hatappi/gomodoro/internal/task"
@@ -97,7 +98,7 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 			case screen.EventEnter:
 				break L
 			case screen.EventCancel:
-				return nil
+				return errors.ErrCancel
 			case screen.EventRune:
 				if rune(e) == rune(99) { // c
 					p.screenClient.Clear()
