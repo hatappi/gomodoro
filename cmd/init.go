@@ -83,7 +83,7 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		confFile, err := os.OpenFile(confPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+		confFile, err := os.OpenFile(filepath.Clean(confPath), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			return err
 		}

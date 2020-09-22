@@ -31,12 +31,12 @@ func Timer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
 
 func drawNumber(s tcell.Screen, x, y, mag int, nStr string, opts ...Option) {
 	n, _ := strconv.Atoi(nStr)
-	t := strings.Split(strings.Replace(numbers[n], "\n", "", -1), "")
+	t := strings.Split(strings.ReplaceAll(numbers[n], "\n", ""), "")
 	draw(s, t, numberWidth, numberHeight, x, y, mag, opts...)
 }
 
 func drawSeparater(s tcell.Screen, x, y, mag int, opts ...Option) {
-	t := strings.Split(strings.Replace(separator, "\n", "", -1), "")
+	t := strings.Split(strings.ReplaceAll(separator, "\n", ""), "")
 	draw(s, t, separaterWidth, separaterHeight, x, y, mag, opts...)
 }
 
