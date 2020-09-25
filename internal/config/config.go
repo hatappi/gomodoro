@@ -2,8 +2,12 @@
 package config
 
 import (
+	"reflect"
+
+	"github.com/gdamore/tcell"
 	"github.com/go-playground/validator/v10"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
@@ -27,6 +31,7 @@ const (
 type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
 	Toggl                TogglConfig    `mapstructure:"toggl"`
+	Color                ColorConfig    `mapstructure:"color"`
 	LogFile              string         `mapstructure:"log_file"`
 	LogLevel             string         `mapstructure:"log_level"`
 	TaskFile             string         `mapstructure:"task_file"`
@@ -78,10 +83,21 @@ func (tc TogglConfig) Enable() bool {
 	return tc.APIToken != "" && tc.ProjectID != 0
 }
 
+type ColorConfig struct {
+	Background tcell.Color `mapstructure:"background"`
+}
+
 // GetConfig get Config
 func GetConfig() (*Config, error) {
 	var c Config
-	err := viper.Unmarshal(&c)
+
+	err := viper.Unmarshal(&c,
+		viper.DecodeHook(
+			mapstructure.ComposeDecodeHookFunc(
+				TcellColorDecodeHook(),
+			),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -93,4 +109,18 @@ func GetConfig() (*Config, error) {
 	}
 
 	return &c, nil
+}
+
+func TcellColorDecodeHook() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(tcell.Color(0)) {
+			return data, nil
+		}
+
+		if str, ok := data.(string); ok {
+			return tcell.GetColor(str), nil
+		}
+
+		return data, nil
+	}
 }
