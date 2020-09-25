@@ -225,7 +225,7 @@ func createTaskName(c screen.Client) (string, error) {
 	newTaskName := []rune{}
 	s := c.GetScreen()
 	for {
-		msg := fmt.Sprintf("Please Input New Task Name >%s", string(newTaskName))
+		msg := fmt.Sprintf("new task> %s", string(newTaskName))
 		w, _ := c.ScreenSize()
 		c.Clear()
 		x := draw.Sentence(s, 0, 0, w, msg, false)
