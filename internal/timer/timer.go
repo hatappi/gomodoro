@@ -204,7 +204,7 @@ func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, o
 		screenHeight,
 		"(e): end timer / (Enter): stop start timer",
 		true,
-		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		draw.WithBackgroundColor(t.config.Color.StatusBarBackground),
 	)
 
 	return nil

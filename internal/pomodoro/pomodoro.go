@@ -118,7 +118,7 @@ func (p *pomodoroImpl) selectNextAction() error {
 		w,
 		"(Enter): continue / (c): change task / (d): delete task",
 		true,
-		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		draw.WithBackgroundColor(p.config.Color.StatusBarBackground),
 	)
 
 	for {
