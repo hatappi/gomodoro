@@ -61,7 +61,7 @@ please specify argument or config yaml.
 		timer := timer.NewTimer(config, screenClient)
 		taskClient := task.NewClient(config, screenClient, taskFile)
 
-		p := pomodoro.NewPomodoro(screenClient, timer, taskClient, opts...)
+		p := pomodoro.NewPomodoro(config, screenClient, timer, taskClient, opts...)
 		defer p.Finish()
 
 		// unix domain socket server

@@ -42,7 +42,6 @@ func drawSeparater(s tcell.Screen, x, y, mag int, opts ...Option) {
 
 func draw(s tcell.Screen, t []string, w, h, x, y, mag int, opts ...Option) {
 	st := tcell.StyleDefault
-	st = st.Background(tcell.ColorGreen)
 	for _, opt := range opts {
 		st = opt(st)
 	}

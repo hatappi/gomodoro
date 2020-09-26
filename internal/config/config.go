@@ -89,6 +89,8 @@ type ColorConfig struct {
 	SelectedLine        tcell.Color `mapstructure:"selected_line"`
 	StatusBarBackground tcell.Color `mapstructure:"status_bar_background"`
 	TimerPauseFont      tcell.Color `mapstructure:"timer_pause_font"`
+	TimerWorkFont       tcell.Color `mapstructure:"timer_work_font"`
+	TimerBreakFont      tcell.Color `mapstructure:"timer_break_font"`
 }
 
 func defaultConfig() *Config {
@@ -99,6 +101,8 @@ func defaultConfig() *Config {
 			SelectedLine:        tcell.ColorBlue,
 			StatusBarBackground: tcell.ColorBlack,
 			TimerPauseFont:      tcell.ColorDarkOrange,
+			TimerWorkFont:       tcell.ColorGreen,
+			TimerBreakFont:      tcell.ColorBlue,
 		},
 	}
 }

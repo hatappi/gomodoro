@@ -48,7 +48,7 @@ func NewTimer(config *config.Config, c screen.Client) Timer {
 		config:       config,
 		ticker:       nil,
 		screenClient: c,
-		fontColor:    tcell.ColorGreen,
+		fontColor:    config.Color.TimerWorkFont,
 	}
 }
 
