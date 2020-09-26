@@ -40,14 +40,14 @@ type Client interface {
 // NewClient initilize Client
 func NewClient(config *config.Config, c screen.Client, taskFile string) Client {
 	return &clientImpl{
-		conifg:       config,
+		config:       config,
 		taskFile:     taskFile,
 		screenClient: c,
 	}
 }
 
 type clientImpl struct {
-	conifg       *config.Config
+	config       *config.Config
 	taskFile     string
 	screenClient screen.Client
 }
@@ -72,7 +72,7 @@ func (c *clientImpl) GetTask() (*Task, error) {
 	}
 
 	if t.Name == "" {
-		t.Name, err = createTaskName(c.screenClient)
+		t.Name, err = createTaskName(c.config, c.screenClient)
 		if xerrors.Is(err, errors.ErrCancel) {
 			return nil, err
 		}
@@ -138,7 +138,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 			opts := []draw.Option{}
 			if y == i {
 				opts = []draw.Option{
-					draw.WithBackgroundColor(c.conifg.Color.SelectedLine),
+					draw.WithBackgroundColor(c.config.Color.SelectedLine),
 				}
 			}
 			tw := runewidth.StringWidth(name)
@@ -155,7 +155,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 			w,
 			"(n): add new task / (d): delete task",
 			true,
-			draw.WithBackgroundColor(c.conifg.Color.StatusBarBackground),
+			draw.WithBackgroundColor(c.config.Color.StatusBarBackground),
 		)
 
 		e := <-c.screenClient.GetEventChan()
@@ -224,7 +224,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 	}
 }
 
-func createTaskName(c screen.Client) (string, error) {
+func createTaskName(config *config.Config, c screen.Client) (string, error) {
 	newTaskName := []rune{}
 	s := c.GetScreen()
 	for {
@@ -235,7 +235,7 @@ func createTaskName(c screen.Client) (string, error) {
 
 		gl := ' '
 		st := tcell.StyleDefault
-		st = st.Background(tcell.ColorGreen)
+		st = st.Background(config.Color.Cursor)
 		s.SetCell(x, 0, st, gl)
 		s.Show()
 

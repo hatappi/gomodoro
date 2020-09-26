@@ -91,6 +91,7 @@ type ColorConfig struct {
 	TimerPauseFont      tcell.Color `mapstructure:"timer_pause_font"`
 	TimerWorkFont       tcell.Color `mapstructure:"timer_work_font"`
 	TimerBreakFont      tcell.Color `mapstructure:"timer_break_font"`
+	Cursor              tcell.Color `mapstructure:"cursor"`
 }
 
 func defaultConfig() *Config {
@@ -103,6 +104,7 @@ func defaultConfig() *Config {
 			TimerPauseFont:      tcell.ColorDarkOrange,
 			TimerWorkFont:       tcell.ColorGreen,
 			TimerBreakFont:      tcell.ColorBlue,
+			Cursor:              tcell.ColorGreen,
 		},
 	}
 }
