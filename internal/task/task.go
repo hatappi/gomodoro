@@ -13,6 +13,7 @@ import (
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 
+	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
@@ -37,14 +38,16 @@ type Client interface {
 }
 
 // NewClient initilize Client
-func NewClient(c screen.Client, taskFile string) Client {
+func NewClient(config *config.Config, c screen.Client, taskFile string) Client {
 	return &clientImpl{
+		conifg:       config,
 		taskFile:     taskFile,
 		screenClient: c,
 	}
 }
 
 type clientImpl struct {
+	conifg       *config.Config
 	taskFile     string
 	screenClient screen.Client
 }
@@ -135,7 +138,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 			opts := []draw.Option{}
 			if y == i {
 				opts = []draw.Option{
-					draw.WithBackgroundColor(tcell.ColorBlue),
+					draw.WithBackgroundColor(c.conifg.Color.SelectedLine),
 				}
 			}
 			tw := runewidth.StringWidth(name)
@@ -152,7 +155,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 			w,
 			"(n): add new task / (d): delete task",
 			true,
-			draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+			draw.WithBackgroundColor(c.conifg.Color.StatusBarBackground),
 		)
 
 		e := <-c.screenClient.GetEventChan()

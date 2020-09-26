@@ -84,15 +84,19 @@ func (tc TogglConfig) Enable() bool {
 }
 
 type ColorConfig struct {
-	Font       tcell.Color `mapstructure:"font"`
-	Background tcell.Color `mapstructure:"background"`
+	Font                tcell.Color `mapstructure:"font"`
+	Background          tcell.Color `mapstructure:"background"`
+	SelectedLine        tcell.Color `mapstructure:"selected_line"`
+	StatusBarBackground tcell.Color `mapstructure:"status_bar_background"`
 }
 
 func defaultConfig() *Config {
 	return &Config{
 		Color: ColorConfig{
-			Font:       tcell.ColorDarkSlateGray,
-			Background: tcell.ColorWhite,
+			Font:                tcell.ColorDarkSlateGray,
+			Background:          tcell.ColorWhite,
+			SelectedLine:        tcell.ColorBlue,
+			StatusBarBackground: tcell.ColorBlack,
 		},
 	}
 }
