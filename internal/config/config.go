@@ -84,12 +84,22 @@ func (tc TogglConfig) Enable() bool {
 }
 
 type ColorConfig struct {
+	Font       tcell.Color `mapstructure:"font"`
 	Background tcell.Color `mapstructure:"background"`
+}
+
+func defaultConfig() *Config {
+	return &Config{
+		Color: ColorConfig{
+			Font:       tcell.ColorDarkSlateGray,
+			Background: tcell.ColorWhite,
+		},
+	}
 }
 
 // GetConfig get Config
 func GetConfig() (*Config, error) {
-	var c Config
+	c := defaultConfig()
 
 	err := viper.Unmarshal(&c,
 		viper.DecodeHook(
@@ -103,12 +113,12 @@ func GetConfig() (*Config, error) {
 	}
 
 	validate := validator.New()
-	err = validate.Struct(&c)
+	err = validate.Struct(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &c, nil
+	return c, nil
 }
 
 func TcellColorDecodeHook() mapstructure.DecodeHookFunc {

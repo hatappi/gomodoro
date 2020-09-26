@@ -50,7 +50,7 @@ please specify argument or config yaml.
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
-		terminalScreen, err := screen.NewScreen()
+		terminalScreen, err := screen.NewScreen(config)
 		if err != nil {
 			return err
 		}
