@@ -58,7 +58,7 @@ please specify argument or config yaml.
 		screenClient := screen.NewClient(terminalScreen)
 		screenClient.StartPollEvent(ctx)
 
-		timer := timer.NewTimer(screenClient)
+		timer := timer.NewTimer(config, screenClient)
 		taskClient := task.NewClient(config, screenClient, taskFile)
 
 		p := pomodoro.NewPomodoro(screenClient, timer, taskClient, opts...)

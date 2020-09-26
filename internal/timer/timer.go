@@ -12,6 +12,7 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 
+	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
@@ -30,24 +31,24 @@ type Timer interface {
 }
 
 type timerImpl struct {
+	config       *config.Config
 	title        string
 	ticker       *time.Ticker
 	screenClient screen.Client
 	stopped      bool
 
-	fontColor      tcell.Color
-	pauseFontColor tcell.Color
+	fontColor tcell.Color
 
 	remainSec int
 }
 
 // NewTimer initilize Timer
-func NewTimer(c screen.Client) Timer {
+func NewTimer(config *config.Config, c screen.Client) Timer {
 	return &timerImpl{
-		ticker:         nil,
-		screenClient:   c,
-		fontColor:      tcell.ColorGreen,
-		pauseFontColor: tcell.ColorDarkOrange,
+		config:       config,
+		ticker:       nil,
+		screenClient: c,
+		fontColor:    tcell.ColorGreen,
 	}
 }
 
@@ -126,7 +127,7 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 					t.Start()
 				} else {
 					opts = []draw.Option{
-						draw.WithBackgroundColor(t.pauseFontColor),
+						draw.WithBackgroundColor(t.config.Color.TimerPauseFont),
 					}
 					t.Stop()
 				}
