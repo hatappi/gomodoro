@@ -83,6 +83,7 @@ func (tc TogglConfig) Enable() bool {
 	return tc.APIToken != "" && tc.ProjectID != 0
 }
 
+// ColorConfig represents colors used within gomodoro
 type ColorConfig struct {
 	Font                tcell.Color `mapstructure:"font"`
 	Background          tcell.Color `mapstructure:"background"`
@@ -116,7 +117,7 @@ func GetConfig() (*Config, error) {
 	err := viper.Unmarshal(&c,
 		viper.DecodeHook(
 			mapstructure.ComposeDecodeHookFunc(
-				TcellColorDecodeHook(),
+				tcellColorDecodeHook(),
 			),
 		),
 	)
@@ -133,7 +134,7 @@ func GetConfig() (*Config, error) {
 	return c, nil
 }
 
-func TcellColorDecodeHook() mapstructure.DecodeHookFunc {
+func tcellColorDecodeHook() mapstructure.DecodeHookFunc {
 	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
 		if t != reflect.TypeOf(tcell.Color(0)) {
 			return data, nil

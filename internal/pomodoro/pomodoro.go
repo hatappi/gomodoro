@@ -34,18 +34,18 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(conf *config.Config, screenClient screen.Client, timer timer.Timer, taskClient task.Client, options ...Option) Pomodoro {
+func NewPomodoro(conf *config.Config, sc screen.Client, timer timer.Timer, tc task.Client, opts ...Option) Pomodoro {
 	p := &pomodoroImpl{
 		config:        conf,
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
 		longBreakSec:  config.DefaultLongBreakSec,
-		screenClient:  screenClient,
-		taskClient:    taskClient,
+		screenClient:  sc,
+		taskClient:    tc,
 		timer:         timer,
 	}
 
-	for _, opt := range options {
+	for _, opt := range opts {
 		opt(p)
 	}
 
