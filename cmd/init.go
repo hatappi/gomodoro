@@ -14,18 +14,30 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
-const confTpl = `pomodoro:
-  work_sec: {{ .Pomodoro.WorkSec }}
-  short_break_sec: {{ .Pomodoro.ShortBreakSec }}
-  long_break_sec: {{ .Pomodoro.LongBreakSec }}
+const confTpl = `# pomodoro:
+#   work_sec: 1500
+#   short_break_sec: 300
+#   long_break_sec: 900
 # toggl:
 #   # https://toggl.com/app/xxxx/projects/{project_id}/team
 #   project_id:
 #   # Toggl API token ref: https://toggl.com/app/profile
 #   api_token:
-# log_file: {{ .LogFile }}
-# task_file: {{ .TaskFile }}
-# unix_domain_socket_path: {{ .UnixDomainScoketPath }}
+# log_file: ~/.gomodoro/gomodoro.log
+# task_file: ~/.gomodoro/tasks.yaml
+# unix_domain_socket_path: ~/.gomodoro/gomodoro.sock
+
+## You can change the colors used within gomodoro.
+## You need to specify W3C Color name (e.g. red) or HEX (.e.g. #ffffff)
+# color:
+#   font: "#2F4F4F"
+#   background: "white"
+#   selected_line: "blue"
+#   status_bar_background: "black"
+#   timer_pause_font: "#FF8C00"
+#   timer_work_font: "green"
+#   timer_break_font: "blue"
+#   cursor: "green"
 `
 
 // initCmd represents the init command
