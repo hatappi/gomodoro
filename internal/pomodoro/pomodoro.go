@@ -4,8 +4,6 @@ package pomodoro
 import (
 	"context"
 
-	"github.com/gdamore/tcell"
-
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
@@ -23,6 +21,7 @@ type Pomodoro interface {
 }
 
 type pomodoroImpl struct {
+	config        *config.Config
 	workSec       int
 	shortBreakSec int
 	longBreakSec  int
@@ -35,17 +34,18 @@ type pomodoroImpl struct {
 }
 
 // NewPomodoro initilize Pomodoro
-func NewPomodoro(screenClient screen.Client, timer timer.Timer, taskClient task.Client, options ...Option) Pomodoro {
+func NewPomodoro(conf *config.Config, sc screen.Client, timer timer.Timer, tc task.Client, opts ...Option) Pomodoro {
 	p := &pomodoroImpl{
+		config:        conf,
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
 		longBreakSec:  config.DefaultLongBreakSec,
-		screenClient:  screenClient,
-		taskClient:    taskClient,
+		screenClient:  sc,
+		taskClient:    tc,
 		timer:         timer,
 	}
 
-	for _, opt := range options {
+	for _, opt := range opts {
 		opt(p)
 	}
 
@@ -64,9 +64,9 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 		isWorkTime := loopCnt%2 != 0
 
 		if isWorkTime {
-			p.timer.ChangeFontColor(tcell.ColorGreen)
+			p.timer.ChangeFontColor(p.config.Color.TimerWorkFont)
 		} else {
-			p.timer.ChangeFontColor(tcell.ColorBlue)
+			p.timer.ChangeFontColor(p.config.Color.TimerBreakFont)
 		}
 
 		p.timer.SetDuration(p.getDuration(loopCnt))
@@ -118,7 +118,7 @@ func (p *pomodoroImpl) selectNextAction() error {
 		w,
 		"(Enter): continue / (c): change task / (d): delete task",
 		true,
-		draw.WithBackgroundColor(draw.StatusBarBackgroundColor),
+		draw.WithBackgroundColor(p.config.Color.StatusBarBackground),
 	)
 
 	for {

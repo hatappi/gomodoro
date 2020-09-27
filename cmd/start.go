@@ -50,7 +50,7 @@ please specify argument or config yaml.
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
 
-		terminalScreen, err := screen.NewScreen()
+		terminalScreen, err := screen.NewScreen(config)
 		if err != nil {
 			return err
 		}
@@ -58,10 +58,10 @@ please specify argument or config yaml.
 		screenClient := screen.NewClient(terminalScreen)
 		screenClient.StartPollEvent(ctx)
 
-		timer := timer.NewTimer(screenClient)
-		taskClient := task.NewClient(screenClient, taskFile)
+		timer := timer.NewTimer(config, screenClient)
+		taskClient := task.NewClient(config, screenClient, taskFile)
 
-		p := pomodoro.NewPomodoro(screenClient, timer, taskClient, opts...)
+		p := pomodoro.NewPomodoro(config, screenClient, timer, taskClient, opts...)
 		defer p.Finish()
 
 		// unix domain socket server

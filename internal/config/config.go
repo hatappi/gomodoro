@@ -2,8 +2,12 @@
 package config
 
 import (
+	"reflect"
+
+	"github.com/gdamore/tcell"
 	"github.com/go-playground/validator/v10"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
 
@@ -27,6 +31,7 @@ const (
 type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
 	Toggl                TogglConfig    `mapstructure:"toggl"`
+	Color                ColorConfig    `mapstructure:"color"`
 	LogFile              string         `mapstructure:"log_file"`
 	LogLevel             string         `mapstructure:"log_level"`
 	TaskFile             string         `mapstructure:"task_file"`
@@ -78,19 +83,67 @@ func (tc TogglConfig) Enable() bool {
 	return tc.APIToken != "" && tc.ProjectID != 0
 }
 
+// ColorConfig represents colors used within gomodoro
+type ColorConfig struct {
+	Font                tcell.Color `mapstructure:"font"`
+	Background          tcell.Color `mapstructure:"background"`
+	SelectedLine        tcell.Color `mapstructure:"selected_line"`
+	StatusBarBackground tcell.Color `mapstructure:"status_bar_background"`
+	TimerPauseFont      tcell.Color `mapstructure:"timer_pause_font"`
+	TimerWorkFont       tcell.Color `mapstructure:"timer_work_font"`
+	TimerBreakFont      tcell.Color `mapstructure:"timer_break_font"`
+	Cursor              tcell.Color `mapstructure:"cursor"`
+}
+
+func defaultConfig() *Config {
+	return &Config{
+		Color: ColorConfig{
+			Font:                tcell.ColorDarkSlateGray,
+			Background:          tcell.ColorWhite,
+			SelectedLine:        tcell.ColorBlue,
+			StatusBarBackground: tcell.ColorBlack,
+			TimerPauseFont:      tcell.ColorDarkOrange,
+			TimerWorkFont:       tcell.ColorGreen,
+			TimerBreakFont:      tcell.ColorBlue,
+			Cursor:              tcell.ColorGreen,
+		},
+	}
+}
+
 // GetConfig get Config
 func GetConfig() (*Config, error) {
-	var c Config
-	err := viper.Unmarshal(&c)
+	c := defaultConfig()
+
+	err := viper.Unmarshal(&c,
+		viper.DecodeHook(
+			mapstructure.ComposeDecodeHookFunc(
+				tcellColorDecodeHook(),
+			),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	validate := validator.New()
-	err = validate.Struct(&c)
+	err = validate.Struct(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &c, nil
+	return c, nil
+}
+
+func tcellColorDecodeHook() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(tcell.Color(0)) {
+			return data, nil
+		}
+
+		if str, ok := data.(string); ok {
+			return tcell.GetColor(str), nil
+		}
+
+		return data, nil
+	}
 }

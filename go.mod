@@ -9,6 +9,7 @@ require (
 	github.com/hatappi/go-kit v0.0.2
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/reviewdog/reviewdog v0.10.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
