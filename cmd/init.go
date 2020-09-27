@@ -15,17 +15,17 @@ import (
 )
 
 const confTpl = `# pomodoro:
-#   work_sec: 1500
-#   short_break_sec: 300
-#   long_break_sec: 900
+#   work_sec: {{ .Pomodoro.WorkSec }}
+#   short_break_sec: {{ .Pomodoro.ShortBreakSec }}
+#   long_break_sec: {{ .Pomodoro.LongBreakSec }}
 # toggl:
 #   # https://toggl.com/app/xxxx/projects/{project_id}/team
 #   project_id:
 #   # Toggl API token ref: https://toggl.com/app/profile
 #   api_token:
-# log_file: ~/.gomodoro/gomodoro.log
-# task_file: ~/.gomodoro/tasks.yaml
-# unix_domain_socket_path: ~/.gomodoro/gomodoro.sock
+# log_file: {{ .LogFile }}
+# task_file: {{ .TaskFile }}
+# unix_domain_socket_path: {{ .UnixDomainScoketPath }}
 
 ## You can change the colors used within gomodoro.
 ## You need to specify W3C Color name (e.g. red) or HEX (.e.g. #ffffff)
