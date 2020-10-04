@@ -74,13 +74,9 @@ type PomodoroConfig struct {
 
 // TogglConfig config for Toggl
 type TogglConfig struct {
+	Enable    bool   `mapstructure:"enable"`
 	APIToken  string `mapstructure:"api_token"`
 	ProjectID int    `mapstructure:"project_id"`
-}
-
-// Enable confirm toggl client is enable
-func (tc TogglConfig) Enable() bool {
-	return tc.APIToken != "" && tc.ProjectID != 0
 }
 
 // ColorConfig represents colors used within gomodoro
@@ -97,6 +93,9 @@ type ColorConfig struct {
 
 func defaultConfig() *Config {
 	return &Config{
+		Toggl: TogglConfig{
+			Enable: false,
+		},
 		Color: ColorConfig{
 			Font:                tcell.ColorDarkSlateGray,
 			Background:          tcell.ColorWhite,

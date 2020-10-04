@@ -45,7 +45,7 @@ please specify argument or config yaml.
 			pomodoro.WithNotify(),
 		}
 
-		if config.Toggl.Enable() {
+		if config.Toggl.Enable {
 			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 		}
