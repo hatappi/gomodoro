@@ -10,6 +10,7 @@ import (
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/notify"
+	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
@@ -67,6 +68,21 @@ func WithRecordToggl(togglClient *toggl.Client) Option {
 
 			if err := togglClient.PostTimeEntry(taskName, s, elapsedTime); err != nil {
 				log.FromContext(ctx).Warn("failed to record time to toggle", zap.Error(err))
+			}
+		})
+	}
+}
+
+// WithRecordPixela record pomodoro count when work time is finished
+func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
+	return func(p *pomodoroImpl) {
+		p.completeFuncs = append(p.completeFuncs, func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
+			if !isWorkTime {
+				return
+			}
+
+			if err := client.IncrementPixel(ctx, userName, graphID); err != nil {
+				log.FromContext(ctx).Warn("failed to increment a pixel at Pixela", zap.Error(err))
 			}
 		})
 	}
