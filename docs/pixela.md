@@ -1,6 +1,6 @@
 # Record Pomodoro count with Pixela
-Pixela records and tracks your habits or effort. All by API.
-https://pixe.la/
+Pixela records and tracks your habits or effort. All by API.  
+https://pixe.la/  
 https://medium.com/@a.know.dev/pixela-a-service-for-generating-github-like-graphs-5867baaa107b
 
 Gomodoro records pomodoro count using Pixela.
