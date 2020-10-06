@@ -10,6 +10,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/net/unix"
+	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/pomodoro"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/task"
@@ -48,6 +49,11 @@ please specify argument or config yaml.
 		if config.Toggl.Enable {
 			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
 			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
+		}
+
+		if config.Pixela.Enable {
+			client := pixela.NewClient(config.Pixela.Token)
+			opts = append(opts, pomodoro.WithRecordPixela(client, config.Pixela.UserName, config.Pixela.GraphID))
 		}
 
 		terminalScreen, err := screen.NewScreen(config)

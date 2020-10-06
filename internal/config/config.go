@@ -32,6 +32,7 @@ type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
 	Toggl                TogglConfig    `mapstructure:"toggl"`
 	Color                ColorConfig    `mapstructure:"color"`
+	Pixela               PixelaConfig   `mapstructure:"pixela"`
 	LogFile              string         `mapstructure:"log_file"`
 	LogLevel             string         `mapstructure:"log_level"`
 	TaskFile             string         `mapstructure:"task_file"`
@@ -77,6 +78,15 @@ type TogglConfig struct {
 	Enable    bool   `mapstructure:"enable"`
 	APIToken  string `mapstructure:"api_token"`
 	ProjectID int    `mapstructure:"project_id"`
+}
+
+// PixelaConfig is configuration for Pixela
+// https://pixe.la/
+type PixelaConfig struct {
+	Enable   bool   `mapstructure:"enable"`
+	Token    string `mapstructure:"token"`
+	UserName string `mapstructure:"user_name"`
+	GraphID  string `mapstructure:"graph_id"`
 }
 
 // ColorConfig represents colors used within gomodoro
