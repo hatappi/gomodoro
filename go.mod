@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/golangci/golangci-lint v1.31.0
 	github.com/hatappi/go-kit v0.0.2
-	github.com/mattn/go-runewidth v0.0.9
+	github.com/mattn/go-runewidth v0.0.10
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/reviewdog/reviewdog v0.10.2
