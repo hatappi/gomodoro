@@ -11,6 +11,8 @@ categories:
   - title: '🚧 Maintenance'
     label:
       - 'chore'
+  - title: '📦 Dependencies'
+    labels:
       - 'dependencies'
 change-template: '- #$NUMBER $TITLE (@$AUTHOR)'
 change-title-escapes: '\<*_&'
