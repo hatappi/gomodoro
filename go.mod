@@ -6,7 +6,7 @@ require (
 	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
 	github.com/gdamore/tcell v1.4.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/golangci/golangci-lint v1.35.2
+	github.com/golangci/golangci-lint v1.36.0
 	github.com/hatappi/go-kit v0.0.2
 	github.com/mattn/go-runewidth v0.0.10
 	github.com/mitchellh/go-homedir v1.1.0
