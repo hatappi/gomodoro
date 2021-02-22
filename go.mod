@@ -6,13 +6,13 @@ require (
 	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
 	github.com/gdamore/tcell v1.4.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/golangci/golangci-lint v1.35.2
+	github.com/golangci/golangci-lint v1.37.1
 	github.com/hatappi/go-kit v0.0.2
 	github.com/mattn/go-runewidth v0.0.10
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/reviewdog/reviewdog v0.11.0
-	github.com/spf13/cobra v1.1.1
+	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
 	github.com/ugorji/go v1.1.4 // indirect
 	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
