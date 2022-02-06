@@ -34,11 +34,6 @@ please specify argument or config yaml.
 			return err
 		}
 
-		taskFile, err := config.ExpandTaskFile()
-		if err != nil {
-			return err
-		}
-
 		opts := []pomodoro.Option{
 			pomodoro.WithWorkSec(config.Pomodoro.WorkSec),
 			pomodoro.WithShortBreakSec(config.Pomodoro.ShortBreakSec),
@@ -65,18 +60,12 @@ please specify argument or config yaml.
 		screenClient.StartPollEvent(ctx)
 
 		timer := timer.NewTimer(config, screenClient)
-		taskClient := task.NewClient(config, screenClient, taskFile)
+		taskClient := task.NewClient(config, screenClient, config.TaskFile)
 
 		p := pomodoro.NewPomodoro(config, screenClient, timer, taskClient, opts...)
 		defer p.Finish()
 
-		// unix domain socket server
-		udsp, err := config.ExpandUnixDomainSocketPath()
-		if err != nil {
-			return err
-		}
-
-		server, err := unix.NewServer(udsp, timer)
+		server, err := unix.NewServer(config.UnixDomainScoketPath, timer)
 		if err != nil {
 			return err
 		}

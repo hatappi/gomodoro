@@ -27,14 +27,10 @@ And add a task using the editor.
 		if err != nil {
 			return err
 		}
-		taskPath, err := config.ExpandTaskFile()
-		if err != nil {
-			return err
-		}
 
 		name := strings.Join(args, " ")
 		if name != "" {
-			err = task.AddTask(taskPath, name)
+			err = task.AddTask(config.TaskFile, name)
 			if err != nil {
 				return err
 			}
@@ -54,7 +50,7 @@ And add a task using the editor.
 			if strings.HasPrefix(t, "#") {
 				continue
 			}
-			err = task.AddTask(taskPath, t)
+			err = task.AddTask(config.TaskFile, t)
 			if err != nil {
 				return err
 			}

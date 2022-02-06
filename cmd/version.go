@@ -2,8 +2,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -27,9 +25,9 @@ var versionCmd = &cobra.Command{
 		}
 
 		if short {
-			fmt.Println(version)
+			cmd.Println(version)
 		} else {
-			fmt.Printf("Version %s (git-%s)\n", version, commit)
+			cmd.Printf("Version %s (git-%s)\n", version, commit)
 		}
 
 		return nil

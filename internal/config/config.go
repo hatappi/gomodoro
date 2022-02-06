@@ -9,6 +9,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -34,36 +35,9 @@ type Config struct {
 	Color                ColorConfig    `mapstructure:"color"`
 	Pixela               PixelaConfig   `mapstructure:"pixela"`
 	LogFile              string         `mapstructure:"log_file"`
-	LogLevel             string         `mapstructure:"log_level"`
+	LogLevel             zapcore.Level  `mapstructure:"log_level"`
 	TaskFile             string         `mapstructure:"task_file"`
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
-}
-
-// ExpandTaskFile get expand task file
-func (c *Config) ExpandTaskFile() (string, error) {
-	p, err := homedir.Expand(c.TaskFile)
-	if err != nil {
-		return "", err
-	}
-	return p, nil
-}
-
-// ExpandLogFile get expand log file
-func (c *Config) ExpandLogFile() (string, error) {
-	p, err := homedir.Expand(c.LogFile)
-	if err != nil {
-		return "", err
-	}
-	return p, nil
-}
-
-// ExpandUnixDomainSocketPath get expand UnixDomainScoketPath
-func (c *Config) ExpandUnixDomainSocketPath() (string, error) {
-	p, err := homedir.Expand(c.UnixDomainScoketPath)
-	if err != nil {
-		return "", err
-	}
-	return p, nil
 }
 
 // PomodoroConfig config for pomodoro
@@ -127,6 +101,7 @@ func GetConfig() (*Config, error) {
 		viper.DecodeHook(
 			mapstructure.ComposeDecodeHookFunc(
 				tcellColorDecodeHook(),
+				zapcoreLevelDecodeHook(),
 			),
 		),
 	)
@@ -137,6 +112,20 @@ func GetConfig() (*Config, error) {
 	validate := validator.New()
 	err = validate.Struct(c)
 	if err != nil {
+		return nil, err
+	}
+
+	// Expand each file
+
+	if c.TaskFile, err = homedir.Expand(c.TaskFile); err != nil {
+		return nil, err
+	}
+
+	if c.LogFile, err = homedir.Expand(c.LogFile); err != nil {
+		return nil, err
+	}
+
+	if c.UnixDomainScoketPath, err = homedir.Expand(c.UnixDomainScoketPath); err != nil {
 		return nil, err
 	}
 
@@ -151,6 +140,25 @@ func tcellColorDecodeHook() mapstructure.DecodeHookFunc {
 
 		if str, ok := data.(string); ok {
 			return tcell.GetColor(str), nil
+		}
+
+		return data, nil
+	}
+}
+
+func zapcoreLevelDecodeHook() mapstructure.DecodeHookFunc {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(zapcore.Level(0)) {
+			return data, nil
+		}
+
+		if str, ok := data.(string); ok {
+			lvl := new(zapcore.Level)
+			if err := lvl.UnmarshalText([]byte(str)); err != nil {
+				return nil, err
+			}
+
+			return lvl, nil
 		}
 
 		return data, nil
