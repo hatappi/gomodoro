@@ -8,7 +8,6 @@ import (
 	"net"
 
 	"github.com/hatappi/go-kit/log"
-	"go.uber.org/zap"
 )
 
 // Client represents unix server client
@@ -37,7 +36,7 @@ func NewClient(socketPath string) (Client, error) {
 func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
 	b, err := ioutil.ReadAll(bufio.NewReader(c.conn))
 	if err != nil {
-		log.FromContext(ctx).Error("failed to read connection", zap.Error(err))
+		log.FromContext(ctx).Error(err, "failed to read connection")
 	}
 
 	r := &Response{}

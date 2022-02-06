@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell"
-	"go.uber.org/zap"
-
 	"github.com/hatappi/go-kit/log"
 )
 
@@ -82,7 +80,7 @@ func (c *clientImpl) StartPollEvent(ctx context.Context) {
 	go func() {
 		for {
 			ev := c.screen.PollEvent()
-			log.FromContext(ctx).Debug("receive event", zap.Any("event", ev))
+			log.FromContext(ctx).V(1).Info("receive event", "event", ev)
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {

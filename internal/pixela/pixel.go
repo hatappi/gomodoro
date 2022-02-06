@@ -6,10 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"go.uber.org/zap"
-	"golang.org/x/xerrors"
-
 	"github.com/hatappi/go-kit/log"
+	"golang.org/x/xerrors"
 )
 
 type postPixelResponse struct {
@@ -28,7 +26,7 @@ func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) e
 	if err != nil {
 		return err
 	}
-	log.FromContext(ctx).Debug("request: increment a pixel", zap.String("url", url))
+	log.FromContext(ctx).V(1).Info("request: increment a pixel", "url", url)
 
 	req.Header.Set("X-USER-TOKEN", c.token)
 
@@ -45,7 +43,7 @@ func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) e
 		return err
 	}
 
-	log.FromContext(ctx).Debug("response: increment a pixel", zap.String("response body", string(body)))
+	log.FromContext(ctx).V(1).Info("response: increment a pixel", "response body", string(body))
 
 	var postPixel postPixelResponse
 	if err = json.Unmarshal(body, &postPixel); err != nil {

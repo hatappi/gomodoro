@@ -9,7 +9,6 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 	"github.com/hatappi/gomodoro/internal/timer"
-	"go.uber.org/zap"
 )
 
 // Response represents unix server response
@@ -56,10 +55,10 @@ func (c *serverImpl) Serve(ctx context.Context) {
 	for {
 		conn, err := c.listener.Accept()
 		if err != nil {
-			log.FromContext(ctx).Warn("failed to accpect", zap.Error(err))
+			log.FromContext(ctx).Error(err, "failed to accpect")
 			return
 		}
-		log.FromContext(ctx).Debug("accept request")
+		log.FromContext(ctx).V(1).Info("accept request")
 
 		go func() {
 			defer func() {
@@ -74,12 +73,12 @@ func (c *serverImpl) Serve(ctx context.Context) {
 
 			b, err := json.Marshal(r)
 			if err != nil {
-				log.FromContext(ctx).Error("faield to marshal Response", zap.Error(err))
+				log.FromContext(ctx).Error(err, "faield to marshal Response")
 				return
 			}
 
 			if _, err = conn.Write(b); err != nil {
-				log.FromContext(ctx).Error("failed to write response", zap.Error(err))
+				log.FromContext(ctx).Error(err, "failed to write response")
 			}
 		}()
 	}

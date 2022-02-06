@@ -5,10 +5,7 @@ import (
 	"context"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/hatappi/go-kit/log"
-
 	"github.com/hatappi/gomodoro/internal/notify"
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/toggl"
@@ -50,7 +47,7 @@ func WithNotify() Option {
 			}
 
 			if err := notify.Notify("gomodoro", taskName+":"+message); err != nil {
-				log.FromContext(ctx).Warn("failed to notify", zap.Error(err))
+				log.FromContext(ctx).Error(err, "failed to notify")
 			}
 		})
 	}
@@ -67,7 +64,7 @@ func WithRecordToggl(togglClient *toggl.Client) Option {
 			s := time.Now().Add(-time.Duration(elapsedTime) * time.Second)
 
 			if err := togglClient.PostTimeEntry(taskName, s, elapsedTime); err != nil {
-				log.FromContext(ctx).Warn("failed to record time to toggle", zap.Error(err))
+				log.FromContext(ctx).Error(err, "failed to record time to toggle")
 			}
 		})
 	}
@@ -82,7 +79,7 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 			}
 
 			if err := client.IncrementPixel(ctx, userName, graphID); err != nil {
-				log.FromContext(ctx).Warn("failed to increment a pixel at Pixela", zap.Error(err))
+				log.FromContext(ctx).Error(err, "failed to increment a pixel at Pixela")
 			}
 		})
 	}
