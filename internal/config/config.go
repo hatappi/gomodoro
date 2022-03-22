@@ -25,7 +25,7 @@ const (
 	// DefaultTaskFile default task file path
 	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
 	// DefaultUnixDomainScoketPath default unix domain socket file path
-	DefaultUnixDomainScoketPath = "~/.gomodoro/gomodoro.sock"
+	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
 )
 
 // Config config for gomodoro
