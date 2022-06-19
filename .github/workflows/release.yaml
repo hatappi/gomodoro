@@ -25,7 +25,7 @@ jobs:
       - name: confirm cache
         run: echo "cache is ${{ steps.cache.outputs.cache-hit }}"
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v1
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           args: release --rm-dist
