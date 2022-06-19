@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/gdamore/tcell v1.4.0
-	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-playground/validator/v10 v10.11.0
 	github.com/golangci/golangci-lint v1.35.2
 	github.com/hatappi/go-kit v0.0.8
 	github.com/mattn/go-runewidth v0.0.10
@@ -46,8 +46,8 @@ require (
 	github.com/go-critic/go-critic v0.5.3 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
 	github.com/go-logr/zapr v1.2.2 // indirect
-	github.com/go-playground/locales v0.13.0 // indirect
-	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/locales v0.14.0 // indirect
+	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-toolsmith/astcast v1.0.0 // indirect
 	github.com/go-toolsmith/astcopy v1.0.0 // indirect
 	github.com/go-toolsmith/astequal v1.0.0 // indirect
@@ -93,7 +93,7 @@ require (
 	github.com/kulti/thelper v0.2.1 // indirect
 	github.com/kunwardeep/paralleltest v1.0.2 // indirect
 	github.com/kyoh86/exportloopref v0.1.8 // indirect
-	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/maratori/testpackage v1.0.1 // indirect
@@ -146,7 +146,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
