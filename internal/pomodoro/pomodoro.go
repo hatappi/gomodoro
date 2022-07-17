@@ -4,6 +4,8 @@ package pomodoro
 import (
 	"context"
 
+	"github.com/gdamore/tcell"
+
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
@@ -59,17 +61,13 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 	}
 	p.timer.SetTitle(task.Name)
 
-	loopCnt := 1
+	var loopCnt int
 	for {
-		isWorkTime := loopCnt%2 != 0
+		isWorkTime := loopCnt%2 == 0
+		intervalNum := loopCnt/2 + 1
 
-		if isWorkTime {
-			p.timer.ChangeFontColor(p.config.Color.TimerWorkFont)
-		} else {
-			p.timer.ChangeFontColor(p.config.Color.TimerBreakFont)
-		}
+		p.changeTimerConfig(isWorkTime, intervalNum)
 
-		p.timer.SetDuration(p.getDuration(loopCnt))
 		elapsedTime, err := p.timer.Run(ctx)
 		if err != nil {
 			return err
@@ -94,17 +92,26 @@ func (p *pomodoroImpl) Finish() {
 	p.screenClient.Finish()
 }
 
-func (p *pomodoroImpl) getDuration(cnt int) int {
-	setNum := cnt / 2
+func (p *pomodoroImpl) changeTimerConfig(isWorkTime bool, intervalNum int) {
+	var (
+		timerColor    tcell.Color
+		timerDuration int
+	)
 
-	switch {
-	case setNum != 0 && cnt%2 == 0 && setNum%3 == 0:
-		return p.longBreakSec
-	case cnt%2 == 0:
-		return p.shortBreakSec
-	default:
-		return p.workSec
+	if isWorkTime {
+		timerColor = p.config.Color.TimerWorkFont
+		timerDuration = p.workSec
+	} else {
+		timerColor = p.config.Color.TimerBreakFont
+		if intervalNum%3 == 0 {
+			timerDuration = p.longBreakSec
+		} else {
+			timerDuration = p.shortBreakSec
+		}
 	}
+
+	p.timer.SetFontColor(timerColor)
+	p.timer.SetDuration(timerDuration)
 }
 
 // selectNextAction selects next action.
