@@ -23,10 +23,9 @@ type Timer interface {
 	Stop()
 	SetTitle(string)
 	GetTitle() string
-	SetDuration(sec int)
 	GetRemainSec() int
-
-	ChangeFontColor(tcell.Color)
+	SetDuration(sec int)
+	SetFontColor(tcell.Color)
 }
 
 type timerImpl struct {
@@ -67,7 +66,7 @@ func (t *timerImpl) GetRemainSec() int {
 	return t.remainSec
 }
 
-func (t *timerImpl) ChangeFontColor(c tcell.Color) {
+func (t *timerImpl) SetFontColor(c tcell.Color) {
 	t.fontColor = c
 }
 
