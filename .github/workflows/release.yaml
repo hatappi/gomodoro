@@ -7,6 +7,8 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yaml
+    with:
+      reviewdog_args: '-diff="git diff master"'
   goreleaser:
     runs-on: ubuntu-latest
     needs:
