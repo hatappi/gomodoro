@@ -4,8 +4,7 @@ on:
   workflow_call:
     inputs:
       reviewdog_args:
-        default: '-reporter=github-check'
-        required: false
+        required: true
         type: string
 
 jobs:
@@ -61,11 +60,20 @@ jobs:
       - name: Install lint tools
         run: make install-tools
 
+      - name: Set Reviewdog args
+        id: reviewdog
+        run: |
+          if [ -z "${{ inputs.reviewdog_args }}" ]; then
+            echo "::set-output name=args::-reporter=github-check"
+          else
+            echo "::set-output name=args::${{ inputs.reviewdog_args }}"
+          fi
+
       - name: Run reviewdog
         run: make reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REVIEWDOG_ARGS: ${{ inputs.reviewdog_args }}
+          REVIEWDOG_ARGS: ${{ steps.reviewdog.outputs.args }}
 
   test:
     name: Test
