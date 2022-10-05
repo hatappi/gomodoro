@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -69,6 +70,17 @@ func initLogger() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load config. %s\n", err)
 		os.Exit(1)
+	}
+
+	logDir := filepath.Dir(conf.LogFile)
+
+	_, err = os.Stat(logDir)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Dir(conf.LogFile), 0750)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to create log directory. %s\n", err)
+			os.Exit(1)
+		}
 	}
 
 	logger, err := zap.NewLogger("gomodoro",
