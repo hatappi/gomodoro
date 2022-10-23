@@ -1,6 +1,6 @@
 module github.com/hatappi/gomodoro
 
-go 1.17
+go 1.19
 
 require (
 	github.com/gdamore/tcell v1.4.0
