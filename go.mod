@@ -6,7 +6,7 @@ require (
 	github.com/gdamore/tcell v1.4.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golangci/golangci-lint v1.35.2
-	github.com/hatappi/go-kit v0.0.8
+	github.com/hatappi/go-kit v0.0.9
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.5.0
@@ -76,7 +76,7 @@ require (
 	github.com/gostaticanalysis/analysisutil v0.4.1 // indirect
 	github.com/gostaticanalysis/comment v1.4.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
