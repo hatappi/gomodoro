@@ -2,13 +2,14 @@
 package cmd
 
 import (
+	"errors"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/xerrors"
 
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/errors"
+	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/net/unix"
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/pomodoro"
@@ -74,7 +75,7 @@ please specify argument or config yaml.
 
 		err = p.Start(ctx)
 		if err != nil {
-			if xerrors.Is(err, errors.ErrCancel) {
+			if errors.Is(err, gomodoro_error.ErrCancel) {
 				return nil
 			}
 			return err
