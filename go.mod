@@ -12,7 +12,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/reviewdog/reviewdog v0.14.1
 	github.com/spf13/cobra v1.6.0
-	github.com/spf13/viper v1.12.0
+	github.com/spf13/viper v1.13.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df
 	gopkg.in/yaml.v2 v2.4.0
