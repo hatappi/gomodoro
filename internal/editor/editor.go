@@ -3,14 +3,13 @@ package editor
 
 import (
 	"bufio"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
 
 // GetSliceText get slice text edited with editor
 func GetSliceText(initialText string) ([]string, error) {
-	tmpfile, err := ioutil.TempFile("", "gomodoro")
+	tmpfile, err := os.CreateTemp("", "gomodoro")
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +20,7 @@ func GetSliceText(initialText string) ([]string, error) {
 		_ = tmpfile.Close()
 	}()
 
-	if _, err = tmpfile.Write([]byte(initialText)); err != nil {
+	if _, err = tmpfile.WriteString(initialText); err != nil {
 		return nil, err
 	}
 

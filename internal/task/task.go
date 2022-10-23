@@ -2,19 +2,18 @@
 package task
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"strings"
 
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/errors"
+	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 )
@@ -73,7 +72,7 @@ func (c *clientImpl) GetTask() (*Task, error) {
 
 	if t.Name == "" {
 		t.Name, err = createTaskName(c.config, c.screenClient)
-		if xerrors.Is(err, errors.ErrCancel) {
+		if errors.Is(err, gomodoro_error.ErrCancel) {
 			return nil, err
 		}
 		tasks, err = c.loadTasks()
@@ -94,7 +93,7 @@ func (c *clientImpl) GetTask() (*Task, error) {
 func (c *clientImpl) loadTasks() (Tasks, error) {
 	t := Tasks{}
 
-	b, err := ioutil.ReadFile(c.taskFile)
+	b, err := os.ReadFile(c.taskFile)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok {
 			return t, nil
@@ -117,7 +116,7 @@ func (c *clientImpl) saveTasks(tasks Tasks) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(c.taskFile, d, 0600)
+	err = os.WriteFile(c.taskFile, d, 0600)
 	if err != nil {
 		return err
 	}
@@ -161,7 +160,7 @@ func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
 		e := <-c.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
-			return "", errors.ErrCancel
+			return "", gomodoro_error.ErrCancel
 		case screen.EventEnter:
 			return tasks[offset+i].Name, nil
 		case screen.EventKeyDown:
@@ -242,7 +241,7 @@ func createTaskName(config *config.Config, c screen.Client) (string, error) {
 		e := <-c.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
-			return "", errors.ErrCancel
+			return "", gomodoro_error.ErrCancel
 		case screen.EventEnter:
 			if len(newTaskName) == 0 {
 				continue
@@ -261,7 +260,7 @@ func createTaskName(config *config.Config, c screen.Client) (string, error) {
 // AddTask save task to file
 func AddTask(taskFile, name string) error {
 	if name == "" {
-		return xerrors.New("task name is empty")
+		return errors.New("task name is empty")
 	}
 
 	c := &clientImpl{

@@ -4,10 +4,9 @@ package toggl
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
-
-	"golang.org/x/xerrors"
 )
 
 const appName = "gomodoro"
@@ -63,7 +62,7 @@ func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error
 	}()
 
 	if res.StatusCode != 200 {
-		return xerrors.Errorf("request failed. detail: %s", res.Body)
+		return fmt.Errorf("request failed. detail: %s", res.Body)
 	}
 	return nil
 }

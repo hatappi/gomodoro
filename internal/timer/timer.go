@@ -3,16 +3,15 @@ package timer
 
 import (
 	"context"
+	"errors"
 	"math"
 	"time"
 
 	"github.com/gdamore/tcell"
-	"golang.org/x/xerrors"
-
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/errors"
+	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 )
@@ -84,7 +83,7 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 	for {
 		err := t.drawTimer(ctx, t.remainSec, t.title, opts...)
 		if err != nil {
-			if xerrors.Is(err, errors.ErrScreenSmall) {
+			if errors.Is(err, gomodoro_error.ErrScreenSmall) {
 				t.screenClient.Clear()
 				w, h := t.screenClient.ScreenSize()
 				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please large screen", true)
@@ -95,7 +94,7 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 				case e := <-t.screenClient.GetEventChan():
 					switch e.(type) {
 					case screen.EventCancel:
-						return elapsedTime, errors.ErrCancel
+						return elapsedTime, gomodoro_error.ErrCancel
 					case screen.EventScreenResize:
 						continue
 					}
@@ -112,7 +111,7 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 		case e := <-t.screenClient.GetEventChan():
 			switch e := e.(type) {
 			case screen.EventCancel:
-				return elapsedTime, errors.ErrCancel
+				return elapsedTime, gomodoro_error.ErrCancel
 			case screen.EventRune:
 				if rune(e) == rune(101) { // e
 					t.remainSec = 0
@@ -215,7 +214,7 @@ func timerMagnification(w, h float64) (float64, error) {
 
 	for {
 		if mag < 1.0 {
-			return 0.0, errors.ErrScreenSmall
+			return 0.0, gomodoro_error.ErrScreenSmall
 		}
 
 		if w >= draw.TimerBaseWidth*mag && h >= draw.TimerBaseHeight*mag {

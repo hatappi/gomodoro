@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net"
 
 	"github.com/hatappi/go-kit/log"
@@ -34,7 +34,7 @@ func NewClient(socketPath string) (Client, error) {
 }
 
 func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
-	b, err := ioutil.ReadAll(bufio.NewReader(c.conn))
+	b, err := io.ReadAll(bufio.NewReader(c.conn))
 	if err != nil {
 		log.FromContext(ctx).Error(err, "failed to read connection")
 	}

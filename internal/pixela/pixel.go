@@ -3,11 +3,11 @@ package pixela
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/hatappi/go-kit/log"
-	"golang.org/x/xerrors"
 )
 
 type postPixelResponse struct {
@@ -38,7 +38,7 @@ func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) e
 		_ = res.Body.Close()
 	}()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) e
 	}
 
 	if !postPixel.IsSuccess {
-		return xerrors.Errorf("request failed. detail: %s", postPixel.Message)
+		return fmt.Errorf("request failed. detail: %s", postPixel.Message)
 	}
 
 	return nil
