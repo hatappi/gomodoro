@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -43,7 +44,7 @@ func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error
 	}
 	req, err := http.NewRequest(
 		"POST",
-		"https://www.toggl.com/api/v8/time_entries",
+		"https://api.track.toggl.com/api/v8/time_entries",
 		bytes.NewBuffer(jsonBytes),
 	)
 	if err != nil {
@@ -62,7 +63,11 @@ func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error
 	}()
 
 	if res.StatusCode != 200 {
-		return fmt.Errorf("request failed. detail: %s", res.Body)
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read body: %s", err)
+		}
+		return fmt.Errorf("request failed. detail: %s", body)
 	}
 	return nil
 }
