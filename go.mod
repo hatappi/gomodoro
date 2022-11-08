@@ -11,7 +11,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/reviewdog/reviewdog v0.14.1
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
