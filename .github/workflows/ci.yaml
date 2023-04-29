@@ -12,22 +12,14 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-        id: go
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        id: cache
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          cache-dependency-path: go.sum
+          go-version-file: go.mod
 
       - name: Get dependencies
         run: make dependencies
@@ -41,21 +33,14 @@ jobs:
       - Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-      - name: setup Go
-        uses: actions/setup-go@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.19
-        id: go
-
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          cache-dependency-path: go.sum
+          go-version-file: go.mod
 
       - name: Install lint tools
         run: make install-tools
@@ -81,22 +66,14 @@ jobs:
       - Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-        id: go
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        id: cache
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          cache-dependency-path: go.sum
+          go-version-file: go.mod
 
       - name: Get dependencies
         run: make dependencies
