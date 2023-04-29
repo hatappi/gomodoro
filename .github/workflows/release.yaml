@@ -16,20 +16,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.20
-        id: go
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: confirm cache
-        run: echo "cache is ${{ steps.cache.outputs.cache-hit }}"
+          cache-dependency-path: go.sum
+          go-version-file: go.mod
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
