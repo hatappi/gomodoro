@@ -1,3 +1,5 @@
+export
+
 GOLANGCI_LINT_VERSION=v1.22.2
 
 GIT_HASH=$(shell git rev-parse --short HEAD)
@@ -16,11 +18,17 @@ build:
 	  -ldflags "-X github.com/hatappi/gomodoro/cmd.commit=${GIT_HASH}" \
 	  -o ./dist/gomodoro
 
-install-tools:
-	@GOBIN=${GOBIN} ./scripts/install_tools.sh
+.PHONY: tools
+tools:
+	@go generate -tags tools tools/tools.go
 
+.PHONY: lint
 lint:
 	@${GOBIN}/golangci-lint run ./...
+
+.PHONY: lint-fix
+lint-fix:
+	@${GOBIN}/golangci-lint run --fix ./...
 
 test:
 	@go test ./...

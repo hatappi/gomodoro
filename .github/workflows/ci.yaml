@@ -43,7 +43,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Install lint tools
-        run: make install-tools
+        run: make tools
 
       - name: Set Reviewdog args
         id: reviewdog
