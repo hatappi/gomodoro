@@ -9,14 +9,14 @@ type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// Client manage toggl
+// Client manage toggl.
 type Client struct {
 	token string
 
 	httpclient httpClient
 }
 
-// NewClient initilize toggl client
+// NewClient initilize toggl client.
 func NewClient(token string) *Client {
 	return &Client{
 		token:      token,

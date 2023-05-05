@@ -7,7 +7,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
-// NewScreen initilize screen
+// NewScreen initilize screen.
 func NewScreen(config *config.Config) (tcell.Screen, error) {
 	s, err := tcell.NewScreen()
 	if err != nil {

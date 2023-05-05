@@ -19,8 +19,34 @@ import (
 
 var cfgFile string
 
-func init() {
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	ctx := context.Background()
+
 	cobra.OnInitialize(initConfig, initLogger)
+
+	rootCmd := newRootCmd()
+	rootCmd.AddCommand(
+		newVersionCmd(),
+		newStartCmd(),
+		newRemainCmd(),
+		newInitCmd(),
+		newAddTaskCmd(),
+	)
+
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func newRootCmd() *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:           "gomodoro",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.gomodoro/config.yaml", "config file")
 
@@ -30,26 +56,14 @@ func init() {
 	rootCmd.PersistentFlags().String("log-level", "error", "log Level (default is error)")
 	cobra.CheckErr(viper.BindPFlag("log_level", rootCmd.PersistentFlags().Lookup("log-level")))
 
-	rootCmd.PersistentFlags().String("unix-domain-socket-path", config.DefaultUnixDomainScoketPath, "unix domain socket path")
+	rootCmd.PersistentFlags().String(
+		"unix-domain-socket-path",
+		config.DefaultUnixDomainScoketPath,
+		"unix domain socket path",
+	)
 	cobra.CheckErr(viper.BindPFlag("unix_domain_socket_path", rootCmd.PersistentFlags().Lookup("unix-domain-socket-path")))
-}
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:           "gomodoro",
-	SilenceUsage:  true,
-	SilenceErrors: true,
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	ctx := context.Background()
-
-	if err := rootCmd.ExecuteContext(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+	return rootCmd
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -76,7 +90,7 @@ func initLogger() {
 
 	_, err = os.Stat(logDir)
 	if os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(conf.LogFile), 0750)
+		err = os.MkdirAll(filepath.Dir(conf.LogFile), 0o750) //nolint:gomnd
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed to create log directory. %s\n", err)
 			os.Exit(1)

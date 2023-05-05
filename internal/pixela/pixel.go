@@ -15,11 +15,12 @@ type postPixelResponse struct {
 	IsSuccess bool   `json:"isSuccess"`
 }
 
-// IncrementPixel increments a pixel
+// IncrementPixel increments a pixel.
 func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) error {
 	url := "https://pixe.la/v1/users/" + userName + "/graphs/" + graphID + "/increment"
-	req, err := http.NewRequest(
-		"PUT",
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPut,
 		url,
 		nil,
 	)

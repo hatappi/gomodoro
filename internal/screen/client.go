@@ -5,34 +5,35 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell"
+
 	"github.com/hatappi/go-kit/log"
 )
 
-// Event screen event
+// Event screen event.
 type Event interface{}
 
-// EventKeyUp press keyup event
+// EventKeyUp press keyup event.
 type EventKeyUp struct{}
 
-// EventKeyDown press keydown event
+// EventKeyDown press keydown event.
 type EventKeyDown struct{}
 
-// EventCancel cancel event
+// EventCancel cancel event.
 type EventCancel struct{}
 
-// EventEnter press Enter event
+// EventEnter press Enter event.
 type EventEnter struct{}
 
-// EventDelete delete event
+// EventDelete delete event.
 type EventDelete struct{}
 
-// EventRune press rune
+// EventRune press rune.
 type EventRune rune
 
-// EventScreenResize resize screen Event
+// EventScreenResize resize screen Event.
 type EventScreenResize struct{}
 
-// Client include related screen
+// Client include related screen.
 type Client interface {
 	GetScreen() tcell.Screen
 	ScreenSize() (int, int)
@@ -46,43 +47,50 @@ type Client interface {
 	GetEventChan() chan Event
 }
 
-type clientImpl struct {
+// IClient implements Client interface.
+type IClient struct {
 	screen tcell.Screen
 
 	eventChan chan Event
 }
 
-// NewClient initilize Client
-func NewClient(s tcell.Screen) Client {
-	return &clientImpl{
+// NewClient initilize Client.
+func NewClient(s tcell.Screen) *IClient {
+	return &IClient{
 		screen:    s,
 		eventChan: make(chan Event),
 	}
 }
 
-func (c *clientImpl) GetScreen() tcell.Screen {
+// GetScreen gets screen.
+func (c *IClient) GetScreen() tcell.Screen {
 	return c.screen
 }
 
-func (c *clientImpl) ScreenSize() (int, int) {
+// ScreenSize gets screen size.
+func (c *IClient) ScreenSize() (int, int) {
 	return c.screen.Size()
 }
 
-func (c *clientImpl) Clear() {
+// Clear clears screen.
+func (c *IClient) Clear() {
 	c.screen.Clear()
 }
 
-func (c *clientImpl) Finish() {
+// Finish finishes screen.
+func (c *IClient) Finish() {
 	c.screen.Fini()
 }
 
-func (c *clientImpl) StartPollEvent(ctx context.Context) {
+// StartPollEvent starts polling event on goroutine.
+func (c *IClient) StartPollEvent(ctx context.Context) {
 	go func() {
 		for {
 			ev := c.screen.PollEvent()
 			log.FromContext(ctx).V(1).Info("receive event", "event", ev)
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
+				//nolint:exhaustive
 				switch ev.Key() {
 				case tcell.KeyEscape, tcell.KeyCtrlC:
 					c.eventChan <- EventCancel{}
@@ -107,7 +115,8 @@ func (c *clientImpl) StartPollEvent(ctx context.Context) {
 	}()
 }
 
-func (c *clientImpl) GetEventChan() chan Event {
+// GetEventChan gets an event connection.
+func (c *IClient) GetEventChan() chan Event {
 	return c.eventChan
 }
 
@@ -117,6 +126,7 @@ func (fpe *finishPollEvent) When() time.Time {
 	return time.Now()
 }
 
-func (c *clientImpl) StopPollEvent() {
+// StopPollEvent stops polling event of screen.
+func (c *IClient) StopPollEvent() {
 	c.screen.PostEventWait(&finishPollEvent{})
 }

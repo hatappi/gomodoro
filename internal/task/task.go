@@ -18,15 +18,15 @@ import (
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 )
 
-// Task represents task
+// Task represents task.
 type Task struct {
 	Name string `yaml:"name"`
 }
 
-// Tasks is array of Task
+// Tasks is array of Task.
 type Tasks []*Task
 
-// Client task client
+// Client task client.
 type Client interface {
 	GetTask() (*Task, error)
 
@@ -36,22 +36,24 @@ type Client interface {
 	saveTasks(Tasks) error
 }
 
-// NewClient initilize Client
-func NewClient(config *config.Config, c screen.Client, taskFile string) Client {
-	return &clientImpl{
+// NewClient initilize Client.
+func NewClient(config *config.Config, c screen.Client, taskFile string) *IClient {
+	return &IClient{
 		config:       config,
 		taskFile:     taskFile,
 		screenClient: c,
 	}
 }
 
-type clientImpl struct {
+// IClient meets Client interface.
+type IClient struct {
 	config       *config.Config
 	taskFile     string
 	screenClient screen.Client
 }
 
-func (c *clientImpl) GetTask() (*Task, error) {
+// GetTask get selected Task.
+func (c *IClient) GetTask() (*Task, error) {
 	tasks, err := c.loadTasks()
 	if err != nil {
 		return nil, err
@@ -90,12 +92,12 @@ func (c *clientImpl) GetTask() (*Task, error) {
 	return t, nil
 }
 
-func (c *clientImpl) loadTasks() (Tasks, error) {
+func (c *IClient) loadTasks() (Tasks, error) {
 	t := Tasks{}
 
 	b, err := os.ReadFile(c.taskFile)
 	if err != nil {
-		if _, ok := err.(*os.PathError); ok {
+		if errors.Is(err, &os.PathError{}) {
 			return t, nil
 		}
 
@@ -110,13 +112,14 @@ func (c *clientImpl) loadTasks() (Tasks, error) {
 	return t, nil
 }
 
-func (c *clientImpl) saveTasks(tasks Tasks) error {
+func (c *IClient) saveTasks(tasks Tasks) error {
 	d, err := yaml.Marshal(tasks)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(c.taskFile, d, 0600)
+	//nolint:gomnd
+	err = os.WriteFile(c.taskFile, d, 0o600)
 	if err != nil {
 		return err
 	}
@@ -124,100 +127,106 @@ func (c *clientImpl) saveTasks(tasks Tasks) error {
 	return nil
 }
 
-func (c *clientImpl) selectTaskName(tasks Tasks) (string, error) {
+func (c *IClient) renderTasks(tasks Tasks, offset, limit, cursorPosition int) {
+	w, h := c.screenClient.ScreenSize()
+
+	for y, t := range tasks[offset:limit] {
+		name := fmt.Sprintf("%3d. %s", y+1, t.Name)
+		opts := []draw.Option{}
+		if y == cursorPosition {
+			opts = []draw.Option{
+				draw.WithBackgroundColor(c.config.Color.SelectedLine),
+			}
+		}
+		tw := runewidth.StringWidth(name)
+		if d := w - tw; d > 0 {
+			name += strings.Repeat(" ", d)
+		}
+		_ = draw.Sentence(c.screenClient.GetScreen(), 0, y, w, name, true, opts...)
+	}
+
+	draw.Sentence(
+		c.screenClient.GetScreen(),
+		0,
+		h-1,
+		w,
+		"(n): add new task / (d): delete task",
+		true,
+		draw.WithBackgroundColor(c.config.Color.StatusBarBackground),
+	)
+}
+
+//nolint:gocognit
+func (c *IClient) selectTaskName(tasks Tasks) (string, error) {
 	offset := 0
-	i := 0
+	cursorPosition := 0
 	for {
-		w, h := c.screenClient.ScreenSize()
+		_, h := c.screenClient.ScreenSize()
 		selectedHeight := h - 1
 		limit := int(math.Min(float64(offset+selectedHeight), float64(len(tasks))))
 
-		for y, t := range tasks[offset:limit] {
-			name := fmt.Sprintf("%3d. %s", y+1, t.Name)
-			opts := []draw.Option{}
-			if y == i {
-				opts = []draw.Option{
-					draw.WithBackgroundColor(c.config.Color.SelectedLine),
-				}
-			}
-			tw := runewidth.StringWidth(name)
-			if d := w - tw; d > 0 {
-				name += strings.Repeat(" ", d)
-			}
-			_ = draw.Sentence(c.screenClient.GetScreen(), 0, y, w, name, true, opts...)
-		}
-
-		draw.Sentence(
-			c.screenClient.GetScreen(),
-			0,
-			h-1,
-			w,
-			"(n): add new task / (d): delete task",
-			true,
-			draw.WithBackgroundColor(c.config.Color.StatusBarBackground),
-		)
+		c.renderTasks(tasks, offset, limit, cursorPosition)
 
 		e := <-c.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
 			return "", gomodoro_error.ErrCancel
 		case screen.EventEnter:
-			return tasks[offset+i].Name, nil
+			return tasks[offset+cursorPosition].Name, nil
 		case screen.EventKeyDown:
-			if offset+i >= len(tasks)-1 {
-				i = len(tasks) - offset - 1
+			cursorPosition++
+
+			if offset+cursorPosition >= len(tasks) {
+				cursorPosition = len(tasks) - offset - 1
 				continue
 			}
 
-			if i < selectedHeight-1 {
-				i++
-			} else {
+			if cursorPosition >= selectedHeight {
 				c.screenClient.Clear()
 				offset += selectedHeight
-				i = 0
+				cursorPosition = 0
 			}
 		case screen.EventKeyUp:
-			if offset+i <= 0 {
-				continue
-			}
+			cursorPosition--
 
-			if i > 0 {
-				i--
-			} else {
+			if offset <= 0 && cursorPosition <= 0 {
+				cursorPosition = 0
+				continue
+			} else if cursorPosition < 0 {
 				c.screenClient.Clear()
 				offset -= selectedHeight
-				i = selectedHeight - 1
+				cursorPosition = selectedHeight - 1
 			}
 		case screen.EventRune:
 			s := c.screenClient.GetScreen()
-			switch rune(e) {
-			case rune(106): // j
+			switch string(e) {
+			case "j": // j
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
-			case rune(107): // k
+			case "k": // k
 				s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
-			case rune(110): // n
+			case "n": // n
 				c.screenClient.Clear()
 				return "", nil
-			case rune(100): // d
-				si := offset + i
+			case "d": // d
+				si := offset + cursorPosition
 				tasks = append(tasks[:si], tasks[si+1:]...)
-				err := c.saveTasks(tasks)
-				if err != nil {
+				if err := c.saveTasks(tasks); err != nil {
 					return "", err
 				}
+
 				if len(tasks) == 0 {
 					return "", nil
 				}
 				c.screenClient.Clear()
 
 				// when bottom task is deleted, key is up
-				if len(tasks) == i {
+				if len(tasks) == cursorPosition {
 					s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
 				}
 			}
 		case screen.EventScreenResize:
 			// reset
-			i = 0
+			cursorPosition = 0
 			offset = 0
 		}
 	}
@@ -257,13 +266,13 @@ func createTaskName(config *config.Config, c screen.Client) (string, error) {
 	}
 }
 
-// AddTask save task to file
+// AddTask save task to file.
 func AddTask(taskFile, name string) error {
 	if name == "" {
 		return errors.New("task name is empty")
 	}
 
-	c := &clientImpl{
+	c := &IClient{
 		taskFile: taskFile,
 	}
 

@@ -10,30 +10,32 @@ import (
 	"github.com/hatappi/go-kit/log"
 )
 
-// Client represents unix server client
+// Client represents unix server client.
 type Client interface {
 	Get(context.Context) (*Response, error)
 
 	Close()
 }
 
-type clientImpl struct {
+// IClient implements Client interface.
+type IClient struct {
 	conn net.Conn
 }
 
-// NewClient initialize Client
-func NewClient(socketPath string) (Client, error) {
+// NewClient initialize Client.
+func NewClient(socketPath string) (*IClient, error) {
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return &clientImpl{
+	return &IClient{
 		conn: conn,
 	}, nil
 }
 
-func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
+// Get a response of connection.
+func (c *IClient) Get(ctx context.Context) (*Response, error) {
 	b, err := io.ReadAll(bufio.NewReader(c.conn))
 	if err != nil {
 		log.FromContext(ctx).Error(err, "failed to read connection")
@@ -47,6 +49,7 @@ func (c *clientImpl) Get(ctx context.Context) (*Response, error) {
 	return r, nil
 }
 
-func (c *clientImpl) Close() {
+// Close closes client connection.
+func (c *IClient) Close() {
 	_ = c.conn.Close()
 }

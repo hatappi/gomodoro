@@ -8,7 +8,7 @@ type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// Client manage toggl
+// Client manage toggl.
 type Client struct {
 	projectID int
 	apiToken  string
@@ -16,7 +16,7 @@ type Client struct {
 	httpclient httpClient
 }
 
-// NewClient initilize toggl client
+// NewClient initilize toggl client.
 func NewClient(projectID int, apiToken string) *Client {
 	return &Client{
 		projectID:  projectID,
