@@ -166,15 +166,15 @@ func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts
 
 	screenWidth, screenHeight := t.screenClient.ScreenSize()
 
-	leftMarginWidth := float64(screenWidth) / marginTileRate
-	rightMarginWidth := float64(screenWidth) / marginTileRate
-	topMarginHeight := float64(screenHeight) / marginTileRate
-	bottomMarginHeight := float64(screenHeight) / marginTileRate
+	leftMargin := float64(screenWidth) / marginTileRate
+	rightMargin := float64(screenWidth) / marginTileRate
+	topMargin := float64(screenHeight) / marginTileRate
+	bottomMargin := float64(screenHeight) / marginTileRate
 
 	// renderWidth subtracts left and right margin from screen width
-	renderWidth := float64(screenWidth) - leftMarginWidth + rightMarginWidth
+	renderWidth := float64(screenWidth) - leftMargin - rightMargin
 	// renderHeight subtracts top and bottom margin from screen height
-	renderHeight := float64(screenHeight) - topMarginHeight + bottomMarginHeight
+	renderHeight := float64(screenHeight) - topMargin - bottomMargin
 
 	// text height is 1, but add 1 to include margin
 	textHeight := 2
@@ -192,8 +192,8 @@ func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts
 	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2    //nolint:gomnd
 	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2 //nolint:gomnd
 
-	x := int(math.Round(leftMarginWidth + timerPaddingWidth))
-	y := int(math.Round(topMarginHeight + timerPaddingHeight))
+	x := int(math.Round(leftMargin + timerPaddingWidth))
+	y := int(math.Round(topMargin + timerPaddingHeight))
 	log.FromContext(ctx).V(1).Info("screen information",
 		"x", x,
 		"y", y,
