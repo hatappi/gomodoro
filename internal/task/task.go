@@ -131,7 +131,7 @@ func (c *IClient) renderTasks(tasks Tasks, offset, limit, cursorPosition int) {
 	w, h := c.screenClient.ScreenSize()
 
 	for y, t := range tasks[offset:limit] {
-		name := fmt.Sprintf("%3d. %s", y+1, t.Name)
+		name := fmt.Sprintf("%3d: %s", offset+y+1, t.Name)
 		opts := []draw.Option{}
 		if y == cursorPosition {
 			opts = []draw.Option{
