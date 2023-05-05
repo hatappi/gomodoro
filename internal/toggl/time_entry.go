@@ -3,6 +3,7 @@ package toggl
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +13,7 @@ import (
 
 const appName = "gomodoro"
 
-// TimeEntry time_entry of toggl
+// TimeEntry time_entry of toggl.
 type TimeEntry struct {
 	Description string   `json:"description"`
 	CreatedWith string   `json:"created_with"`
@@ -22,8 +23,8 @@ type TimeEntry struct {
 	TAGS        []string `json:"tags"`
 }
 
-// PostTimeEntry record duration with description
-func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error {
+// PostTimeEntry record duration with description.
+func (c *Client) PostTimeEntry(ctx context.Context, desc string, start time.Time, duration int) error {
 	timeEntry := &TimeEntry{
 		Description: desc,
 		CreatedWith: appName,
@@ -42,8 +43,9 @@ func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(
-		"POST",
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
 		"https://api.track.toggl.com/api/v8/time_entries",
 		bytes.NewBuffer(jsonBytes),
 	)
@@ -62,10 +64,10 @@ func (c *Client) PostTimeEntry(desc string, start time.Time, duration int) error
 		_ = res.Body.Close()
 	}()
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
-			return fmt.Errorf("failed to read body: %s", err)
+			return fmt.Errorf("failed to read body: %w", err)
 		}
 		return fmt.Errorf("request failed. detail: %s", body)
 	}

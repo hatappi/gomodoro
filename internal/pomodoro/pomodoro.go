@@ -14,15 +14,15 @@ import (
 	"github.com/hatappi/gomodoro/internal/timer"
 )
 
-// Pomodoro interface
+// Pomodoro interface.
 type Pomodoro interface {
 	Start(context.Context) error
-	Stop()
 
 	Finish()
 }
 
-type pomodoroImpl struct {
+// IPomodoro implements Pomodoro interface.
+type IPomodoro struct {
 	config        *config.Config
 	workSec       int
 	shortBreakSec int
@@ -35,9 +35,15 @@ type pomodoroImpl struct {
 	completeFuncs []func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int)
 }
 
-// NewPomodoro initilize Pomodoro
-func NewPomodoro(conf *config.Config, sc screen.Client, timer timer.Timer, tc task.Client, opts ...Option) Pomodoro {
-	p := &pomodoroImpl{
+// NewPomodoro initilize Pomodoro.
+func NewPomodoro(
+	conf *config.Config,
+	sc screen.Client,
+	timer timer.Timer,
+	tc task.Client,
+	opts ...Option,
+) *IPomodoro {
+	p := &IPomodoro{
 		config:        conf,
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
@@ -54,19 +60,19 @@ func NewPomodoro(conf *config.Config, sc screen.Client, timer timer.Timer, tc ta
 	return p
 }
 
-func (p *pomodoroImpl) Start(ctx context.Context) error {
+// Start starts pomodoro.
+func (p *IPomodoro) Start(ctx context.Context) error {
 	task, err := p.taskClient.GetTask()
 	if err != nil {
 		return err
 	}
 	p.timer.SetTitle(task.Name)
 
-	var loopCnt int
+	loopCnt := 1
 	for {
-		isWorkTime := loopCnt%2 == 0
-		intervalNum := loopCnt/2 + 1
+		isWorkTime := loopCnt%p.config.Pomodoro.BreakFrequency != 0
 
-		p.changeTimerConfig(isWorkTime, intervalNum)
+		p.changeTimerConfig(isWorkTime, loopCnt)
 
 		elapsedTime, err := p.timer.Run(ctx)
 		if err != nil {
@@ -85,14 +91,12 @@ func (p *pomodoroImpl) Start(ctx context.Context) error {
 	}
 }
 
-func (p *pomodoroImpl) Stop() {
-}
-
-func (p *pomodoroImpl) Finish() {
+// Finish finishes Pomodoro.
+func (p *IPomodoro) Finish() {
 	p.screenClient.Finish()
 }
 
-func (p *pomodoroImpl) changeTimerConfig(isWorkTime bool, intervalNum int) {
+func (p *IPomodoro) changeTimerConfig(isWorkTime bool, loopCnt int) {
 	var (
 		timerColor    tcell.Color
 		timerDuration int
@@ -103,7 +107,7 @@ func (p *pomodoroImpl) changeTimerConfig(isWorkTime bool, intervalNum int) {
 		timerDuration = p.workSec
 	} else {
 		timerColor = p.config.Color.TimerBreakFont
-		if intervalNum%3 == 0 {
+		if loopCnt%3 == 0 {
 			timerDuration = p.longBreakSec
 		} else {
 			timerDuration = p.shortBreakSec
@@ -115,8 +119,8 @@ func (p *pomodoroImpl) changeTimerConfig(isWorkTime bool, intervalNum int) {
 }
 
 // selectNextAction selects next action.
-// e.g create new task, use same task
-func (p *pomodoroImpl) selectNextAction() error {
+// e.g create new task, use same task.
+func (p *IPomodoro) selectNextAction() error {
 	w, h := p.screenClient.ScreenSize()
 	draw.Sentence(
 		p.screenClient.GetScreen(),
@@ -137,7 +141,7 @@ func (p *pomodoroImpl) selectNextAction() error {
 		case screen.EventCancel:
 			return errors.ErrCancel
 		case screen.EventRune:
-			if rune(e) == rune(99) { // c
+			if string(e) == "c" { // c
 				p.screenClient.Clear()
 				t, err := p.taskClient.GetTask()
 				if err != nil {

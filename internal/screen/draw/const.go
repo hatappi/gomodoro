@@ -1,9 +1,9 @@
 package draw
 
 const (
-	// TimerBaseWidth is base width of timer
+	// TimerBaseWidth is base width of timer.
 	TimerBaseWidth = 21
-	// TimerBaseHeight is base height of timer
+	// TimerBaseHeight is base height of timer.
 	TimerBaseHeight = 5
 
 	numberWidth  = 4

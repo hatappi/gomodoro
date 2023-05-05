@@ -13,22 +13,22 @@ import (
 )
 
 const (
-	// DefaultWorkSec default working second
+	// DefaultWorkSec default working second.
 	DefaultWorkSec = 1500
-	// DefaultShortBreakSec default short break second
+	// DefaultShortBreakSec default short break second.
 	DefaultShortBreakSec = 300
-	// DefaultLongBreakSec default long break second
+	// DefaultLongBreakSec default long break second.
 	DefaultLongBreakSec = 900
 
-	// DefaultLogFile default log file path
+	// DefaultLogFile default log file path.
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
-	// DefaultTaskFile default task file path
+	// DefaultTaskFile default task file path.
 	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
-	// DefaultUnixDomainScoketPath default unix domain socket file path
+	// DefaultUnixDomainScoketPath default unix domain socket file path.
 	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
 )
 
-// Config config for gomodoro
+// Config config for gomodoro.
 type Config struct {
 	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
 	Toggl                TogglConfig    `mapstructure:"toggl"`
@@ -40,14 +40,15 @@ type Config struct {
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
 }
 
-// PomodoroConfig config for pomodoro
+// PomodoroConfig config for pomodoro.
 type PomodoroConfig struct {
-	WorkSec       int `mapstructure:"work_sec" validate:"gt=0,lte=3600"`
-	ShortBreakSec int `mapstructure:"short_break_sec" validate:"gt=0,lte=3600"`
-	LongBreakSec  int `mapstructure:"long_break_sec" validate:"gt=0,lte=3600"`
+	WorkSec        int `mapstructure:"work_sec" validate:"gt=0,lte=3600"`
+	ShortBreakSec  int `mapstructure:"short_break_sec" validate:"gt=0,lte=3600"`
+	LongBreakSec   int `mapstructure:"long_break_sec" validate:"gt=0,lte=3600"`
+	BreakFrequency int `mapstructure:"break_frequency" validate:"gte=2,lte=9"`
 }
 
-// TogglConfig config for Toggl
+// TogglConfig config for Toggl.
 type TogglConfig struct {
 	Enable    bool   `mapstructure:"enable"`
 	APIToken  string `mapstructure:"api_token"`
@@ -63,7 +64,7 @@ type PixelaConfig struct {
 	GraphID  string `mapstructure:"graph_id"`
 }
 
-// ColorConfig represents colors used within gomodoro
+// ColorConfig represents colors used within gomodoro.
 type ColorConfig struct {
 	Font                tcell.Color `mapstructure:"font"`
 	Background          tcell.Color `mapstructure:"background"`
@@ -75,11 +76,21 @@ type ColorConfig struct {
 	Cursor              tcell.Color `mapstructure:"cursor"`
 }
 
-func defaultConfig() *Config {
+// DefaultConfig get default config.
+func DefaultConfig() *Config {
 	return &Config{
 		Toggl: TogglConfig{
 			Enable: false,
 		},
+		Pomodoro: PomodoroConfig{
+			WorkSec:        DefaultWorkSec,
+			ShortBreakSec:  DefaultShortBreakSec,
+			LongBreakSec:   DefaultLongBreakSec,
+			BreakFrequency: 2, //nolint:gomnd
+		},
+		LogFile:              DefaultLogFile,
+		TaskFile:             DefaultTaskFile,
+		UnixDomainScoketPath: DefaultUnixDomainScoketPath,
 		Color: ColorConfig{
 			Font:                tcell.ColorDarkSlateGray,
 			Background:          tcell.ColorWhite,
@@ -93,9 +104,9 @@ func defaultConfig() *Config {
 	}
 }
 
-// GetConfig get Config
+// GetConfig get Config.
 func GetConfig() (*Config, error) {
-	c := defaultConfig()
+	c := DefaultConfig()
 
 	err := viper.Unmarshal(&c,
 		viper.DecodeHook(

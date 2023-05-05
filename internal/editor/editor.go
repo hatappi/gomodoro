@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-// GetSliceText get slice text edited with editor
+// GetSliceText get slice text edited with editor.
 func GetSliceText(initialText string) ([]string, error) {
 	tmpfile, err := os.CreateTemp("", "gomodoro")
 	if err != nil {

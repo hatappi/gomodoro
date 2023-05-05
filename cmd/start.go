@@ -19,73 +19,73 @@ import (
 	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
-// startCmd represents the start command
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "start pomodoro",
-	Long: `start pomodoro.
+// startCmd represents the start command.
+func newStartCmd() *cobra.Command {
+	startCmd := &cobra.Command{
+		Use:   "start",
+		Short: "start pomodoro",
+		Long: `start pomodoro.
 if you want to change work time, break time,
 please specify argument or config yaml.
 	`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := cmd.Context()
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
 
-		config, err := config.GetConfig()
-		if err != nil {
-			return err
-		}
-
-		opts := []pomodoro.Option{
-			pomodoro.WithWorkSec(config.Pomodoro.WorkSec),
-			pomodoro.WithShortBreakSec(config.Pomodoro.ShortBreakSec),
-			pomodoro.WithLongBreakSec(config.Pomodoro.LongBreakSec),
-			pomodoro.WithNotify(),
-		}
-
-		if config.Toggl.Enable {
-			togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
-			opts = append(opts, pomodoro.WithRecordToggl(togglClient))
-		}
-
-		if config.Pixela.Enable {
-			client := pixela.NewClient(config.Pixela.Token)
-			opts = append(opts, pomodoro.WithRecordPixela(client, config.Pixela.UserName, config.Pixela.GraphID))
-		}
-
-		terminalScreen, err := screen.NewScreen(config)
-		if err != nil {
-			return err
-		}
-
-		screenClient := screen.NewClient(terminalScreen)
-		screenClient.StartPollEvent(ctx)
-
-		timer := timer.NewTimer(config, screenClient)
-		taskClient := task.NewClient(config, screenClient, config.TaskFile)
-
-		p := pomodoro.NewPomodoro(config, screenClient, timer, taskClient, opts...)
-		defer p.Finish()
-
-		server, err := unix.NewServer(config.UnixDomainScoketPath, timer)
-		if err != nil {
-			return err
-		}
-		defer server.Close()
-		go server.Serve(ctx)
-
-		err = p.Start(ctx)
-		if err != nil {
-			if errors.Is(err, gomodoro_error.ErrCancel) {
-				return nil
+			config, err := config.GetConfig()
+			if err != nil {
+				return err
 			}
-			return err
-		}
 
-		return nil
-	},
-}
+			opts := []pomodoro.Option{
+				pomodoro.WithWorkSec(config.Pomodoro.WorkSec),
+				pomodoro.WithShortBreakSec(config.Pomodoro.ShortBreakSec),
+				pomodoro.WithLongBreakSec(config.Pomodoro.LongBreakSec),
+				pomodoro.WithNotify(),
+			}
 
-func init() {
+			if config.Toggl.Enable {
+				togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
+				opts = append(opts, pomodoro.WithRecordToggl(togglClient))
+			}
+
+			if config.Pixela.Enable {
+				client := pixela.NewClient(config.Pixela.Token)
+				opts = append(opts, pomodoro.WithRecordPixela(client, config.Pixela.UserName, config.Pixela.GraphID))
+			}
+
+			terminalScreen, err := screen.NewScreen(config)
+			if err != nil {
+				return err
+			}
+
+			screenClient := screen.NewClient(terminalScreen)
+			screenClient.StartPollEvent(ctx)
+
+			timer := timer.NewTimer(config, screenClient)
+			taskClient := task.NewClient(config, screenClient, config.TaskFile)
+
+			p := pomodoro.NewPomodoro(config, screenClient, timer, taskClient, opts...)
+			defer p.Finish()
+
+			server, err := unix.NewServer(config.UnixDomainScoketPath, timer)
+			if err != nil {
+				return err
+			}
+			defer server.Close()
+			go server.Serve(ctx)
+
+			err = p.Start(ctx)
+			if err != nil {
+				if errors.Is(err, gomodoro_error.ErrCancel) {
+					return nil
+				}
+				return err
+			}
+
+			return nil
+		},
+	}
+
 	startCmd.Flags().IntP("work-sec", "w", config.DefaultWorkSec, "work seconds")
 	_ = viper.BindPFlag("pomodoro.work_sec", startCmd.Flags().Lookup("work-sec"))
 
@@ -99,5 +99,5 @@ func init() {
 	startCmd.Flags().StringP("task-file", "t", home, "task file path")
 	_ = viper.BindPFlag("task_file", startCmd.Flags().Lookup("task-file"))
 
-	rootCmd.AddCommand(startCmd)
+	return startCmd
 }

@@ -6,52 +6,56 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/timer"
 )
 
-// Response represents unix server response
+// Response represents unix server response.
 type Response struct {
-	RemainSec int
+	RemainSec int `json:"remain_sec"`
 }
 
-// GetRemain get remain string
+// GetRemain get remain string.
 func (r *Response) GetRemain() string {
 	if r.RemainSec == 0 {
 		return "00:00"
 	}
-	min := r.RemainSec / 60
-	sec := r.RemainSec % 60
+
+	min := r.RemainSec / int(time.Minute.Seconds())
+	sec := r.RemainSec % int(time.Minute.Seconds())
 	return fmt.Sprintf("%02d:%02d", min, sec)
 }
 
-// Server represents server
+// Server represents server.
 type Server interface {
 	Serve(context.Context)
 	Close()
 }
 
-type serverImpl struct {
+// IServer implements Server interface.
+type IServer struct {
 	listener net.Listener
 	timer    timer.Timer
 }
 
-// NewServer initialize Server
-func NewServer(socketPath string, timer timer.Timer) (Server, error) {
+// NewServer initialize Server.
+func NewServer(socketPath string, timer timer.Timer) (*IServer, error) {
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return &serverImpl{
+	return &IServer{
 		listener: listener,
 		timer:    timer,
 	}, nil
 }
 
-// Serve start unix domain socket server
-func (c *serverImpl) Serve(ctx context.Context) {
+// Serve start unix domain socket server.
+func (c *IServer) Serve(ctx context.Context) {
 	for {
 		conn, err := c.listener.Accept()
 		if err != nil {
@@ -84,6 +88,7 @@ func (c *serverImpl) Serve(ctx context.Context) {
 	}
 }
 
-func (c *serverImpl) Close() {
+// Close closes listener.
+func (c *IServer) Close() {
 	_ = c.listener.Close()
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell"
+
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/config"
@@ -16,7 +17,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/screen/draw"
 )
 
-// Timer interface
+// Timer interface.
 type Timer interface {
 	Run(context.Context) (int, error)
 	Stop()
@@ -27,7 +28,8 @@ type Timer interface {
 	SetFontColor(tcell.Color)
 }
 
-type timerImpl struct {
+// ITimer implements Timer interface.
+type ITimer struct {
 	config       *config.Config
 	title        string
 	ticker       *time.Ticker
@@ -39,9 +41,9 @@ type timerImpl struct {
 	remainSec int
 }
 
-// NewTimer initilize Timer
-func NewTimer(config *config.Config, c screen.Client) Timer {
-	return &timerImpl{
+// NewTimer initilize Timer.
+func NewTimer(config *config.Config, c screen.Client) *ITimer {
+	return &ITimer{
 		config:       config,
 		ticker:       nil,
 		screenClient: c,
@@ -49,44 +51,52 @@ func NewTimer(config *config.Config, c screen.Client) Timer {
 	}
 }
 
-func (t *timerImpl) SetTitle(title string) {
+// SetTitle sets title.
+func (t *ITimer) SetTitle(title string) {
 	t.title = title
 }
 
-func (t *timerImpl) GetTitle() string {
+// GetTitle gets title.
+func (t *ITimer) GetTitle() string {
 	return t.title
 }
 
-func (t *timerImpl) SetDuration(d int) {
+// SetDuration sets remaining seconds.
+func (t *ITimer) SetDuration(d int) {
 	t.remainSec = d
 }
 
-func (t *timerImpl) GetRemainSec() int {
+// GetRemainSec get remaining seconds of timer.
+func (t *ITimer) GetRemainSec() int {
 	return t.remainSec
 }
 
-func (t *timerImpl) SetFontColor(c tcell.Color) {
+// SetFontColor sets cell color.
+func (t *ITimer) SetFontColor(c tcell.Color) {
 	t.fontColor = c
 }
 
-// Run timer
-func (t *timerImpl) Run(ctx context.Context) (int, error) {
+// Run timer.
+func (t *ITimer) Run(ctx context.Context) (int, error) {
 	t.Start()
 	defer t.Stop()
-
-	opts := []draw.Option{
-		draw.WithBackgroundColor(t.fontColor),
-	}
 
 	elapsedTime := 0
 
 	for {
+		opts := []draw.Option{}
+		if t.stopped {
+			opts = append(opts, draw.WithBackgroundColor(t.config.Color.TimerPauseFont))
+		} else {
+			opts = append(opts, draw.WithBackgroundColor(t.fontColor))
+		}
 		err := t.drawTimer(ctx, t.remainSec, t.title, opts...)
 		if err != nil {
 			if errors.Is(err, gomodoro_error.ErrScreenSmall) {
 				t.screenClient.Clear()
 				w, h := t.screenClient.ScreenSize()
-				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please large screen", true)
+				//nolint:gomnd
+				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please expand the screen size", true)
 
 				select {
 				case <-t.ticker.C:
@@ -113,21 +123,11 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 			case screen.EventCancel:
 				return elapsedTime, gomodoro_error.ErrCancel
 			case screen.EventRune:
-				if rune(e) == rune(101) { // e
+				if string(e) == "e" { // e
 					t.remainSec = 0
 				}
 			case screen.EventEnter:
-				if t.stopped {
-					opts = []draw.Option{
-						draw.WithBackgroundColor(t.fontColor),
-					}
-					t.Start()
-				} else {
-					opts = []draw.Option{
-						draw.WithBackgroundColor(t.config.Color.TimerPauseFont),
-					}
-					t.Stop()
-				}
+				t.Toggle()
 			}
 		case <-t.ticker.C:
 			t.remainSec--
@@ -136,30 +136,45 @@ func (t *timerImpl) Run(ctx context.Context) (int, error) {
 	}
 }
 
-// Start timer
-func (t *timerImpl) Start() {
+// Start timer.
+func (t *ITimer) Start() {
 	t.stopped = false
 	t.ticker = time.NewTicker(1 * time.Second)
 }
 
-// Stop timer
-func (t *timerImpl) Stop() {
+// Stop timer.
+func (t *ITimer) Stop() {
 	t.stopped = true
 	t.ticker.Stop()
 }
 
-func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, opts ...draw.Option) error {
+// Toggle timer between stop and start.
+func (t *ITimer) Toggle() {
+	if t.stopped {
+		t.Start()
+	} else {
+		t.Stop()
+	}
+}
+
+const (
+	marginTileRate = 16
+)
+
+func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts ...draw.Option) error {
 	s := t.screenClient.GetScreen()
 
 	screenWidth, screenHeight := t.screenClient.ScreenSize()
 
-	marginWidth := float64(screenWidth) / 16
-	marginHeight := float64(screenHeight) / 16
+	leftMarginWidth := float64(screenWidth) / marginTileRate
+	rightMarginWidth := float64(screenWidth) / marginTileRate
+	topMarginHeight := float64(screenHeight) / marginTileRate
+	bottomMarginHeight := float64(screenHeight) / marginTileRate
 
 	// renderWidth subtracts left and right margin from screen width
-	renderWidth := float64(screenWidth) - (marginWidth * 2)
+	renderWidth := float64(screenWidth) - leftMarginWidth + rightMarginWidth
 	// renderHeight subtracts top and bottom margin from screen height
-	renderHeight := float64(screenHeight) - (marginHeight * 2)
+	renderHeight := float64(screenHeight) - topMarginHeight + bottomMarginHeight
 
 	// text height is 1, but add 1 to include margin
 	textHeight := 2
@@ -174,11 +189,11 @@ func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, o
 	timerWidth := draw.TimerBaseWidth * mag
 	timerHeight := draw.TimerBaseHeight * mag
 
-	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2
-	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2
+	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2    //nolint:gomnd
+	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2 //nolint:gomnd
 
-	x := int(math.Round(marginWidth + timerPaddingWidth))
-	y := int(math.Round(marginHeight + timerPaddingHeight))
+	x := int(math.Round(leftMarginWidth + timerPaddingWidth))
+	y := int(math.Round(topMarginHeight + timerPaddingHeight))
 	log.FromContext(ctx).V(1).Info("screen information",
 		"x", x,
 		"y", y,
@@ -190,8 +205,8 @@ func (t *timerImpl) drawTimer(ctx context.Context, duration int, title string, o
 
 	draw.Sentence(s, x, y, int(timerWidth), title, true)
 
-	min := duration / 60
-	sec := duration % 60
+	min := duration / int(time.Minute.Seconds())
+	sec := duration % int(time.Minute.Seconds())
 	draw.Timer(s, x, y+textHeight, int(mag), min, sec, opts...)
 
 	draw.Sentence(

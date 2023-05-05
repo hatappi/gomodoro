@@ -9,7 +9,7 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-// Timer is draw the timer
+// Timer is draw the timer.
 func Timer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
 	minStr := fmt.Sprintf("%02d", min)
 	secStr := fmt.Sprintf("%02d", sec)

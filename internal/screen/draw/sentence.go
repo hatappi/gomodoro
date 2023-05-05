@@ -1,13 +1,14 @@
 package draw
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gdamore/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
-// Sentence is draw the sentence
+// Sentence is draw the sentence.
 func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts ...Option) int {
 	if centered {
 		str = adjustMessage(width, str)
@@ -19,7 +20,7 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 	}
 
 	i := 0
-	var deferred []rune
+	deferred := []rune{}
 	dwidth := 0
 	zwj := false
 	for _, r := range str {
@@ -37,6 +38,7 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 			zwj = false
 			continue
 		}
+
 		switch runewidth.RuneWidth(r) {
 		case 0:
 			if len(deferred) == 0 {
@@ -50,7 +52,7 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 			}
 			deferred = nil
 			dwidth = 1
-		case 2:
+		case 2: //nolint:gomnd
 			if len(deferred) != 0 {
 				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 				i += dwidth
@@ -69,15 +71,12 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 }
 
 func adjustMessage(width int, str string) string {
-	remain := (width - runewidth.StringWidth(str)) / 2
-	if remain >= 0 {
-		s := strings.Repeat(" ", remain)
-		e := strings.Repeat(" ", width-runewidth.StringWidth(str)-remain)
-		str = s + str + e
-	} else {
-		str = str[:width-3]
-		str += "..."
+	margin := width - runewidth.StringWidth(str)
+	if margin >= 0 {
+		lm := margin / 2 //nolint:gomnd
+		rm := width - runewidth.StringWidth(str) - lm
+		return fmt.Sprintf("%s%s%s", strings.Repeat(" ", lm), str, strings.Repeat(" ", rm))
 	}
 
-	return str
+	return fmt.Sprintf("%s...", str[:width-3])
 }
