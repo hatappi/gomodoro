@@ -75,14 +75,11 @@ please specify argument or config yaml.
 			go server.Serve(ctx)
 
 			err = p.Start(ctx)
-			if err != nil {
-				if errors.Is(err, gomodoro_error.ErrCancel) {
-					return nil
-				}
-				return err
+			if err == nil || errors.Is(err, gomodoro_error.ErrCancel) {
+				return nil
 			}
 
-			return nil
+			return err
 		},
 	}
 
