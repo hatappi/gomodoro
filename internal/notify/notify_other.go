@@ -8,7 +8,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// Notify return unsupported error
-func Notify(title, message string) error {
+// Notify return unsupported error.
+func Notify(_, _ string) error {
 	return xerrors.New("unsupported notification")
 }
