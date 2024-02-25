@@ -95,6 +95,12 @@ func (c *IClient) GetTask() (*Task, error) {
 func (c *IClient) loadTasks() (Tasks, error) {
 	t := Tasks{}
 
+	// create empty file if not exist
+	_, err := os.Stat(c.taskFile)
+	if err != nil {
+		os.WriteFile(c.taskFile, []byte{}, 0o600) //nolint:gomnd
+	}
+
 	b, err := os.ReadFile(c.taskFile)
 	if err != nil {
 		if errors.Is(err, &os.PathError{}) {
