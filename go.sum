@@ -351,8 +351,8 @@ github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
-github.com/hatappi/go-kit v0.0.12 h1:KohJc/0XyhJVBlCmdqiq5TgFDEUpeT4MuLYJnGcW2T8=
-github.com/hatappi/go-kit v0.0.12/go.mod h1:IVkWcgiQix5lTtZLhB/YL0toCKv9m5yyb42tKKTIv9M=
+github.com/hatappi/go-kit v0.0.14 h1:LLU4tFMxdZL2MA5wEg4C/uwP1WhLhNW0wVe2pD3rcqY=
+github.com/hatappi/go-kit v0.0.14/go.mod h1:IVkWcgiQix5lTtZLhB/YL0toCKv9m5yyb42tKKTIv9M=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01 h1:HiJF8Mek+I7PY0Bm+SuhkwaAZSZP83sw6rrTMrgZ0io=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01/go.mod h1:1DWDZmeYf0LX30zscWb7K9rUMeirNeBMd5Dum+seUhc=
 github.com/haya14busa/go-checkstyle v0.0.0-20170303121022-5e9d09f51fa1/go.mod h1:RsN5RGgVYeXpcXNtWyztD5VIe7VNSEqpJvF2iEH7QvI=
