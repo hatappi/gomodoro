@@ -13,7 +13,7 @@ require (
 	github.com/reviewdog/reviewdog v0.14.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	gopkg.in/yaml.v2 v2.4.0
 )
