@@ -7,7 +7,7 @@ run:
   allow-parallel-runners: true
 
 output:
-  format: colored-line-number
+  formats: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
@@ -17,7 +17,7 @@ linters-settings:
 
   govet:
     enable-all: true
-    check-shadowing: true
+    shadowing: true
     disable:
       - fieldalignment
 
@@ -72,6 +72,8 @@ linters:
     - varcheck
     - nosnakecase
     - structcheck
+    - perfsprint
+    - depguard
 
 issues:
   exclude-use-default: false

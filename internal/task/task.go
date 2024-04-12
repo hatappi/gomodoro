@@ -33,7 +33,7 @@ type Client interface {
 	selectTaskName(tasks Tasks) (string, error)
 
 	loadTasks() (Tasks, error)
-	saveTasks(Tasks) error
+	saveTasks(tasks Tasks) error
 }
 
 // NewClient initilize Client.
@@ -98,7 +98,7 @@ func (c *IClient) loadTasks() (Tasks, error) {
 	// create empty file if not exist
 	_, err := os.Stat(c.taskFile)
 	if err != nil {
-		os.WriteFile(c.taskFile, []byte{}, 0o600) //nolint:gomnd
+		_ = os.WriteFile(c.taskFile, []byte{}, 0o600) //nolint:gomnd
 	}
 
 	b, err := os.ReadFile(c.taskFile)
@@ -162,7 +162,6 @@ func (c *IClient) renderTasks(tasks Tasks, offset, limit, cursorPosition int) {
 	)
 }
 
-//nolint:gocognit
 func (c *IClient) selectTaskName(tasks Tasks) (string, error) {
 	offset := 0
 	cursorPosition := 0

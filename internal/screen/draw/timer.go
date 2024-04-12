@@ -47,11 +47,11 @@ func draw(s tcell.Screen, t []string, w, h, x, y, mag int, opts ...Option) {
 	}
 	gl := ' '
 
-	for row := 0; row < h; row++ {
-		for col := 0; col < w; col++ {
+	for row := range h {
+		for col := range w {
 			if t[(row*w)+(col)] == "#" {
-				for pRow := 0; pRow < mag; pRow++ {
-					for pCol := 0; pCol < mag; pCol++ {
+				for pRow := range mag {
+					for pCol := range mag {
 						s.SetCell(x+(col*mag)+pCol, y+(row*mag)+pRow, st, gl)
 					}
 				}

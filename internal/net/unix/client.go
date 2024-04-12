@@ -12,7 +12,7 @@ import (
 
 // Client represents unix server client.
 type Client interface {
-	Get(context.Context) (*Response, error)
+	Get(ctx context.Context) (*Response, error)
 
 	Close()
 }

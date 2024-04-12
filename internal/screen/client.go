@@ -41,7 +41,7 @@ type Client interface {
 	Clear()
 	Finish()
 
-	StartPollEvent(context.Context)
+	StartPollEvent(ctx context.Context)
 	StopPollEvent()
 
 	GetEventChan() chan Event

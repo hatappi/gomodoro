@@ -45,7 +45,7 @@ func newInitCmd() *cobra.Command {
 		Use:   "init",
 		Short: "init gomodoro config file",
 		Long:  "init gomodoro config file",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			conf := config.DefaultConfig()
 
 			t := template.Must(template.New("config").Parse(confTpl))

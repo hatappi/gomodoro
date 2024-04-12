@@ -28,7 +28,7 @@ func newStartCmd() *cobra.Command {
 if you want to change work time, break time,
 please specify argument or config yaml.
 	`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
 
 			config, err := config.GetConfig()
