@@ -42,9 +42,9 @@ type Config struct {
 
 // PomodoroConfig config for pomodoro.
 type PomodoroConfig struct {
-	WorkSec        int `mapstructure:"work_sec" validate:"gt=0,lte=3600"`
+	WorkSec        int `mapstructure:"work_sec"        validate:"gt=0,lte=3600"`
 	ShortBreakSec  int `mapstructure:"short_break_sec" validate:"gt=0,lte=3600"`
-	LongBreakSec   int `mapstructure:"long_break_sec" validate:"gt=0,lte=3600"`
+	LongBreakSec   int `mapstructure:"long_break_sec"  validate:"gt=0,lte=3600"`
 	BreakFrequency int `mapstructure:"break_frequency" validate:"gte=2,lte=9"`
 }
 
@@ -144,7 +144,7 @@ func GetConfig() (*Config, error) {
 }
 
 func tcellColorDecodeHook() mapstructure.DecodeHookFunc {
-	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+	return func(_ reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
 		if t != reflect.TypeOf(tcell.Color(0)) {
 			return data, nil
 		}
@@ -158,7 +158,7 @@ func tcellColorDecodeHook() mapstructure.DecodeHookFunc {
 }
 
 func zapcoreLevelDecodeHook() mapstructure.DecodeHookFunc {
-	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+	return func(_ reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
 		if t != reflect.TypeOf(zapcore.Level(0)) {
 			return data, nil
 		}

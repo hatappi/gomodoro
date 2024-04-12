@@ -14,7 +14,7 @@ func newVersionCmd() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "show version",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			short, err := cmd.Flags().GetBool("short")
 			if err != nil {
 				return err

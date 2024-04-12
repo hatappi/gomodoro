@@ -41,7 +41,7 @@ func WithNotify() Option {
 	return func(p *IPomodoro) {
 		p.completeFuncs = append(
 			p.completeFuncs,
-			func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
+			func(ctx context.Context, taskName string, isWorkTime bool, _ int) {
 				var message string
 				if isWorkTime {
 					message = "Finish work time"
@@ -82,7 +82,7 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 	return func(p *IPomodoro) {
 		p.completeFuncs = append(
 			p.completeFuncs,
-			func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
+			func(ctx context.Context, _ string, isWorkTime bool, _ int) {
 				if !isWorkTime {
 					return
 				}

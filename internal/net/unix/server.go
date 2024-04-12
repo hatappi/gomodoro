@@ -31,7 +31,7 @@ func (r *Response) GetRemain() string {
 
 // Server represents server.
 type Server interface {
-	Serve(context.Context)
+	Serve(ctx context.Context)
 	Close()
 }
 

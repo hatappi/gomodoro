@@ -22,7 +22,7 @@ Please specify the task name in the argument.
 if you doesn't specify task name, editor starts up.
 And add a task using the editor.
 `,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			config, err := config.GetConfig()
 			if err != nil {
 				return err

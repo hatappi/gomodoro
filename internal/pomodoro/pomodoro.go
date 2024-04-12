@@ -16,7 +16,7 @@ import (
 
 // Pomodoro interface.
 type Pomodoro interface {
-	Start(context.Context) error
+	Start(ctx context.Context) error
 
 	Finish()
 }

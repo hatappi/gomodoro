@@ -19,13 +19,13 @@ import (
 
 // Timer interface.
 type Timer interface {
-	Run(context.Context) (int, error)
+	Run(ctx context.Context) (int, error)
 	Stop()
-	SetTitle(string)
+	SetTitle(title string)
 	GetTitle() string
 	GetRemainSec() int
 	SetDuration(sec int)
-	SetFontColor(tcell.Color)
+	SetFontColor(c tcell.Color)
 }
 
 // ITimer implements Timer interface.
