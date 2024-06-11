@@ -28,33 +28,34 @@ And add a task using the editor.
 				return err
 			}
 
-			name := strings.Join(args, " ")
-			if name != "" {
-				err = task.AddTask(config.TaskFile, name)
+			var newTasks []string
+
+			if len(args) > 0 {
+				newTasks = append(newTasks, strings.Join(args, " "))
+			}
+
+			if len(newTasks) == 0 {
+				lines, err := editor.ContentsByLine(initialText)
 				if err != nil {
 					return err
 				}
-				fmt.Printf("add %s\n", name)
-				return nil
+
+				for _, l := range lines {
+					// ignore empty string and comment
+					if l == "" || strings.HasPrefix(l, "#") {
+						continue
+					}
+
+					newTasks = append(newTasks, l)
+				}
 			}
 
-			ts, err := editor.GetSliceText(initialText)
-			if err != nil {
-				return err
-			}
-
-			for _, t := range ts {
-				if t == "" {
-					continue
-				}
-				if strings.HasPrefix(t, "#") {
-					continue
-				}
-				err = task.AddTask(config.TaskFile, t)
-				if err != nil {
+			for _, newTask := range newTasks {
+				if err := task.AddTask(config.TaskFile, newTask); err != nil {
 					return err
 				}
-				fmt.Printf("add %s\n", t)
+
+				fmt.Printf("added '%s'\n", newTask)
 			}
 
 			return nil
