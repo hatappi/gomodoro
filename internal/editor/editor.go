@@ -2,13 +2,13 @@
 package editor
 
 import (
-	"bufio"
 	"os"
 	"os/exec"
+	"strings"
 )
 
-// GetSliceText get slice text edited with editor.
-func GetSliceText(initialText string) ([]string, error) {
+// ContentsByLine gets contents edited with editor by line.
+func ContentsByLine(initialText string) ([]string, error) {
 	tmpfile, err := os.CreateTemp("", "gomodoro")
 	if err != nil {
 		return nil, err
@@ -24,32 +24,19 @@ func GetSliceText(initialText string) ([]string, error) {
 		return nil, err
 	}
 
-	if err = openEditor(tmpfile.Name()); err != nil {
+	if err = edit(tmpfile.Name()); err != nil {
 		return nil, err
 	}
 
-	f, err := os.Open(tmpfile.Name())
+	b, err := os.ReadFile(tmpfile.Name())
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		_ = f.Close()
-	}()
 
-	ts := make([]string, 0)
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		ts = append(ts, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return ts, nil
+	return strings.Split(string(b), "\n"), nil
 }
 
-func openEditor(filepath string) error {
+func edit(filepath string) error {
 	cmdName := "vi"
 	if e := os.Getenv("EDITOR"); e != "" {
 		cmdName = e
