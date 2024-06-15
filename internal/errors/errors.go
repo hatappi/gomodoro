@@ -2,12 +2,12 @@
 package errors
 
 import (
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 var (
 	// ErrCancel cancel error.
-	ErrCancel = xerrors.New("cancel")
+	ErrCancel = errors.New("cancel")
 	// ErrScreenSmall screen is small error.
-	ErrScreenSmall = xerrors.New("screen is small")
+	ErrScreenSmall = errors.New("screen is small")
 )
