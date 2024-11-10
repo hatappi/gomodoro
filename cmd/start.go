@@ -44,7 +44,7 @@ please specify argument or config yaml.
 			}
 
 			if config.Toggl.Enable {
-				togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.APIToken)
+				togglClient := toggl.NewClient(config.Toggl.ProjectID, config.Toggl.WorkspaceID, config.Toggl.APIToken)
 				opts = append(opts, pomodoro.WithRecordToggl(togglClient))
 			}
 

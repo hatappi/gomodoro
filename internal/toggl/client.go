@@ -10,17 +10,19 @@ type httpClient interface {
 
 // Client manage toggl.
 type Client struct {
-	projectID int
-	apiToken  string
+	projectID   int
+	workspaceID int
+	apiToken    string
 
 	httpclient httpClient
 }
 
 // NewClient initilize toggl client.
-func NewClient(projectID int, apiToken string) *Client {
+func NewClient(projectID int, workspaceID int, apiToken string) *Client {
 	return &Client{
-		projectID:  projectID,
-		apiToken:   apiToken,
-		httpclient: &http.Client{},
+		projectID:   projectID,
+		workspaceID: workspaceID,
+		apiToken:    apiToken,
+		httpclient:  &http.Client{},
 	}
 }

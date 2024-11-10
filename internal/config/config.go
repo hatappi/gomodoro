@@ -50,9 +50,10 @@ type PomodoroConfig struct {
 
 // TogglConfig config for Toggl.
 type TogglConfig struct {
-	Enable    bool   `mapstructure:"enable"`
-	APIToken  string `mapstructure:"api_token"`
-	ProjectID int    `mapstructure:"project_id"`
+	Enable      bool   `mapstructure:"enable"`
+	APIToken    string `mapstructure:"api_token"`
+	ProjectID   int    `mapstructure:"project_id"`
+	WorkspaceID int    `mapstructure:"workspace_id"`
 }
 
 // PixelaConfig is configuration for Pixela

@@ -70,7 +70,7 @@ func WithRecordToggl(togglClient *toggl.Client) Option {
 				s := time.Now().Add(-time.Duration(elapsedTime) * time.Second)
 
 				if err := togglClient.PostTimeEntry(ctx, taskName, s, elapsedTime); err != nil {
-					log.FromContext(ctx).Error(err, "failed to record time to toggle")
+					log.FromContext(ctx).Error(err, "failed to record time to toggl")
 				}
 			},
 		)
