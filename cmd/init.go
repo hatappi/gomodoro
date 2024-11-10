@@ -19,8 +19,10 @@ const confTpl = `# pomodoro:
 #   long_break_sec: {{ .Pomodoro.LongBreakSec }}
 # toggl:
 #   enable: false
-#   # https://toggl.com/app/xxxx/projects/{project_id}/team
+#   # https://track.toggl.com/{organization_id}/projects/{project_id}/team
 #   project_id:
+#   # https://track.toggl.com/organization/{organization_id}/workspaces/{workspace_id}
+#   workspace_id:
 #   # Toggl API token ref: https://toggl.com/app/profile
 #   api_token:
 # log_file: {{ .LogFile }}
