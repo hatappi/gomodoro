@@ -162,7 +162,7 @@ const (
 )
 
 func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts ...draw.Option) error {
-	s := t.screenClient.GetScreen()
+	screen := t.screenClient.GetScreen()
 
 	screenWidth, screenHeight := t.screenClient.ScreenSize()
 
@@ -203,14 +203,14 @@ func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts
 
 	t.screenClient.Clear()
 
-	draw.Sentence(s, x, y, int(timerWidth), title, true)
+	draw.Sentence(screen, x, y, int(timerWidth), title, true)
 
-	min := duration / int(time.Minute.Seconds())
-	sec := duration % int(time.Minute.Seconds())
-	draw.Timer(s, x, y+textHeight, int(mag), min, sec, opts...)
+	m := duration / int(time.Minute.Seconds())
+	s := duration % int(time.Minute.Seconds())
+	draw.Timer(screen, x, y+textHeight, int(mag), m, s, opts...)
 
 	draw.Sentence(
-		s,
+		screen,
 		0,
 		screenWidth-1,
 		screenHeight,

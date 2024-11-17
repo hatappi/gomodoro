@@ -24,9 +24,9 @@ func (r *Response) GetRemain() string {
 		return "00:00"
 	}
 
-	min := r.RemainSec / int(time.Minute.Seconds())
-	sec := r.RemainSec % int(time.Minute.Seconds())
-	return fmt.Sprintf("%02d:%02d", min, sec)
+	m := r.RemainSec / int(time.Minute.Seconds())
+	s := r.RemainSec % int(time.Minute.Seconds())
+	return fmt.Sprintf("%02d:%02d", m, s)
 }
 
 // Server represents server.

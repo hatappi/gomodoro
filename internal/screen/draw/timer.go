@@ -10,9 +10,9 @@ import (
 )
 
 // Timer is draw the timer.
-func Timer(s tcell.Screen, x, y, mag, min, sec int, opts ...Option) {
-	minStr := fmt.Sprintf("%02d", min)
-	secStr := fmt.Sprintf("%02d", sec)
+func Timer(s tcell.Screen, x, y, mag, minInt, secInt int, opts ...Option) {
+	minStr := fmt.Sprintf("%02d", minInt)
+	secStr := fmt.Sprintf("%02d", secInt)
 
 	drawNumber(s, x, y, mag, string(minStr[0]), opts...)
 
