@@ -95,7 +95,7 @@ func (t *ITimer) Run(ctx context.Context) (int, error) {
 			if errors.Is(err, gomodoro_error.ErrScreenSmall) {
 				t.screenClient.Clear()
 				w, h := t.screenClient.ScreenSize()
-				//nolint:gomnd
+				//nolint:mnd
 				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please expand the screen size", true)
 
 				select {
@@ -189,8 +189,8 @@ func (t *ITimer) drawTimer(ctx context.Context, duration int, title string, opts
 	timerWidth := draw.TimerBaseWidth * mag
 	timerHeight := draw.TimerBaseHeight * mag
 
-	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2    //nolint:gomnd
-	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2 //nolint:gomnd
+	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2    //nolint:mnd
+	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2 //nolint:mnd
 
 	x := int(math.Round(leftMargin + timerPaddingWidth))
 	y := int(math.Round(topMargin + timerPaddingHeight))

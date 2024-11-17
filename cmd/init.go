@@ -72,12 +72,12 @@ func newInitCmd() *cobra.Command {
 				return fmt.Errorf("%s already exist", confPath)
 			}
 
-			//nolint:gomnd
+			//nolint:mnd
 			if err = os.MkdirAll(filepath.Dir(confPath), 0o750); err != nil {
 				return err
 			}
 
-			confFile, err := os.OpenFile(filepath.Clean(confPath), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600) //nolint:gomnd
+			confFile, err := os.OpenFile(filepath.Clean(confPath), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600) //nolint:mnd
 			if err != nil {
 				return err
 			}

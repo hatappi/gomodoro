@@ -90,7 +90,7 @@ func initLogger() {
 
 	_, err = os.Stat(logDir)
 	if os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(conf.LogFile), 0o750) //nolint:gomnd
+		err = os.MkdirAll(filepath.Dir(conf.LogFile), 0o750) //nolint:mnd
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed to create log directory. %s\n", err)
 			os.Exit(1)
