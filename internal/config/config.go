@@ -87,7 +87,7 @@ func DefaultConfig() *Config {
 			WorkSec:        DefaultWorkSec,
 			ShortBreakSec:  DefaultShortBreakSec,
 			LongBreakSec:   DefaultLongBreakSec,
-			BreakFrequency: 2, //nolint:gomnd
+			BreakFrequency: 2, //nolint:mnd
 		},
 		LogFile:              DefaultLogFile,
 		TaskFile:             DefaultTaskFile,

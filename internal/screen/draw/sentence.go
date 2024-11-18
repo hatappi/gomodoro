@@ -52,7 +52,7 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 			}
 			deferred = nil
 			dwidth = 1
-		case 2: //nolint:gomnd
+		case 2: //nolint:mnd
 			if len(deferred) != 0 {
 				s.SetContent(x+i, y, deferred[0], deferred[1:], style)
 				i += dwidth
@@ -73,7 +73,7 @@ func Sentence(s tcell.Screen, x, y, width int, str string, centered bool, opts .
 func adjustMessage(width int, str string) string {
 	margin := width - runewidth.StringWidth(str)
 	if margin >= 0 {
-		lm := margin / 2 //nolint:gomnd
+		lm := margin / 2 //nolint:mnd
 		rm := width - runewidth.StringWidth(str) - lm
 		return fmt.Sprintf("%s%s%s", strings.Repeat(" ", lm), str, strings.Repeat(" ", rm))
 	}

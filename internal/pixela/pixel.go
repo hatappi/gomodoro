@@ -29,7 +29,7 @@ func (c *Client) IncrementPixel(ctx context.Context, userName, graphID string) e
 	}
 	log.FromContext(ctx).V(1).Info("request: increment a pixel", "url", url)
 
-	req.Header.Set("X-USER-TOKEN", c.token)
+	req.Header.Set("X-User-Token", c.token)
 
 	res, err := c.httpclient.Do(req)
 	if err != nil {

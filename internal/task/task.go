@@ -98,7 +98,7 @@ func (c *IClient) loadTasks() (Tasks, error) {
 	// create empty file if not exist
 	_, err := os.Stat(c.taskFile)
 	if err != nil {
-		_ = os.WriteFile(c.taskFile, []byte{}, 0o600) //nolint:gomnd
+		_ = os.WriteFile(c.taskFile, []byte{}, 0o600) //nolint:mnd
 	}
 
 	b, err := os.ReadFile(c.taskFile)
@@ -124,7 +124,7 @@ func (c *IClient) saveTasks(tasks Tasks) error {
 		return err
 	}
 
-	//nolint:gomnd
+	//nolint:mnd
 	err = os.WriteFile(c.taskFile, d, 0o600)
 	if err != nil {
 		return err
