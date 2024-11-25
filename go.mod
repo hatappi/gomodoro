@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/gdamore/tcell v1.4.0
-	github.com/go-playground/validator/v10 v10.21.0
+	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golangci/golangci-lint v1.62.0
 	github.com/hatappi/go-kit v0.0.12
 	github.com/mattn/go-runewidth v0.0.16
