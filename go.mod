@@ -3,7 +3,7 @@ module github.com/hatappi/gomodoro
 go 1.23
 
 require (
-	github.com/gdamore/tcell v1.4.0
+	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/go-playground/validator/v10 v10.21.0
 	github.com/golangci/golangci-lint v1.62.0
 	github.com/hatappi/go-kit v0.0.12
@@ -136,7 +136,7 @@ require (
 	github.com/ldez/tagliatelle v0.5.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/leonklingele/grouper v1.1.2 // indirect
-	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/macabu/inamedparam v0.1.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/maratori/testableexamples v1.0.0 // indirect
@@ -229,6 +229,7 @@ require (
 	golang.org/x/oauth2 v0.23.0 // indirect
 	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/term v0.26.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	golang.org/x/tools v0.27.0 // indirect

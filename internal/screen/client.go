@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 
 	"github.com/hatappi/go-kit/log"
 )
@@ -42,7 +42,7 @@ type Client interface {
 	Finish()
 
 	StartPollEvent(ctx context.Context)
-	StopPollEvent()
+	StopPollEvent() error
 
 	GetEventChan() chan Event
 }
@@ -63,6 +63,8 @@ func NewClient(s tcell.Screen) *IClient {
 }
 
 // GetScreen gets screen.
+//
+//nolint:ireturn
 func (c *IClient) GetScreen() tcell.Screen {
 	return c.screen
 }
@@ -127,6 +129,6 @@ func (fpe *finishPollEvent) When() time.Time {
 }
 
 // StopPollEvent stops polling event of screen.
-func (c *IClient) StopPollEvent() {
-	c.screen.PostEventWait(&finishPollEvent{})
+func (c *IClient) StopPollEvent() error {
+	return c.screen.PostEvent(&finishPollEvent{})
 }

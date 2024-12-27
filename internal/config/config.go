@@ -4,7 +4,7 @@ package config
 import (
 	"reflect"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/go-playground/validator/v10"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/mitchellh/mapstructure"
