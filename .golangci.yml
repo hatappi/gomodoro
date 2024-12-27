@@ -2,12 +2,12 @@ run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
-  skip-dirs-use-default: true
   modules-download-mode: readonly
   allow-parallel-runners: true
 
 output:
-  formats: colored-line-number
+  formats:
+  - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
 
@@ -17,7 +17,6 @@ linters-settings:
 
   govet:
     enable-all: true
-    shadowing: true
     disable:
       - fieldalignment
 
@@ -44,7 +43,6 @@ linters-settings:
   forbidigo:
     forbid:
       - '^log\..+(# Use github.com/hatappi/go-kit/log)'
-    exclude_godoc_examples: false
 
   cyclop:
     max-complexity: 20
@@ -56,24 +54,15 @@ linters:
     - varnamelen
     - nlreturn
     - gochecknoglobals
-    - goerr113
+    - err113
     - exhaustruct
     - wsl
     - funlen
     - tagliatelle
-    # deprecated linters
-    - scopelint
-    - maligned
-    - interfacer
-    - exhaustivestruct
-    - golint
-    - deadcode
-    - ifshort
-    - varcheck
-    - nosnakecase
-    - structcheck
     - perfsprint
     - depguard
+    # deprecated linters
+    - exportloopref
 
 issues:
   exclude-use-default: false
