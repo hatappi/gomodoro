@@ -4,7 +4,7 @@ package pomodoro
 import (
 	"context"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/errors"
