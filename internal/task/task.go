@@ -162,6 +162,7 @@ func (c *IClient) renderTasks(tasks Tasks, offset, limit, cursorPosition int) {
 	)
 }
 
+//nolint:gocognit,cyclop
 func (c *IClient) selectTaskName(tasks Tasks) (string, error) {
 	offset := 0
 	cursorPosition := 0
@@ -206,9 +207,13 @@ func (c *IClient) selectTaskName(tasks Tasks) (string, error) {
 			s := c.screenClient.GetScreen()
 			switch string(e) {
 			case "j": // j
-				s.PostEventWait(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone))
+				if err := s.PostEvent(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone)); err != nil {
+					return "", err
+				}
 			case "k": // k
-				s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
+				if err := s.PostEvent(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone)); err != nil {
+					return "", err
+				}
 			case "n": // n
 				c.screenClient.Clear()
 				return "", nil
@@ -226,7 +231,9 @@ func (c *IClient) selectTaskName(tasks Tasks) (string, error) {
 
 				// when bottom task is deleted, key is up
 				if len(tasks) == cursorPosition {
-					s.PostEventWait(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone))
+					if err := s.PostEvent(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone)); err != nil {
+						return "", err
+					}
 				}
 			}
 		case screen.EventScreenResize:

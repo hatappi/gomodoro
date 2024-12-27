@@ -3,7 +3,7 @@ module github.com/hatappi/gomodoro
 go 1.23
 
 require (
-	github.com/gdamore/tcell v1.4.0
+	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/go-playground/validator/v10 v10.21.0
 	github.com/golangci/golangci-lint v1.62.0
 	github.com/hatappi/go-kit v0.0.12
@@ -72,7 +72,6 @@ require (
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
-	github.com/gdamore/tcell/v2 v2.7.4 // indirect
 	github.com/ghostiam/protogetter v0.3.8 // indirect
 	github.com/go-critic/go-critic v0.11.5 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
