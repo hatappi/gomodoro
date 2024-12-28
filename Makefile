@@ -7,8 +7,6 @@ GIT_HASH=$(shell git rev-parse --short HEAD)
 GOBIN:=${PWD}/bin
 PATH:=${GOBIN}:${PATH}
 
-REVIEWDOG_ARGS ?= -diff="git diff master" -tee
-
 dependencies:
 	go mod download
 	go mod tidy
@@ -32,6 +30,3 @@ lint-fix:
 
 test:
 	@go test ./...
-
-reviewdog:
-	${GOBIN}/reviewdog ${REVIEWDOG_ARGS}
