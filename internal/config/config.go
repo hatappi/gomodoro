@@ -122,10 +122,7 @@ func GetConfig() (*Config, error) {
 	}
 
 	validate := validator.New()
-	err = validate.Struct(c)
-	if err != nil {
-		return nil, err
-	}
+	validate.Struct(c)
 
 	// Expand each file
 
