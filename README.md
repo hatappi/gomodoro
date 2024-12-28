@@ -3,6 +3,7 @@ Gomodoro is Pomodoro Technique by Go.
 The working time can be automatically recorded in [toggl](https://toggl.com/).
 
 [![CI](https://github.com/hatappi/gomodoro/actions/workflows/ci.yaml/badge.svg)](https://github.com/hatappi/gomodoro/actions/workflows/ci.yaml)
+[![release](https://github.com/hatappi/gomodoro/actions/workflows/release.yaml/badge.svg)](https://github.com/hatappi/gomodoro/actions/workflows/release.yaml)
 
 ## Installation
 
