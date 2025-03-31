@@ -26,7 +26,6 @@ const confTpl = `# pomodoro:
 #   # Toggl API token ref: https://toggl.com/app/profile
 #   api_token:
 # log_file: {{ .LogFile }}
-# task_file: {{ .TaskFile }}
 # unix_domain_socket_path: {{ .UnixDomainScoketPath }}
 
 ## You can change the colors used within gomodoro.

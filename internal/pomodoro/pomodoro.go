@@ -3,10 +3,13 @@ package pomodoro
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	"github.com/gdamore/tcell/v2"
-
+	"github.com/hatappi/go-kit/log"
+	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
@@ -17,7 +20,6 @@ import (
 // Pomodoro interface.
 type Pomodoro interface {
 	Start(ctx context.Context) error
-
 	Finish()
 }
 
@@ -31,6 +33,12 @@ type IPomodoro struct {
 	screenClient screen.Client
 	taskClient   task.Client
 	timer        timer.Timer
+
+	// API client related
+	pomodoroClient *client.PomodoroClient
+	taskAPIClient  *client.TaskClient
+	wsClient       event.WebSocketClient
+	eventBus       event.EventBus
 
 	completeFuncs []func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int)
 }
@@ -57,70 +65,70 @@ func NewPomodoro(
 		opt(p)
 	}
 
+	if p.wsClient != nil {
+		p.eventBus = event.NewClientWebSocketEventBus(p.wsClient)
+	}
+
 	return p
 }
 
 // Start starts pomodoro.
 func (p *IPomodoro) Start(ctx context.Context) error {
-	task, err := p.taskClient.GetTask()
+	task, err := p.taskClient.GetTask(ctx)
 	if err != nil {
 		return err
 	}
-	p.timer.SetTitle(task.Name)
 
-	loopCnt := 1
+	workDuration := time.Duration(p.workSec) * time.Second
+	breakDuration := time.Duration(p.shortBreakSec) * time.Second
+	longBreakDuration := time.Duration(p.longBreakSec) * time.Second
+
 	for {
-		isWorkTime := loopCnt%p.config.Pomodoro.BreakFrequency != 0
+		type timerResult struct {
+			elapsedTime int
+			err         error
+		}
+		resultCh := make(chan timerResult, 1)
+		go func() {
+			elapsedTime, err := p.timer.Run(ctx, task.Name)
+			resultCh <- timerResult{elapsedTime: elapsedTime, err: err}
+		}()
 
-		p.changeTimerConfig(isWorkTime, loopCnt)
+		pomodoro, err := p.pomodoroClient.Start(ctx, workDuration, breakDuration, longBreakDuration, task.ID)
+		if err != nil {
+			return fmt.Errorf("failed to start pomodoro via API: %w", err)
+		}
 
-		elapsedTime, err := p.timer.Run(ctx)
+		res := <-resultCh
+		if res.err != nil {
+			return res.err
+		}
+		log.FromContext(ctx).Info("Pomodoro finished", "elapsedTime", res.elapsedTime, "err", nil)
+
+		for _, cf := range p.completeFuncs {
+			go cf(ctx, task.Name, pomodoro.Phase == event.PomodoroPhaseWork, res.elapsedTime)
+		}
+
+		task, err = p.selectNextTask(ctx, task)
 		if err != nil {
 			return err
 		}
-
-		for _, cf := range p.completeFuncs {
-			go cf(ctx, p.timer.GetTitle(), isWorkTime, elapsedTime)
-		}
-
-		if err := p.selectNextAction(); err != nil {
-			return err
-		}
-
-		loopCnt++
 	}
+
 }
 
 // Finish finishes Pomodoro.
 func (p *IPomodoro) Finish() {
+	// Stop pomodoro
+	if p.pomodoroClient != nil {
+		_, _ = p.pomodoroClient.Stop(context.Background())
+	}
+
 	p.screenClient.Finish()
 }
 
-func (p *IPomodoro) changeTimerConfig(isWorkTime bool, loopCnt int) {
-	var (
-		timerColor    tcell.Color
-		timerDuration int
-	)
-
-	if isWorkTime {
-		timerColor = p.config.Color.TimerWorkFont
-		timerDuration = p.workSec
-	} else {
-		timerColor = p.config.Color.TimerBreakFont
-		if loopCnt%3 == 0 {
-			timerDuration = p.longBreakSec
-		} else {
-			timerDuration = p.shortBreakSec
-		}
-	}
-
-	p.timer.SetFontColor(timerColor)
-	p.timer.SetDuration(timerDuration)
-}
-
-// selectNextAction selects next action.
-// e.g create new task, use same task.
-func (p *IPomodoro) selectNextAction() error {
+// selectNextTask selects next task.
+func (p *IPomodoro) selectNextTask(ctx context.Context, currentTask *task.Task) (*task.Task, error) {
 	w, h := p.screenClient.ScreenSize()
 	draw.Sentence(
 		p.screenClient.GetScreen(),
@@ -137,18 +145,18 @@ func (p *IPomodoro) selectNextAction() error {
 		switch e := e.(type) {
 		case screen.EventEnter:
 			// use Same Task
-			return nil
+			return currentTask, nil
 		case screen.EventCancel:
-			return errors.ErrCancel
+			return nil, errors.ErrCancel
 		case screen.EventRune:
 			if string(e) == "c" { // c
 				p.screenClient.Clear()
-				t, err := p.taskClient.GetTask()
+				t, err := p.taskClient.GetTask(ctx)
 				if err != nil {
-					return err
+					return nil, err
 				}
-				p.timer.SetTitle(t.Name)
-				return nil
+
+				return t, nil
 			}
 		}
 	}

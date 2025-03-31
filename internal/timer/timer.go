@@ -11,7 +11,9 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 
+	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/core/event"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/screen/draw"
@@ -19,141 +21,159 @@ import (
 
 // Timer interface.
 type Timer interface {
-	Run(ctx context.Context) (int, error)
-	Stop()
-	SetTitle(title string)
-	GetTitle() string
-	GetRemainSec() int
-	SetDuration(sec int)
-	SetFontColor(c tcell.Color)
+	Run(ctx context.Context, taskName string) (int, error)
 }
 
 // ITimer implements Timer interface.
 type ITimer struct {
-	config       *config.Config
-	title        string
-	ticker       *time.Ticker
-	screenClient screen.Client
-	stopped      bool
-
-	fontColor tcell.Color
-
-	remainSec int
+	config         *config.Config
+	screenClient   screen.Client
+	pomodoroClient *client.PomodoroClient
+	eventBus       event.EventBus
 }
 
 // NewTimer initilize Timer.
-func NewTimer(config *config.Config, c screen.Client) *ITimer {
+func NewTimer(config *config.Config, c screen.Client, pomodoroClient *client.PomodoroClient, eventBus event.EventBus) *ITimer {
 	return &ITimer{
-		config:       config,
-		ticker:       nil,
-		screenClient: c,
-		fontColor:    config.Color.TimerWorkFont,
+		config:         config,
+		screenClient:   c,
+		pomodoroClient: pomodoroClient,
+		eventBus:       eventBus,
 	}
 }
 
-// SetTitle sets title.
-func (t *ITimer) SetTitle(title string) {
-	t.title = title
+// handleScreenEvent processes screen events
+func (t *ITimer) handleScreenEvent(ctx context.Context, e interface{}) error {
+	switch ev := e.(type) {
+	case screen.EventCancel:
+		return gomodoro_error.ErrCancel
+	case screen.EventRune:
+		if string(ev) == "e" {
+			_, stopErr := t.pomodoroClient.Stop(ctx)
+			if stopErr != nil {
+				log.FromContext(ctx).Error(stopErr, "failed to stop pomodoro")
+				return stopErr
+			}
+			return nil
+		}
+	case screen.EventEnter:
+		t.Toggle(ctx)
+	}
+	return nil
 }
 
-// GetTitle gets title.
-func (t *ITimer) GetTitle() string {
-	return t.title
+// handlePomodoroEvent processes pomodoro events
+func (t *ITimer) handlePomodoroEvent(ctx context.Context, e interface{}, title string) (bool, error) {
+	ev, ok := e.(event.PomodoroEvent)
+	if !ok {
+		return false, nil
+	}
+	log.FromContext(ctx).Info("event", "event", ev, "remainSec", ev.RemainingTime.Seconds())
+
+	remainSec := int(ev.RemainingTime.Seconds())
+
+	var bc tcell.Color
+	// Use event.PomodoroPhase constants for comparison
+	if ev.Phase == event.PomodoroPhaseWork {
+		bc = t.config.Color.TimerWorkFont
+	} else if ev.Phase == event.PomodoroPhaseShortBreak || ev.Phase == event.PomodoroPhaseLongBreak {
+		bc = t.config.Color.TimerBreakFont
+	}
+
+	if ev.Type == event.PomodoroPaused {
+		bc = t.config.Color.TimerPauseFont
+	}
+
+	opts := []draw.Option{
+		draw.WithBackgroundColor(bc),
+	}
+	drawErr := t.drawTimer(ctx, remainSec, title, opts...)
+	if drawErr != nil {
+		if errors.Is(drawErr, gomodoro_error.ErrScreenSmall) {
+			t.screenClient.Clear()
+			w, h := t.screenClient.ScreenSize()
+			//nolint:mnd
+			draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please expand the screen size", true)
+
+			select {
+			case e := <-t.screenClient.GetEventChan():
+				switch e.(type) {
+				case screen.EventCancel:
+					return false, gomodoro_error.ErrCancel
+				case screen.EventScreenResize:
+					return false, nil
+				}
+			}
+		}
+		return false, drawErr
+	}
+
+	if ev.Type == event.PomodoroCompleted || ev.Type == event.PomodoroStopped {
+		return true, nil
+	}
+	return false, nil
 }
 
-// SetDuration sets remaining seconds.
-func (t *ITimer) SetDuration(d int) {
-	t.remainSec = d
-}
-
-// GetRemainSec get remaining seconds of timer.
-func (t *ITimer) GetRemainSec() int {
-	return t.remainSec
-}
-
-// SetFontColor sets cell color.
-func (t *ITimer) SetFontColor(c tcell.Color) {
-	t.fontColor = c
+// getCurrentPomodoro retrieves the current pomodoro and handles errors.
+func (t *ITimer) getCurrentPomodoro(ctx context.Context) (int, error) {
+	current, err := t.pomodoroClient.GetCurrent(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return current.ElapsedTime, nil
 }
 
 // Run timer.
-func (t *ITimer) Run(ctx context.Context) (int, error) {
-	t.Start()
-	defer t.Stop()
-
-	elapsedTime := 0
+func (t *ITimer) Run(ctx context.Context, taskName string) (int, error) {
+	ch, unsubscribe := t.eventBus.SubscribeChannel([]string{
+		string(event.PomodoroTick),
+		string(event.PomodoroPaused),
+		string(event.PomodoroStarted),
+		string(event.PomodoroStopped),
+		string(event.PomodoroCompleted),
+	})
+	defer unsubscribe()
 
 	for {
-		opts := []draw.Option{}
-		if t.stopped {
-			opts = append(opts, draw.WithBackgroundColor(t.config.Color.TimerPauseFont))
-		} else {
-			opts = append(opts, draw.WithBackgroundColor(t.fontColor))
-		}
-		err := t.drawTimer(ctx, t.remainSec, t.title, opts...)
-		if err != nil {
-			if errors.Is(err, gomodoro_error.ErrScreenSmall) {
-				t.screenClient.Clear()
-				w, h := t.screenClient.ScreenSize()
-				//nolint:mnd
-				draw.Sentence(t.screenClient.GetScreen(), 0, h/2, w, "Please expand the screen size", true)
-
-				select {
-				case <-t.ticker.C:
-					continue
-				case e := <-t.screenClient.GetEventChan():
-					switch e.(type) {
-					case screen.EventCancel:
-						return elapsedTime, gomodoro_error.ErrCancel
-					case screen.EventScreenResize:
-						continue
-					}
-				}
-			}
-			return elapsedTime, err
-		}
-
-		if t.remainSec == 0 {
-			return elapsedTime, nil
-		}
-
 		select {
 		case e := <-t.screenClient.GetEventChan():
-			switch e := e.(type) {
-			case screen.EventCancel:
-				return elapsedTime, gomodoro_error.ErrCancel
-			case screen.EventRune:
-				if string(e) == "e" { // e
-					t.remainSec = 0
+			err := t.handleScreenEvent(ctx, e)
+			if err != nil {
+				if errors.Is(err, gomodoro_error.ErrCancel) {
+					elapsedTime, _ := t.getCurrentPomodoro(ctx)
+					return elapsedTime, gomodoro_error.ErrCancel
 				}
-			case screen.EventEnter:
-				t.Toggle()
+				return 0, err
 			}
-		case <-t.ticker.C:
-			t.remainSec--
-			elapsedTime++
+		case e := <-ch:
+			isCompleted, err := t.handlePomodoroEvent(ctx, e, taskName)
+			if err != nil {
+				if errors.Is(err, gomodoro_error.ErrCancel) {
+					elapsedTime, _ := t.getCurrentPomodoro(ctx)
+					return elapsedTime, gomodoro_error.ErrCancel
+				}
+				return 0, err
+			}
+
+			if isCompleted {
+				elapsedTime, _ := t.getCurrentPomodoro(ctx)
+				return elapsedTime, nil
+			}
 		}
 	}
 }
 
-// Start timer.
-func (t *ITimer) Start() {
-	t.stopped = false
-	t.ticker = time.NewTicker(1 * time.Second)
-}
-
-// Stop timer.
-func (t *ITimer) Stop() {
-	t.stopped = true
-	t.ticker.Stop()
-}
-
 // Toggle timer between stop and start.
-func (t *ITimer) Toggle() {
-	if t.stopped {
-		t.Start()
+func (t *ITimer) Toggle(ctx context.Context) {
+	currPomodoro, _ := t.pomodoroClient.GetCurrent(ctx)
+	if currPomodoro == nil {
+		return
+	}
+
+	if currPomodoro.State == "paused" {
+		_, _ = t.pomodoroClient.Resume(ctx)
 	} else {
-		t.Stop()
+		_, _ = t.pomodoroClient.Pause(ctx)
 	}
 }
 

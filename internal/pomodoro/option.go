@@ -7,6 +7,8 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 
+	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/notify"
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/toggl"
@@ -46,7 +48,7 @@ func WithNotify() Option {
 				if isWorkTime {
 					message = "Finish work time"
 				} else {
-					message = "Finish brek time"
+					message = "Finish break time"
 				}
 
 				if err := notify.Notify("gomodoro", taskName+":"+message); err != nil {
@@ -92,5 +94,26 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 				}
 			},
 		)
+	}
+}
+
+// WithPomodoroClient sets the pomodoro API client
+func WithPomodoroClient(pomodoroClient *client.PomodoroClient) Option {
+	return func(p *IPomodoro) {
+		p.pomodoroClient = pomodoroClient
+	}
+}
+
+// WithPomodoroClient sets the pomodoro API client
+func WithTaskClient(taskClient *client.TaskClient) Option {
+	return func(p *IPomodoro) {
+		p.taskAPIClient = taskClient
+	}
+}
+
+// WithWebSocketClient sets the WebSocket client for real-time updates
+func WithWebSocketClient(wsClient event.WebSocketClient) Option {
+	return func(p *IPomodoro) {
+		p.wsClient = wsClient
 	}
 }

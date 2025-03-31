@@ -1,0 +1,175 @@
+// Package server provides the HTTP API server implementation
+package server
+
+import (
+	"context"
+	"fmt"
+	"net"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/go-logr/logr"
+
+	"github.com/hatappi/gomodoro/internal/api/server/handlers"
+	servermiddleware "github.com/hatappi/gomodoro/internal/api/server/middleware"
+	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/core"
+	"github.com/hatappi/gomodoro/internal/core/event"
+)
+
+// Server represents the API server
+type Server struct {
+	config           *config.APIConfig
+	router           *chi.Mux
+	httpServer       *http.Server
+	logger           logr.Logger
+	pomodoroService  *core.PomodoroService
+	taskService      *core.TaskService
+	eventBus         event.EventBus
+	webSocketHandler *EventWebSocketHandler
+}
+
+// NewServer creates a new API server instance
+func NewServer(
+	config *config.APIConfig,
+	logger logr.Logger,
+	pomodoroService *core.PomodoroService,
+	taskService *core.TaskService,
+	eventBus event.EventBus,
+) *Server {
+	router := chi.NewRouter()
+
+	server := &Server{
+		config:           config,
+		router:           router,
+		logger:           logger,
+		pomodoroService:  pomodoroService,
+		taskService:      taskService,
+		eventBus:         eventBus,
+		webSocketHandler: NewEventWebSocketHandler(logger, eventBus),
+	}
+
+	server.webSocketHandler.SetupEventSubscription()
+	server.setupMiddleware()
+	server.setupRoutes()
+
+	return server
+}
+
+// setupMiddleware configures the middleware for the server
+func (s *Server) setupMiddleware() {
+	s.router.Use(middleware.RequestID)
+	s.router.Use(middleware.RealIP)
+	s.router.Use(middleware.Recoverer)
+	s.router.Use(middleware.Timeout(s.config.RequestTimeout))
+	s.router.Use(servermiddleware.ErrorHandler())
+
+	// Setup CORS
+	s.router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+}
+
+// setupRoutes configures the routes for the server
+func (s *Server) setupRoutes() {
+	s.router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	s.router.Route("/api", func(r chi.Router) {
+		r.Use(servermiddleware.JSONContentType)
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			handlers.RespondWithJSON(w, http.StatusOK, map[string]string{
+				"name":    "Gomodoro API",
+				"version": "1.0.0",
+			})
+		})
+
+		pomodoroHandler := handlers.NewPomodoroHandler(s.pomodoroService)
+		r.Route("/pomodoro", func(r chi.Router) {
+			r.Get("/", pomodoroHandler.GetCurrentPomodoro)
+			r.Post("/start", pomodoroHandler.StartPomodoro)
+			r.Post("/pause", pomodoroHandler.PausePomodoro)
+			r.Post("/resume", pomodoroHandler.ResumePomodoro)
+			r.Delete("/", pomodoroHandler.StopPomodoro)
+		})
+
+		taskHandler := handlers.NewTaskHandler(s.taskService)
+		r.Route("/tasks", func(r chi.Router) {
+			r.Get("/", taskHandler.GetTasks)
+			r.Post("/", taskHandler.CreateTask)
+			r.Get("/{id}", taskHandler.GetTask)
+			r.Put("/{id}", taskHandler.UpdateTask)
+			r.Delete("/{id}", taskHandler.DeleteTask)
+		})
+
+		r.HandleFunc("/events/ws", s.webSocketHandler.ServeHTTP)
+	})
+}
+
+// Start starts the HTTP server
+func (s *Server) Start() error {
+	s.httpServer = &http.Server{
+		Addr:         s.config.Addr,
+		Handler:      s.router,
+		ReadTimeout:  s.config.ReadTimeout,
+		WriteTimeout: s.config.WriteTimeout,
+	}
+
+	s.logger.Info("Starting API server", "address", s.config.Addr)
+
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return fmt.Errorf("failed to start server: %w", err)
+	}
+
+	return nil
+}
+
+// Stop gracefully shuts down the HTTP server
+func (s *Server) Stop(ctx context.Context) error {
+	s.logger.Info("Stopping API server")
+
+	if s.httpServer != nil {
+		if err := s.httpServer.Shutdown(ctx); err != nil {
+			return fmt.Errorf("failed to stop server: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Listen starts listening on the configured address and returns a net.Listener
+func (s *Server) Listen() (net.Listener, error) {
+	s.httpServer = &http.Server{
+		Addr:         s.config.Addr,
+		Handler:      s.router,
+		ReadTimeout:  s.config.ReadTimeout,
+		WriteTimeout: s.config.WriteTimeout,
+	}
+
+	s.logger.Info("Listening API server", "addr", s.config.Addr)
+
+	ln, err := net.Listen("tcp", s.config.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to listen: %w", err)
+	}
+	return ln, nil
+}
+
+// Serve starts serving HTTP requests using the provided listener
+func (s *Server) Serve(ln net.Listener) error {
+	s.logger.Info("Serving API server")
+	if err := s.httpServer.Serve(ln); err != nil && err != http.ErrServerClosed {
+		return fmt.Errorf("failed to serve: %w", err)
+	}
+	return nil
+}

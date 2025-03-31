@@ -3,6 +3,7 @@ package config
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-playground/validator/v10"
@@ -22,8 +23,6 @@ const (
 
 	// DefaultLogFile default log file path.
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
-	// DefaultTaskFile default task file path.
-	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
 	// DefaultUnixDomainScoketPath default unix domain socket file path.
 	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
 )
@@ -36,8 +35,15 @@ type Config struct {
 	Pixela               PixelaConfig   `mapstructure:"pixela"`
 	LogFile              string         `mapstructure:"log_file"`
 	LogLevel             zapcore.Level  `mapstructure:"log_level"`
-	TaskFile             string         `mapstructure:"task_file"`
 	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
+	API                  APIConfig      `mapstructure:"api"`
+}
+
+type APIConfig struct {
+	Addr           string        `mapstructure:"addr"`
+	ReadTimeout    time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout   time.Duration `mapstructure:"write_timeout"`
+	RequestTimeout time.Duration `mapstructure:"request_timeout"`
 }
 
 // PomodoroConfig config for pomodoro.
@@ -90,7 +96,6 @@ func DefaultConfig() *Config {
 			BreakFrequency: 2, //nolint:mnd
 		},
 		LogFile:              DefaultLogFile,
-		TaskFile:             DefaultTaskFile,
 		UnixDomainScoketPath: DefaultUnixDomainScoketPath,
 		Color: ColorConfig{
 			Font:                tcell.ColorDarkSlateGray,
@@ -101,6 +106,11 @@ func DefaultConfig() *Config {
 			TimerWorkFont:       tcell.ColorGreen,
 			TimerBreakFont:      tcell.ColorBlue,
 			Cursor:              tcell.ColorGreen,
+		},
+		API: APIConfig{
+			ReadTimeout:    time.Second * 10,
+			WriteTimeout:   time.Second * 10,
+			RequestTimeout: time.Second * 10,
 		},
 	}
 }
@@ -128,10 +138,6 @@ func GetConfig() (*Config, error) {
 	}
 
 	// Expand each file
-
-	if c.TaskFile, err = homedir.Expand(c.TaskFile); err != nil {
-		return nil, err
-	}
 
 	if c.LogFile, err = homedir.Expand(c.LogFile); err != nil {
 		return nil, err
