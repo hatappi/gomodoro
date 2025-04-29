@@ -30,7 +30,7 @@ func newServeCmd() *cobra.Command {
 			}
 
 			logger := log.FromContext(ctx)
-			serverRunner := server.NewServerRunner(cfg)
+			serverRunner := server.NewRunner(cfg)
 			ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 			defer stop()
 

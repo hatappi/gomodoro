@@ -40,7 +40,7 @@ please specify argument or config yaml.
 				return err
 			}
 
-			serverRunner := server.NewServerRunner(cfg)
+			serverRunner := server.NewRunner(cfg)
 
 			err = serverRunner.EnsureRunning(ctx)
 			if err != nil {

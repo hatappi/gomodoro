@@ -32,7 +32,7 @@ And add a task using the editor.
 				return fmt.Errorf("failed to get config: %w", err)
 			}
 
-			serverRunner := server.NewServerRunner(cfg)
+			serverRunner := server.NewRunner(cfg)
 
 			if err := serverRunner.EnsureRunning(ctx); err != nil {
 				log.FromContext(ctx).Error(err, "Failed to ensure API server is running")

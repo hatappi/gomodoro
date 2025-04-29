@@ -15,23 +15,23 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage/file"
 )
 
-// ServerRunner manages API server lifecycle
-type ServerRunner struct {
+// Runner manages API server lifecycle
+type Runner struct {
 	config    *config.Config
 	server    *Server
 	isRunning bool
 	mu        sync.Mutex
 }
 
-// NewServerRunner creates a new server runner
-func NewServerRunner(config *config.Config) *ServerRunner {
-	return &ServerRunner{
+// NewRunner creates a new server runner
+func NewRunner(config *config.Config) *Runner {
+	return &Runner{
 		config: config,
 	}
 }
 
 // Start initializes and starts the API server
-func (r *ServerRunner) Start(ctx context.Context) error {
+func (r *Runner) Start(ctx context.Context) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -82,7 +82,7 @@ func (r *ServerRunner) Start(ctx context.Context) error {
 }
 
 // Stop gracefully stops the API server
-func (r *ServerRunner) Stop(ctx context.Context) error {
+func (r *Runner) Stop(ctx context.Context) error {
 	r.mu.Lock()
 	if !r.isRunning || r.server == nil {
 		r.mu.Unlock()
@@ -108,7 +108,7 @@ func (r *ServerRunner) Stop(ctx context.Context) error {
 }
 
 // IsRunning returns true if the server is running
-func (r *ServerRunner) IsRunning() bool {
+func (r *Runner) IsRunning() bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.isRunning
@@ -116,7 +116,7 @@ func (r *ServerRunner) IsRunning() bool {
 
 // EnsureRunning checks if the API server is running and starts it if not.
 // It uses the client to perform health checks.
-func (r *ServerRunner) EnsureRunning(ctx context.Context) error {
+func (r *Runner) EnsureRunning(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 	clientFactory := client.NewFactory(r.config.API)
 	defer clientFactory.Close()
