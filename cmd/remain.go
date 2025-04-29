@@ -22,12 +22,12 @@ func newRemainCmd() *cobra.Command {
 				return err
 			}
 
-			conf, err := config.GetConfig()
+			cfg, err := config.GetConfig()
 			if err != nil {
 				return err
 			}
 
-			factory := client.NewFactory(conf.API)
+			factory := client.NewFactory(cfg.API)
 			defer factory.Close()
 
 			pomodoroClient := factory.Pomodoro()

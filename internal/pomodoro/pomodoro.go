@@ -45,14 +45,14 @@ type IPomodoro struct {
 
 // NewPomodoro initilize Pomodoro.
 func NewPomodoro(
-	conf *config.Config,
+	cfg *config.Config,
 	sc screen.Client,
 	timer timer.Timer,
 	tc task.Client,
 	opts ...Option,
 ) *IPomodoro {
 	p := &IPomodoro{
-		config:        conf,
+		config:        cfg,
 		workSec:       config.DefaultWorkSec,
 		shortBreakSec: config.DefaultShortBreakSec,
 		longBreakSec:  config.DefaultLongBreakSec,
