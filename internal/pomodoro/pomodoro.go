@@ -11,10 +11,10 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/errors"
-	"github.com/hatappi/gomodoro/internal/screen"
-	"github.com/hatappi/gomodoro/internal/screen/draw"
 	"github.com/hatappi/gomodoro/internal/task"
 	"github.com/hatappi/gomodoro/internal/timer"
+	"github.com/hatappi/gomodoro/internal/tui"
+	"github.com/hatappi/gomodoro/internal/tui/screen"
 )
 
 // Pomodoro interface.
@@ -79,6 +79,8 @@ func (p *IPomodoro) Start(ctx context.Context) error {
 		return err
 	}
 
+	pomodoroView := tui.NewPomodoroView(p.config, p.screenClient)
+
 	workDuration := time.Duration(p.workSec) * time.Second
 	breakDuration := time.Duration(p.shortBreakSec) * time.Second
 	longBreakDuration := time.Duration(p.longBreakSec) * time.Second
@@ -109,12 +111,25 @@ func (p *IPomodoro) Start(ctx context.Context) error {
 			go cf(ctx, task.Name, pomodoro.Phase == event.PomodoroPhaseWork, res.elapsedTime)
 		}
 
-		task, err = p.selectNextTask(ctx, task)
+		action, err := pomodoroView.SelectNextTask(ctx, task)
 		if err != nil {
 			return err
 		}
-	}
 
+		switch action {
+		case tui.PomodoroActionCancel:
+			return errors.ErrCancel
+		case tui.PomodoroActionContinue:
+			// Continue with the same task
+		case tui.PomodoroActionChange:
+			// Change task
+			newTask, err := p.taskClient.GetTask(ctx)
+			if err != nil {
+				return err
+			}
+			task = newTask
+		}
+	}
 }
 
 // Finish finishes Pomodoro.
@@ -125,39 +140,4 @@ func (p *IPomodoro) Finish() {
 	}
 
 	p.screenClient.Finish()
-}
-
-// selectNextTask selects next task.
-func (p *IPomodoro) selectNextTask(ctx context.Context, currentTask *task.Task) (*task.Task, error) {
-	w, h := p.screenClient.ScreenSize()
-	draw.Sentence(
-		p.screenClient.GetScreen(),
-		0,
-		h-1,
-		w,
-		"(Enter): continue / (c): change task",
-		true,
-		draw.WithBackgroundColor(p.config.Color.StatusBarBackground),
-	)
-
-	for {
-		e := <-p.screenClient.GetEventChan()
-		switch e := e.(type) {
-		case screen.EventEnter:
-			// use Same Task
-			return currentTask, nil
-		case screen.EventCancel:
-			return nil, errors.ErrCancel
-		case screen.EventRune:
-			if string(e) == "c" { // c
-				p.screenClient.Clear()
-				t, err := p.taskClient.GetTask(ctx)
-				if err != nil {
-					return nil, err
-				}
-
-				return t, nil
-			}
-		}
-	}
 }

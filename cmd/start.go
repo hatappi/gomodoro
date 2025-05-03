@@ -15,10 +15,10 @@ import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/pomodoro"
-	"github.com/hatappi/gomodoro/internal/screen"
 	"github.com/hatappi/gomodoro/internal/task"
 	"github.com/hatappi/gomodoro/internal/timer"
 	"github.com/hatappi/gomodoro/internal/toggl"
+	"github.com/hatappi/gomodoro/internal/tui/screen"
 )
 
 // startCmd represents the start command.
