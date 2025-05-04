@@ -1,4 +1,5 @@
-package tui
+// Package view provides UI components for the TUI
+package view
 
 import (
 	"context"
@@ -11,15 +12,18 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core/event"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
+	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
+// TimerView handles rendering of the timer UI
 type TimerView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
+// NewTimerView creates a new timer view instance
 func NewTimerView(cfg *config.Config, sc screen.Client) *TimerView {
 	return &TimerView{
 		config:       cfg,
@@ -31,6 +35,7 @@ const (
 	marginTileRate = 16
 )
 
+// DrawTimer renders the timer UI with the current time and state
 func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, phase event.PomodoroPhase, isPaused bool) error {
 	screen := v.screenClient.GetScreen()
 
@@ -104,18 +109,19 @@ func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, p
 	return nil
 }
 
-func (v *TimerView) HandleScreenEvent(ctx context.Context, e interface{}) (TimerAction, error) {
+// HandleScreenEvent processes user input events
+func (v *TimerView) HandleScreenEvent(ctx context.Context, e interface{}) (constants.TimerAction, error) {
 	switch ev := e.(type) {
 	case screen.EventCancel:
-		return TimerActionCancel, gomodoro_error.ErrCancel
+		return constants.TimerActionCancel, gomodoro_error.ErrCancel
 	case screen.EventRune:
 		if string(ev) == "e" {
-			return TimerActionStop, nil
+			return constants.TimerActionStop, nil
 		}
 	case screen.EventEnter:
-		return TimerActionToggle, nil
+		return constants.TimerActionToggle, nil
 	}
-	return TimerActionNone, nil
+	return constants.TimerActionNone, nil
 }
 
 func (v *TimerView) timerMagnification(w, h float64) (float64, error) {

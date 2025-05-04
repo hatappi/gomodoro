@@ -1,4 +1,5 @@
-package tui
+// Package view provides UI components for the TUI
+package view
 
 import (
 	"context"
@@ -8,11 +9,13 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
+// ErrorView handles error message displays
 type ErrorView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
+// NewErrorView creates a new error view instance
 func NewErrorView(cfg *config.Config, sc screen.Client) *ErrorView {
 	return &ErrorView{
 		config:       cfg,
@@ -20,6 +23,7 @@ func NewErrorView(cfg *config.Config, sc screen.Client) *ErrorView {
 	}
 }
 
+// DrawSmallScreen displays a message when the screen size is too small
 func (v *ErrorView) DrawSmallScreen(ctx context.Context, w, h int) error {
 	screen := v.screenClient.GetScreen()
 

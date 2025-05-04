@@ -12,12 +12,9 @@ import (
 	"github.com/hatappi/gomodoro/internal/api/server"
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/pixela"
-	"github.com/hatappi/gomodoro/internal/pomodoro"
-	"github.com/hatappi/gomodoro/internal/task"
-	"github.com/hatappi/gomodoro/internal/timer"
 	"github.com/hatappi/gomodoro/internal/toggl"
+	"github.com/hatappi/gomodoro/internal/tui"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
 )
 
@@ -90,7 +87,6 @@ func runWithAPIClient(ctx context.Context, cfg *config.Config) error {
 		logger.Error(err, "failed to get WebSocket client")
 		return err
 	}
-	eventBus := event.NewClientWebSocketEventBus(wsClient)
 
 	terminalScreen, err := screen.NewScreen(cfg)
 	if err != nil {
@@ -100,33 +96,32 @@ func runWithAPIClient(ctx context.Context, cfg *config.Config) error {
 	screenClient := screen.NewClient(terminalScreen)
 	screenClient.StartPollEvent(ctx)
 
-	timer := timer.NewTimer(cfg, screenClient, pomodoroClient, eventBus)
-	localTaskClient := task.NewClient(cfg, screenClient)
-
-	var opts []pomodoro.Option
-	opts = append(opts, pomodoro.WithPomodoroClient(pomodoroClient))
-	opts = append(opts, pomodoro.WithTaskClient(taskClient))
-	opts = append(opts, pomodoro.WithWebSocketClient(wsClient))
-	opts = append(opts, pomodoro.WithWorkSec(cfg.Pomodoro.WorkSec))
-	opts = append(opts, pomodoro.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
-	opts = append(opts, pomodoro.WithLongBreakSec(cfg.Pomodoro.LongBreakSec))
-	opts = append(opts, pomodoro.WithNotify())
+	// Create App options based on configuration
+	var opts []tui.Option
+	opts = append(opts, tui.WithPomodoroClient(pomodoroClient))
+	opts = append(opts, tui.WithTaskClient(taskClient))
+	opts = append(opts, tui.WithWebSocketClient(wsClient))
+	opts = append(opts, tui.WithWorkSec(cfg.Pomodoro.WorkSec))
+	opts = append(opts, tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
+	opts = append(opts, tui.WithLongBreakSec(cfg.Pomodoro.LongBreakSec))
+	opts = append(opts, tui.WithNotify())
 
 	if cfg.Toggl.Enable {
 		togglClient := toggl.NewClient(cfg.Toggl.ProjectID, cfg.Toggl.WorkspaceID, cfg.Toggl.APIToken)
-		opts = append(opts, pomodoro.WithRecordToggl(togglClient))
+		opts = append(opts, tui.WithRecordToggl(togglClient))
 	}
 
 	if cfg.Pixela.Enable {
 		pixelaClient := pixela.NewClient(cfg.Pixela.Token)
-		opts = append(opts, pomodoro.WithRecordPixela(pixelaClient, cfg.Pixela.UserName, cfg.Pixela.GraphID))
+		opts = append(opts, tui.WithRecordPixela(pixelaClient, cfg.Pixela.UserName, cfg.Pixela.GraphID))
 	}
 
-	p := pomodoro.NewPomodoro(cfg, screenClient, timer, localTaskClient, opts...)
-	defer p.Finish()
+	// Create and initialize TUI App
+	app := tui.NewApp(cfg, screenClient, opts...)
+	defer app.Finish()
 
 	logger.Info("Starting Pomodoro session...")
-	startErr := p.Start(ctx)
+	startErr := app.Run(ctx)
 	if startErr != nil {
 		logger.Error(startErr, "Pomodoro session failed to start or exited with error")
 	} else {

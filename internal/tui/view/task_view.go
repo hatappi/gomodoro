@@ -1,4 +1,5 @@
-package tui
+// Package view provides UI components for the TUI
+package view
 
 import (
 	"context"
@@ -12,15 +13,18 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/domain/model"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
+	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
+// TaskView handles task listing and selection UI
 type TaskView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
+// NewTaskView creates a new task view instance
 func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 	return &TaskView{
 		config:       cfg,
@@ -28,6 +32,7 @@ func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 	}
 }
 
+// RenderTasks displays the task list
 func (v *TaskView) RenderTasks(tasks model.Tasks, offset, limit, cursorPosition int) {
 	w, h := v.screenClient.ScreenSize()
 
@@ -57,7 +62,8 @@ func (v *TaskView) RenderTasks(tasks model.Tasks, offset, limit, cursorPosition 
 	)
 }
 
-func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*model.Task, TaskAction, error) {
+// SelectTaskName displays a list of tasks and allows the user to select one
+func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*model.Task, constants.TaskAction, error) {
 	offset := 0
 	cursorPosition := 0
 	for {
@@ -70,9 +76,9 @@ func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*mode
 		e := <-v.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
-			return nil, TaskActionCancel, gomodoro_error.ErrCancel
+			return nil, constants.TaskActionCancel, gomodoro_error.ErrCancel
 		case screen.EventEnter:
-			return tasks[offset+cursorPosition], TaskActionNone, nil
+			return tasks[offset+cursorPosition], constants.TaskActionNone, nil
 		case screen.EventKeyDown:
 			cursorPosition++
 
@@ -102,18 +108,18 @@ func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*mode
 			switch string(e) {
 			case "j":
 				if err := s.PostEvent(tcell.NewEventKey(tcell.KeyDown, ' ', tcell.ModNone)); err != nil {
-					return nil, TaskActionNone, err
+					return nil, constants.TaskActionNone, err
 				}
 			case "k":
 				if err := s.PostEvent(tcell.NewEventKey(tcell.KeyUp, ' ', tcell.ModNone)); err != nil {
-					return nil, TaskActionNone, err
+					return nil, constants.TaskActionNone, err
 				}
 			case "n":
 				v.screenClient.Clear()
-				return nil, TaskActionNew, nil
+				return nil, constants.TaskActionNew, nil
 			case "d":
 				si := offset + cursorPosition
-				return tasks[si], TaskActionDelete, nil
+				return tasks[si], constants.TaskActionDelete, nil
 			}
 		case screen.EventScreenResize:
 			cursorPosition = 0
@@ -122,6 +128,7 @@ func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*mode
 	}
 }
 
+// CreateTaskName displays an input prompt for creating a new task
 func (v *TaskView) CreateTaskName(ctx context.Context) (string, error) {
 	newTaskName := []rune{}
 	s := v.screenClient.GetScreen()
