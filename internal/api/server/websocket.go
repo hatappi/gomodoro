@@ -37,6 +37,7 @@ func (h *EventWebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		h.logger.Error(err, "Failed to upgrade WebSocket connection")
 		return
 	}
+
 	clientID := r.RemoteAddr
 	h.mu.Lock()
 	h.clients[clientID] = conn
