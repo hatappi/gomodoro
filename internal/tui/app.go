@@ -129,14 +129,11 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 }
 
 // NewApp creates a new TUI application instance
-func NewApp(ctx context.Context, cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
-	logger := log.FromContext(ctx)
-
+func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
 	pomodoroClient := clientFactory.Pomodoro()
 	taskClient := clientFactory.Task()
 	wsClient, err := clientFactory.WebSocket()
 	if err != nil {
-		logger.Error(err, "failed to get WebSocket client")
 		return nil, fmt.Errorf("failed to create WebSocket client: %w", err)
 	}
 

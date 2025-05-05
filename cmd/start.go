@@ -39,8 +39,7 @@ please specify argument or config yaml.
 
 			serverRunner := server.NewRunner(cfg)
 
-			err = serverRunner.EnsureRunning(ctx)
-			if err != nil {
+			if err := serverRunner.EnsureRunning(ctx); err != nil {
 				logger.Error(err, "Failed to ensure API server is running")
 				return fmt.Errorf("failed to ensure API server is running: %w", err)
 			}
@@ -70,7 +69,6 @@ please specify argument or config yaml.
 func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	logger := log.FromContext(ctx)
 
-	// Create App options based on configuration
 	var opts []tui.Option
 	opts = append(opts, tui.WithWorkSec(cfg.Pomodoro.WorkSec))
 	opts = append(opts, tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
@@ -90,7 +88,7 @@ func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	clientFactory := client.NewFactory(cfg.API)
 	defer clientFactory.Close()
 
-	app, err := tui.NewApp(ctx, cfg, clientFactory, opts...)
+	app, err := tui.NewApp(cfg, clientFactory, opts...)
 	if err != nil {
 		logger.Error(err, "Failed to create TUI App")
 		return err
