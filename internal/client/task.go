@@ -14,9 +14,9 @@ type TaskClient struct {
 }
 
 // NewTaskClient creates a new task client
-func NewTaskClient(options ...Option) *TaskClient {
+func NewTaskClient(baseURL string, options ...Option) *TaskClient {
 	return &TaskClient{
-		BaseClient: NewBaseClient(options...),
+		BaseClient: NewBaseClient(baseURL, options...),
 	}
 }
 

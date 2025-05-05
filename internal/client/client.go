@@ -35,22 +35,15 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
-// WithBaseURL sets the base URL for API requests
-func WithBaseURL(baseURL string) Option {
-	return func(c *Config) {
-		c.BaseURL = baseURL
-	}
-}
-
 // BaseClient provides common functionality for API clients
 type BaseClient struct {
 	baseURL    string
 	httpClient *http.Client
 }
 
-func NewBaseClient(options ...Option) *BaseClient {
+func NewBaseClient(baseURL string, options ...Option) *BaseClient {
 	config := &Config{
-		BaseURL: "http://localhost:8080",
+		BaseURL: baseURL,
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},

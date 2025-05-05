@@ -16,9 +16,9 @@ type PomodoroClient struct {
 }
 
 // NewPomodoroClient creates a new pomodoro client
-func NewPomodoroClient(options ...Option) *PomodoroClient {
+func NewPomodoroClient(baseURL string, options ...Option) *PomodoroClient {
 	return &PomodoroClient{
-		BaseClient: NewBaseClient(options...),
+		BaseClient: NewBaseClient(baseURL, options...),
 	}
 }
 

@@ -18,14 +18,13 @@ type Factory struct {
 // NewFactory creates a new client factory with the given API configuration and options
 func NewFactory(apiConfig config.APIConfig) *Factory {
 	httpClientOpts := []Option{
-		WithBaseURL(fmt.Sprintf("http://%s", apiConfig.Addr)),
 		WithTimeout(10 * time.Second),
 	}
 
 	factory := &Factory{
 		wsClient: NewWebSocketClient(fmt.Sprintf("ws://%s/api/events/ws", apiConfig.Addr)),
-		pomodoro: NewPomodoroClient(httpClientOpts...),
-		task:     NewTaskClient(httpClientOpts...),
+		pomodoro: NewPomodoroClient(fmt.Sprintf("http://%s", apiConfig.Addr), httpClientOpts...),
+		task:     NewTaskClient(fmt.Sprintf("http://%s", apiConfig.Addr), httpClientOpts...),
 	}
 
 	return factory
