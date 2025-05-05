@@ -51,7 +51,7 @@ please specify argument or config yaml.
 				}
 			}()
 
-			return runWithAPIClient(ctx, cfg)
+			return runTUIApp(ctx, cfg)
 		},
 	}
 
@@ -67,7 +67,7 @@ please specify argument or config yaml.
 	return startCmd
 }
 
-func runWithAPIClient(ctx context.Context, cfg *config.Config) error {
+func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	logger := log.FromContext(ctx)
 
 	// Create App options based on configuration
