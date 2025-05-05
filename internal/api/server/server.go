@@ -65,16 +65,6 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.Timeout(s.config.RequestTimeout))
 	s.router.Use(servermiddleware.ErrorHandler())
-
-	// Setup CORS
-	s.router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
 }
 
 // setupRoutes configures the routes for the server
