@@ -12,10 +12,10 @@ import (
 	"github.com/hatappi/gomodoro/internal/api/server"
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
+	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/toggl"
 	"github.com/hatappi/gomodoro/internal/tui"
-	"github.com/hatappi/gomodoro/internal/tui/screen"
 )
 
 // startCmd represents the start command.
@@ -70,37 +70,8 @@ please specify argument or config yaml.
 func runWithAPIClient(ctx context.Context, cfg *config.Config) error {
 	logger := log.FromContext(ctx)
 
-	clientFactory := client.NewFactory(cfg.API)
-	defer clientFactory.Close()
-
-	pomodoroClient := clientFactory.Pomodoro()
-	taskClient := clientFactory.Task()
-
-	_, err := pomodoroClient.GetCurrent(ctx)
-	if err != nil {
-		logger.Error(err, "Failed to connect to API server after ensuring it is running")
-		return fmt.Errorf("failed to connect to API server: %w", err)
-	}
-
-	wsClient, err := clientFactory.WebSocket()
-	if err != nil {
-		logger.Error(err, "failed to get WebSocket client")
-		return err
-	}
-
-	terminalScreen, err := screen.NewScreen(cfg)
-	if err != nil {
-		logger.Error(err, "Failed to create screen")
-		return err
-	}
-	screenClient := screen.NewClient(terminalScreen)
-	screenClient.StartPollEvent(ctx)
-
 	// Create App options based on configuration
 	var opts []tui.Option
-	opts = append(opts, tui.WithPomodoroClient(pomodoroClient))
-	opts = append(opts, tui.WithTaskClient(taskClient))
-	opts = append(opts, tui.WithWebSocketClient(wsClient))
 	opts = append(opts, tui.WithWorkSec(cfg.Pomodoro.WorkSec))
 	opts = append(opts, tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
 	opts = append(opts, tui.WithLongBreakSec(cfg.Pomodoro.LongBreakSec))
@@ -116,16 +87,26 @@ func runWithAPIClient(ctx context.Context, cfg *config.Config) error {
 		opts = append(opts, tui.WithRecordPixela(pixelaClient, cfg.Pixela.UserName, cfg.Pixela.GraphID))
 	}
 
-	// Create and initialize TUI App
-	app := tui.NewApp(cfg, screenClient, opts...)
+	clientFactory := client.NewFactory(cfg.API)
+	defer clientFactory.Close()
+
+	app, err := tui.NewApp(ctx, cfg, clientFactory, opts...)
+	if err != nil {
+		logger.Error(err, "Failed to create TUI App")
+		return err
+	}
 	defer app.Finish()
 
 	logger.Info("Starting Pomodoro session...")
 	startErr := app.Run(ctx)
 	if startErr != nil {
-		logger.Error(startErr, "Pomodoro session failed to start or exited with error")
-	} else {
-		logger.Info("Pomodoro session finished.")
+		if startErr == gomodoro_error.ErrCancel {
+			logger.Info("Pomodoro session canceled by user.")
+			return nil
+		}
+
+		return startErr
 	}
-	return startErr
+
+	return nil
 }

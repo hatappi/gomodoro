@@ -3,6 +3,7 @@ package tui
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/hatappi/go-kit/log"
@@ -127,36 +128,34 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 	}
 }
 
-// WithPomodoroClient sets the pomodoro API client
-func WithPomodoroClient(pomodoroClient *client.PomodoroClient) Option {
-	return func(a *App) {
-		a.pomodoroClient = pomodoroClient
-	}
-}
-
-// WithTaskClient sets the task API client
-func WithTaskClient(taskClient *client.TaskClient) Option {
-	return func(a *App) {
-		a.taskAPIClient = taskClient
-	}
-}
-
-// WithWebSocketClient sets the WebSocket client for real-time updates
-func WithWebSocketClient(wsClient event.WebSocketClient) Option {
-	return func(a *App) {
-		a.wsClient = wsClient
-		a.eventBus = event.NewClientWebSocketEventBus(wsClient)
-	}
-}
-
 // NewApp creates a new TUI application instance
-func NewApp(cfg *config.Config, sc screen.Client, opts ...Option) *App {
+func NewApp(ctx context.Context, cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
+	logger := log.FromContext(ctx)
+
+	pomodoroClient := clientFactory.Pomodoro()
+	taskClient := clientFactory.Task()
+	wsClient, err := clientFactory.WebSocket()
+	if err != nil {
+		logger.Error(err, "failed to get WebSocket client")
+		return nil, fmt.Errorf("failed to create WebSocket client: %w", err)
+	}
+
+	terminalScreen, err := screen.NewScreen(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create screen: %w", err)
+	}
+	screenClient := screen.NewClient(terminalScreen)
+
 	app := &App{
-		config:        cfg,
-		screenClient:  sc,
-		workSec:       config.DefaultWorkSec,
-		shortBreakSec: config.DefaultShortBreakSec,
-		longBreakSec:  config.DefaultLongBreakSec,
+		config:         cfg,
+		screenClient:   screenClient,
+		pomodoroClient: pomodoroClient,
+		taskAPIClient:  taskClient,
+		wsClient:       wsClient,
+		eventBus:       event.NewClientWebSocketEventBus(wsClient),
+		workSec:        config.DefaultWorkSec,
+		shortBreakSec:  config.DefaultShortBreakSec,
+		longBreakSec:   config.DefaultLongBreakSec,
 	}
 
 	// Apply all options
@@ -165,16 +164,18 @@ func NewApp(cfg *config.Config, sc screen.Client, opts ...Option) *App {
 	}
 
 	// Initialize views
-	app.timerView = view.NewTimerView(cfg, sc)
-	app.taskView = view.NewTaskView(cfg, sc)
-	app.pomodoroView = view.NewPomodoroView(cfg, sc)
-	app.errorView = view.NewErrorView(cfg, sc)
+	app.timerView = view.NewTimerView(cfg, screenClient)
+	app.taskView = view.NewTaskView(cfg, screenClient)
+	app.pomodoroView = view.NewPomodoroView(cfg, screenClient)
+	app.errorView = view.NewErrorView(cfg, screenClient)
 
-	return app
+	return app, nil
 }
 
 // Run starts the TUI application main loop
 func (a *App) Run(ctx context.Context) error {
+	a.screenClient.StartPollEvent(ctx)
+
 	task, err := a.selectTask(ctx)
 	if err != nil {
 		return err
@@ -235,11 +236,7 @@ func (a *App) Run(ctx context.Context) error {
 
 // Finish cleans up resources when the app is closed
 func (a *App) Finish() {
-	// Stop pomodoro
-	if a.pomodoroClient != nil {
-		_, _ = a.pomodoroClient.Stop(context.Background())
-	}
-
+	_, _ = a.pomodoroClient.Stop(context.Background())
 	a.screenClient.Finish()
 }
 
