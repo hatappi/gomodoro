@@ -49,11 +49,11 @@ func NewPomodoroService(storage storage.PomodoroStorage, eventBus event.EventBus
 func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, breakDuration time.Duration, longBreakDuration time.Duration, taskID string) (*Pomodoro, error) {
 	latestPomodoro, err := s.GetLatestPomodoro()
 	if err != nil {
-		return nil, fmt.Errorf("failed to check for active pomodoro: %w", err)
+		return nil, fmt.Errorf("failed to check for latest pomodoro: %w", err)
 	}
 
 	if latestPomodoro != nil && latestPomodoro.State == event.PomodoroStateActive {
-		return nil, fmt.Errorf("there is already an active pomodoro session")
+		return nil, fmt.Errorf("latest pomodoro session already exists")
 	}
 
 	var phase storage.PomodoroPhase
