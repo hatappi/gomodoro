@@ -77,13 +77,6 @@ func (s *Server) setupRoutes() {
 	s.router.Route("/api", func(r chi.Router) {
 		r.Use(servermiddleware.JSONContentType)
 
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			handlers.RespondWithJSON(w, http.StatusOK, map[string]string{
-				"name":    "Gomodoro API",
-				"version": "1.0.0",
-			})
-		})
-
 		pomodoroHandler := handlers.NewPomodoroHandler(s.pomodoroService)
 		r.Route("/pomodoro", func(r chi.Router) {
 			r.Get("/", pomodoroHandler.GetCurrentPomodoro)
