@@ -20,28 +20,26 @@ type WebSocketClientConnection interface {
 	Send(event WebSocketEvent) error
 }
 
-func newWebSocketEventBus(wsClient WebSocketClient, isServer bool) EventBus {
-	bus := &WebSocketEventBus{
-		localBus: NewEventBus(),
-		wsClient: wsClient,
-		isServer: isServer,
-	}
-
-	if wsClient != nil {
-		wsClient.OnMessage(func(event WebSocketEvent) {
-			bus.handleRemoteEvent(event)
-		})
-	}
-
-	return bus
-}
-
 func NewServerWebSocketEventBus() EventBus {
-	return newWebSocketEventBus(nil, true)
+	return &WebSocketEventBus{
+		localBus: NewEventBus(),
+		wsClient: nil,
+		isServer: true,
+	}
 }
 
 func NewClientWebSocketEventBus(wsClient WebSocketClient) EventBus {
-	return newWebSocketEventBus(wsClient, false)
+	bus := &WebSocketEventBus{
+		localBus: NewEventBus(),
+		wsClient: wsClient,
+		isServer: false,
+	}
+
+	wsClient.OnMessage(func(event WebSocketEvent) {
+		bus.handleRemoteEvent(event)
+	})
+
+	return bus
 }
 
 type EventInfo interface {
