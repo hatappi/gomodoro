@@ -93,17 +93,21 @@ func (h *EventWebSocketHandler) SetupEventSubscription() {
 	}
 
 	h.eventBus.SubscribeMulti(eventTypes, func(e interface{}) {
-		if evtInfo, ok := e.(event.EventInfo); ok {
-			payload, err := json.Marshal(evtInfo)
-			if err != nil {
-				h.logger.Error(err, "Failed to marshal event for WebSocket")
-				return
-			}
-			wsEvent := event.WebSocketEvent{
-				EventType: string(evtInfo.GetEventType()),
-				Payload:   payload,
-			}
-			h.Broadcast(wsEvent)
+		evtInfo, ok := e.(event.EventInfo)
+		if !ok {
+			return
 		}
+
+		payload, err := json.Marshal(evtInfo)
+		if err != nil {
+			h.logger.Error(err, "Failed to marshal event for WebSocket")
+			return
+		}
+
+		wsEvent := event.WebSocketEvent{
+			EventType: string(evtInfo.GetEventType()),
+			Payload:   payload,
+		}
+		h.Broadcast(wsEvent)
 	})
 }
