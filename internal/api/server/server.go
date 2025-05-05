@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-logr/logr"
 
 	"github.com/hatappi/gomodoro/internal/api/server/handlers"
@@ -97,24 +96,6 @@ func (s *Server) setupRoutes() {
 
 		r.HandleFunc("/events/ws", s.webSocketHandler.ServeHTTP)
 	})
-}
-
-// Start starts the HTTP server
-func (s *Server) Start() error {
-	s.httpServer = &http.Server{
-		Addr:         s.config.Addr,
-		Handler:      s.router,
-		ReadTimeout:  s.config.ReadTimeout,
-		WriteTimeout: s.config.WriteTimeout,
-	}
-
-	s.logger.Info("Starting API server", "address", s.config.Addr)
-
-	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		return fmt.Errorf("failed to start server: %w", err)
-	}
-
-	return nil
 }
 
 // Stop gracefully shuts down the HTTP server
