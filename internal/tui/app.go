@@ -9,8 +9,8 @@ import (
 	"github.com/hatappi/go-kit/log"
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
+	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
-	"github.com/hatappi/gomodoro/internal/domain/model"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/notify"
 	"github.com/hatappi/gomodoro/internal/pixela"
@@ -189,7 +189,7 @@ func (a *App) Run(ctx context.Context) error {
 		}
 		resultCh := make(chan timerResult, 1)
 		go func() {
-			elapsedTime, err := a.runTimer(ctx, task.Name)
+			elapsedTime, err := a.runTimer(ctx, task.Title)
 			resultCh <- timerResult{elapsedTime: elapsedTime, err: err}
 		}()
 
@@ -207,7 +207,7 @@ func (a *App) Run(ctx context.Context) error {
 
 		// Execute completion functions
 		for _, cf := range a.completeFuncs {
-			go cf(ctx, task.Name, pomodoro.Phase == event.PomodoroPhaseWork, res.elapsedTime)
+			go cf(ctx, task.Title, pomodoro.Phase == event.PomodoroPhaseWork, res.elapsedTime)
 		}
 
 		action, err := a.pomodoroView.SelectNextTask(ctx, task)
@@ -238,13 +238,13 @@ func (a *App) Finish() {
 }
 
 // selectTask handles task selection and creation
-func (a *App) selectTask(ctx context.Context) (*model.Task, error) {
+func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 	tasks, err := a.loadTasks(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var task *model.Task
+	var task *core.Task
 
 	if len(tasks) > 0 {
 		var action constants.TaskAction
@@ -306,17 +306,18 @@ func (a *App) selectTask(ctx context.Context) (*model.Task, error) {
 }
 
 // loadTasks loads tasks from the API
-func (a *App) loadTasks(ctx context.Context) (model.Tasks, error) {
+func (a *App) loadTasks(ctx context.Context) ([]*core.Task, error) {
 	responses, err := a.taskAPIClient.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tasks := make(model.Tasks, len(responses))
+	tasks := make([]*core.Task, len(responses))
 	for i, resp := range responses {
-		tasks[i] = &model.Task{
+		tasks[i] = &core.Task{
 			ID:        resp.ID,
-			Name:      resp.Title,
+			Title:     resp.Title,
+			CreatedAt: resp.CreatedAt,
 			Completed: resp.Completed,
 		}
 	}
@@ -324,15 +325,16 @@ func (a *App) loadTasks(ctx context.Context) (model.Tasks, error) {
 }
 
 // createTask creates a new task
-func (a *App) createTask(ctx context.Context, name string) (*model.Task, error) {
+func (a *App) createTask(ctx context.Context, name string) (*core.Task, error) {
 	resp, err := a.taskAPIClient.Create(ctx, name)
 	if err != nil {
 		return nil, err
 	}
 
-	task := &model.Task{
+	task := &core.Task{
 		ID:        resp.ID,
-		Name:      resp.Title,
+		Title:     resp.Title,
+		CreatedAt: resp.CreatedAt,
 		Completed: resp.Completed,
 	}
 
@@ -345,16 +347,16 @@ func (a *App) deleteTask(ctx context.Context, taskID string) error {
 }
 
 // saveTask saves changes to a task
-func (a *App) saveTask(ctx context.Context, task *model.Task) error {
+func (a *App) saveTask(ctx context.Context, task *core.Task) error {
 	var resp *client.TaskResponse
 	var err error
 
 	if task.ID == "" {
 		// Create new task
-		resp, err = a.taskAPIClient.Create(ctx, task.Name)
+		resp, err = a.taskAPIClient.Create(ctx, task.Title)
 	} else {
 		// Update existing task
-		resp, err = a.taskAPIClient.Update(ctx, task.ID, task.Name, task.Completed)
+		resp, err = a.taskAPIClient.Update(ctx, task.ID, task.Title, task.Completed)
 	}
 
 	if err != nil {

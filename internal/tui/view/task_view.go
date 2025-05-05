@@ -11,7 +11,7 @@ import (
 	runewidth "github.com/mattn/go-runewidth"
 
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/domain/model"
+	"github.com/hatappi/gomodoro/internal/core"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
@@ -33,11 +33,11 @@ func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 }
 
 // RenderTasks displays the task list
-func (v *TaskView) RenderTasks(tasks model.Tasks, offset, limit, cursorPosition int) {
+func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition int) {
 	w, h := v.screenClient.ScreenSize()
 
 	for y, t := range tasks[offset:limit] {
-		name := fmt.Sprintf("%3d: %s", offset+y+1, t.Name)
+		name := fmt.Sprintf("%3d: %s", offset+y+1, t.Title)
 		opts := []draw.Option{}
 		if y == cursorPosition {
 			opts = []draw.Option{
@@ -63,7 +63,7 @@ func (v *TaskView) RenderTasks(tasks model.Tasks, offset, limit, cursorPosition 
 }
 
 // SelectTaskName displays a list of tasks and allows the user to select one
-func (v *TaskView) SelectTaskName(ctx context.Context, tasks model.Tasks) (*model.Task, constants.TaskAction, error) {
+func (v *TaskView) SelectTaskName(ctx context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
 	offset := 0
 	cursorPosition := 0
 	for {
