@@ -47,8 +47,8 @@ func (h *PomodoroHandler) GetCurrentPomodoro(w http.ResponseWriter, r *http.Requ
 
 	pomodoro, err := h.pomodoroService.GetLatestPomodoro()
 	if err != nil {
-		logger.Error(err, "Failed to get active pomodoro")
-		RespondWithError(w, http.StatusInternalServerError, "internal_error", "Failed to retrieve active pomodoro")
+		logger.Error(err, "Failed to get latest pomodoro")
+		RespondWithError(w, http.StatusInternalServerError, "internal_error", "Failed to retrieve latest pomodoro")
 		return
 	}
 
