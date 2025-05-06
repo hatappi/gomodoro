@@ -386,7 +386,11 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			action, err := a.timerView.HandleScreenEvent(ctx, e)
 			if err != nil {
 				if err == gomodoro_error.ErrCancel {
-					elapsedTime, _ := a.getCurrentPomodoro(ctx)
+					elapsedTime, err := a.getCurrentElapsedTime(ctx)
+					if err != nil {
+						log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+						return 0, gomodoro_error.ErrCancel
+					}
 					return elapsedTime, gomodoro_error.ErrCancel
 				}
 				return 0, err
@@ -394,7 +398,11 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 
 			switch action {
 			case constants.TimerActionCancel:
-				elapsedTime, _ := a.getCurrentPomodoro(ctx)
+				elapsedTime, err := a.getCurrentElapsedTime(ctx)
+				if err != nil {
+					log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+					return 0, gomodoro_error.ErrCancel
+				}
 				return elapsedTime, gomodoro_error.ErrCancel
 			case constants.TimerActionStop:
 				_, stopErr := a.pomodoroClient.Stop(ctx)
@@ -417,40 +425,44 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 
 			err := a.timerView.DrawTimer(ctx, remainSec, taskName, ev.Phase, ev.Type == event.PomodoroPaused)
 			if err != nil {
-				if err == gomodoro_error.ErrScreenSmall {
-					a.screenClient.Clear()
-					w, h := a.screenClient.ScreenSize()
-
-					a.errorView.DrawSmallScreen(ctx, w, h)
-
-					for {
-						select {
-						case e := <-a.screenClient.GetEventChan():
-							switch e.(type) {
-							case screen.EventCancel:
-								elapsedTime, _ := a.getCurrentPomodoro(ctx)
-								return elapsedTime, gomodoro_error.ErrCancel
-							case screen.EventScreenResize:
-								break
-							}
-						}
-						break
-					}
-				} else {
+				if err != gomodoro_error.ErrScreenSmall {
 					return 0, err
+				}
+
+				a.screenClient.Clear()
+				w, h := a.screenClient.ScreenSize()
+				a.errorView.DrawSmallScreen(ctx, w, h)
+
+				for {
+					e := <-a.screenClient.GetEventChan()
+					switch e.(type) {
+					case screen.EventCancel:
+						elapsedTime, err := a.getCurrentElapsedTime(ctx)
+						if err != nil {
+							log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+							return 0, gomodoro_error.ErrCancel
+						}
+						return elapsedTime, gomodoro_error.ErrCancel
+					case screen.EventScreenResize:
+						return a.runTimer(ctx, taskName)
+					}
 				}
 			}
 
 			if ev.Type == event.PomodoroCompleted || ev.Type == event.PomodoroStopped {
-				elapsedTime, _ := a.getCurrentPomodoro(ctx)
+				elapsedTime, err := a.getCurrentElapsedTime(ctx)
+				if err != nil {
+					log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+					return 0, err
+				}
 				return elapsedTime, nil
 			}
 		}
 	}
 }
 
-// getCurrentPomodoro retrieves current pomodoro info from API
-func (a *App) getCurrentPomodoro(ctx context.Context) (int, error) {
+// getCurrentElapsedTime retrieves elapsed time from current pomodoro session
+func (a *App) getCurrentElapsedTime(ctx context.Context) (int, error) {
 	current, err := a.pomodoroClient.GetCurrent(ctx)
 	if err != nil {
 		return 0, err
