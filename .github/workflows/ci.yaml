@@ -52,6 +52,8 @@ jobs:
       - name: Set Reviewdog outputs
         id: reviewdog
         run: |
+          echo "${{ steps.golangci-lint.version }}"
+
           echo "args=${{ inputs.reviewdog_args }}" >> $GITHUB_OUTPUT
 
       - name: golangci-lint
