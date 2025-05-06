@@ -23,8 +23,6 @@ const (
 
 	// DefaultLogFile default log file path.
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
-	// DefaultUnixDomainScoketPath default unix domain socket file path.
-	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
 
 	// DefaultAPITimeout default timeout for API operations in seconds.
 	DefaultAPITimeout = 10
@@ -32,14 +30,13 @@ const (
 
 // Config config for gomodoro.
 type Config struct {
-	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
-	Toggl                TogglConfig    `mapstructure:"toggl"`
-	Color                ColorConfig    `mapstructure:"color"`
-	Pixela               PixelaConfig   `mapstructure:"pixela"`
-	LogFile              string         `mapstructure:"log_file"`
-	LogLevel             zapcore.Level  `mapstructure:"log_level"`
-	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
-	API                  APIConfig      `mapstructure:"api"`
+	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
+	Toggl    TogglConfig    `mapstructure:"toggl"`
+	Color    ColorConfig    `mapstructure:"color"`
+	Pixela   PixelaConfig   `mapstructure:"pixela"`
+	LogFile  string         `mapstructure:"log_file"`
+	LogLevel zapcore.Level  `mapstructure:"log_level"`
+	API      APIConfig      `mapstructure:"api"`
 }
 
 // APIConfig contains configuration options for the API server.
@@ -99,8 +96,7 @@ func DefaultConfig() *Config {
 			LongBreakSec:   DefaultLongBreakSec,
 			BreakFrequency: 2, //nolint:mnd
 		},
-		LogFile:              DefaultLogFile,
-		UnixDomainScoketPath: DefaultUnixDomainScoketPath,
+		LogFile: DefaultLogFile,
 		Color: ColorConfig{
 			Font:                tcell.ColorDarkSlateGray,
 			Background:          tcell.ColorWhite,
@@ -144,10 +140,6 @@ func GetConfig() (*Config, error) {
 	// Expand each file
 
 	if c.LogFile, err = homedir.Expand(c.LogFile); err != nil {
-		return nil, err
-	}
-
-	if c.UnixDomainScoketPath, err = homedir.Expand(c.UnixDomainScoketPath); err != nil {
 		return nil, err
 	}
 
