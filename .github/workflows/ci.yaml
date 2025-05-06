@@ -44,12 +44,15 @@ jobs:
       - name: Set golangci-lint outputs
         id: golangci-lint
         run: |
-          echo "::set-output name=version::$(cat go.mod | grep "github.com/golangci/golangci-lint" | awk '{print $2}')"
+          version="$(cat go.mod | grep "github.com/golangci/golangci-lint" | awk '{print $2}')"
+          echo "version is ${version}"
+
+          echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Set Reviewdog outputs
         id: reviewdog
         run: |
-          echo "::set-output name=args::${{ inputs.reviewdog_args }}"
+          echo "args=${{ inputs.reviewdog_args }}" >> $GITHUB_OUTPUT
 
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
