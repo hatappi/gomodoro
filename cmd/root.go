@@ -33,6 +33,7 @@ func Execute() {
 		newRemainCmd(),
 		newInitCmd(),
 		newAddTaskCmd(),
+		newServeCmd(),
 	)
 
 	if err := rootCmd.ExecuteContext(ctx); err != nil {

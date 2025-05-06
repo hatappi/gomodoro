@@ -6,9 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/hatappi/go-kit/log"
+
+	"github.com/hatappi/gomodoro/internal/api/server"
+	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/editor"
-	"github.com/hatappi/gomodoro/internal/task"
 )
 
 const initialText = `# Please write one task per line`
@@ -22,14 +25,37 @@ Please specify the task name in the argument.
 if you doesn't specify task name, editor starts up.
 And add a task using the editor.
 `,
-		RunE: func(_ *cobra.Command, args []string) error {
-			config, err := config.GetConfig()
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			cfg, err := config.GetConfig()
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get config: %w", err)
 			}
 
-			var newTasks []string
+			serverRunner := server.NewRunner(cfg)
 
+			if err := serverRunner.EnsureRunning(ctx); err != nil {
+				log.FromContext(ctx).Error(err, "Failed to ensure API server is running")
+				return fmt.Errorf("failed to ensure API server is running: %w", err)
+			}
+
+			defer func() {
+				if err := serverRunner.Stop(ctx); err != nil {
+					log.FromContext(ctx).Error(err, "Failed to stop API server")
+				}
+			}()
+
+			clientFactory := client.NewFactory(cfg.API)
+			defer func() {
+				if err := clientFactory.Close(); err != nil {
+					log.FromContext(ctx).Error(err, "Failed to close client factory")
+				}
+			}()
+
+			taskClient := clientFactory.Task()
+
+			var newTasks []string
 			if len(args) > 0 {
 				newTasks = append(newTasks, strings.Join(args, " "))
 			}
@@ -41,7 +67,6 @@ And add a task using the editor.
 				}
 
 				for _, l := range lines {
-					// ignore empty string and comment
 					if l == "" || strings.HasPrefix(l, "#") {
 						continue
 					}
@@ -50,12 +75,12 @@ And add a task using the editor.
 				}
 			}
 
-			for _, newTask := range newTasks {
-				if err := task.AddTask(config.TaskFile, newTask); err != nil {
-					return err
+			for _, newTaskTitle := range newTasks {
+				task, err := taskClient.Create(ctx, newTaskTitle)
+				if err != nil {
+					return fmt.Errorf("failed to create task '%s' via API: %w", newTaskTitle, err)
 				}
-
-				fmt.Printf("added '%s'\n", newTask)
+				fmt.Printf("added task '%s' with ID '%s'\n", task.Title, task.ID)
 			}
 
 			return nil

@@ -1,3 +1,4 @@
+version: "2"
 run:
   timeout: 5m
   issues-exit-code: 1
@@ -38,7 +39,9 @@ linters-settings:
     allow:
       - error
       - github.com\/gdamore\/tcell\.Screen
+      - github.com\/gdamore\/tcell\/v2\.Screen
       - github.com\/mitchellh\/mapstructure\.DecodeHookFunc
+      - net
 
   forbidigo:
     forbid:

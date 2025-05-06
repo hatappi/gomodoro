@@ -63,8 +63,6 @@ func NewClient(s tcell.Screen) *IClient {
 }
 
 // GetScreen gets screen.
-//
-//nolint:ireturn
 func (c *IClient) GetScreen() tcell.Screen {
 	return c.screen
 }

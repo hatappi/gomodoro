@@ -8,8 +8,6 @@ import (
 )
 
 // NewScreen initilize screen.
-//
-//nolint:ireturn
 func NewScreen(config *config.Config) (tcell.Screen, error) {
 	s, err := tcell.NewScreen()
 	if err != nil {
