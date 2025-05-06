@@ -62,7 +62,7 @@ jobs:
           fail_level: any
           reporter: github-pr-review
           reviewdog_flags: ${{ steps.reviewdog.outputs.args }}
-          golangci_lint_version: ${{ steps.golangci-lint.version }}
+          golangci_lint_version: "v1.63.4"
 
   test:
     name: Test
