@@ -14,7 +14,16 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage"
 )
 
+const (
+	// Default permissions for directories.
+	dirPermissions = 0o750
+	// Default permissions for files.
+	filePermissions = 0o600
+)
+
 // FileStorage implements storage.Storage using local JSON files.
+//
+//nolint:revive
 type FileStorage struct {
 	pomodoroFile string
 	tasksFile    string
@@ -24,7 +33,7 @@ type FileStorage struct {
 }
 
 // NewFileStorage creates a new file storage instance.
-func NewFileStorage(baseDir string) (storage.Storage, error) {
+func NewFileStorage(baseDir string) (*FileStorage, error) {
 	if baseDir == "" {
 		home, err := homedir.Dir()
 		if err != nil {
@@ -34,7 +43,7 @@ func NewFileStorage(baseDir string) (storage.Storage, error) {
 		baseDir = filepath.Join(home, ".gomodoro")
 	}
 
-	if err := os.MkdirAll(baseDir, 0o755); err != nil {
+	if err := os.MkdirAll(baseDir, dirPermissions); err != nil {
 		return nil, fmt.Errorf("failed to create directory: %w", err)
 	}
 
@@ -54,7 +63,7 @@ func (f *FileStorage) lock() error {
 		return nil
 	}
 
-	lockFile, err := os.OpenFile(f.lockFile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+	lockFile, err := os.OpenFile(f.lockFile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, filePermissions)
 
 	if os.IsExist(err) {
 		return fmt.Errorf("failed to acquire lock, file is locked by another process")
@@ -65,7 +74,9 @@ func (f *FileStorage) lock() error {
 	}
 
 	if _, err = lockFile.WriteString(fmt.Sprintf("%d", os.Getpid())); err != nil {
-		lockFile.Close()
+		if closeErr := lockFile.Close(); closeErr != nil {
+			err = fmt.Errorf("failed to write to lock file and close: %w, close error: %w", err, closeErr)
+		}
 		_ = os.Remove(f.lockFile)
 		return fmt.Errorf("failed to write to lock file: %w", err)
 	}
@@ -84,6 +95,8 @@ func (f *FileStorage) unlock() error {
 	if rmErr := os.Remove(f.lockFile); rmErr != nil {
 		if err == nil {
 			err = rmErr
+		} else {
+			err = fmt.Errorf("failed to close lock file: %w, remove error: %w", err, rmErr)
 		}
 	}
 
@@ -103,7 +116,9 @@ func (f *FileStorage) withFileLock(fn func() error) error {
 	if err := f.lock(); err != nil {
 		return err
 	}
-	defer f.unlock()
+	defer func() {
+		_ = f.unlock()
+	}()
 
 	return fn()
 }
@@ -116,7 +131,7 @@ func (f *FileStorage) SavePomodoro(pomodoro *storage.Pomodoro) error {
 			return fmt.Errorf("failed to marshal pomodoro: %w", err)
 		}
 
-		if err := os.WriteFile(f.pomodoroFile, data, 0o644); err != nil {
+		if err := os.WriteFile(f.pomodoroFile, data, filePermissions); err != nil {
 			return fmt.Errorf("failed to write pomodoro file: %w", err)
 		}
 
@@ -189,7 +204,12 @@ func (f *FileStorage) GetActivePomodoro() (*storage.Pomodoro, error) {
 }
 
 // UpdatePomodoroState updates the state and remaining time of a pomodoro.
-func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState, remainSec int, elapsedSec int) (*storage.Pomodoro, error) {
+func (f *FileStorage) UpdatePomodoroState(
+	id string,
+	state storage.PomodoroState,
+	remainSec int,
+	elapsedSec int,
+) (*storage.Pomodoro, error) {
 	var pomodoro *storage.Pomodoro
 
 	err := f.withFileLock(func() error {
@@ -202,8 +222,8 @@ func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState
 			return fmt.Errorf("failed to read pomodoro file: %w", err)
 		}
 
-		if err := json.Unmarshal(data, &pomodoro); err != nil {
-			return fmt.Errorf("failed to unmarshal pomodoro: %w", err)
+		if unmarshalErr := json.Unmarshal(data, &pomodoro); unmarshalErr != nil {
+			return fmt.Errorf("failed to unmarshal pomodoro: %w", unmarshalErr)
 		}
 
 		if pomodoro.ID != id {
@@ -219,7 +239,7 @@ func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState
 			return fmt.Errorf("failed to marshal updated pomodoro: %w", err)
 		}
 
-		if err := os.WriteFile(f.pomodoroFile, updatedData, 0o644); err != nil {
+		if err := os.WriteFile(f.pomodoroFile, updatedData, filePermissions); err != nil {
 			return fmt.Errorf("failed to write updated pomodoro file: %w", err)
 		}
 
@@ -246,8 +266,8 @@ func (f *FileStorage) DeletePomodoro(id string) error {
 		}
 
 		var p storage.Pomodoro
-		if err := json.Unmarshal(data, &p); err != nil {
-			return fmt.Errorf("failed to unmarshal pomodoro: %w", err)
+		if unmarshalErr := json.Unmarshal(data, &p); unmarshalErr != nil {
+			return fmt.Errorf("failed to unmarshal pomodoro: %w", unmarshalErr)
 		}
 
 		if p.ID != id {
@@ -347,6 +367,7 @@ func (f *FileStorage) UpdateTask(task *storage.Task) error {
 	})
 }
 
+// DeleteTask removes a task by ID from the tasks file.
 func (f *FileStorage) DeleteTask(id string) error {
 	return f.withFileLock(func() error {
 		tasks, err := f.readTasks()
@@ -400,7 +421,7 @@ func (f *FileStorage) writeTasks(tasks []*storage.Task) error {
 		return fmt.Errorf("failed to marshal tasks: %w", err)
 	}
 
-	if err := os.WriteFile(f.tasksFile, data, 0o644); err != nil {
+	if err := os.WriteFile(f.tasksFile, data, filePermissions); err != nil {
 		return fmt.Errorf("failed to write tasks file: %w", err)
 	}
 

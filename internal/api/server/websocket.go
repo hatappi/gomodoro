@@ -24,7 +24,7 @@ type EventWebSocketHandler struct {
 // NewEventWebSocketHandler creates a new EventWebSocketHandler with the given logger and event bus.
 func NewEventWebSocketHandler(logger logr.Logger, eventBus event.EventBus) *EventWebSocketHandler {
 	return &EventWebSocketHandler{
-		upgrader: websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }},
+		upgrader: websocket.Upgrader{CheckOrigin: func(_ *http.Request) bool { return true }},
 		clients:  make(map[string]*websocket.Conn),
 		logger:   logger,
 		eventBus: eventBus,
@@ -49,7 +49,9 @@ func (h *EventWebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		h.mu.Lock()
 		delete(h.clients, clientID)
 		h.mu.Unlock()
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			h.logger.Error(err, "Error closing WebSocket connection", "clientID", clientID)
+		}
 		h.logger.Info("WebSocket client disconnected", "clientID", clientID)
 	}()
 
@@ -88,7 +90,7 @@ func (h *EventWebSocketHandler) Broadcast(event event.WebSocketEvent, excludeCli
 
 // SetupEventSubscription subscribes to events on the event bus and broadcasts them to WebSocket clients.
 func (h *EventWebSocketHandler) SetupEventSubscription() {
-	var eventTypes []string
+	eventTypes := make([]string, 0, len(event.AllEventTypes))
 	for _, eventType := range event.AllEventTypes {
 		eventTypes = append(eventTypes, string(eventType))
 	}

@@ -11,6 +11,14 @@ import (
 	"time"
 )
 
+const (
+	// defaultClientTimeout is the default timeout for HTTP client requests.
+	defaultClientTimeout = 10 * time.Second
+
+	// httpErrorStatusCode is the status code threshold for HTTP errors.
+	httpErrorStatusCode = 400
+)
+
 // Config represents configuration for API clients.
 type Config struct {
 	BaseURL    string
@@ -41,11 +49,12 @@ type BaseClient struct {
 	httpClient *http.Client
 }
 
+// NewBaseClient creates a new BaseClient with the given base URL and options.
 func NewBaseClient(baseURL string, options ...Option) *BaseClient {
 	config := &Config{
 		BaseURL: baseURL,
 		HTTPClient: &http.Client{
-			Timeout: 10 * time.Second,
+			Timeout: defaultClientTimeout,
 		},
 	}
 
@@ -73,6 +82,8 @@ type ErrorData struct {
 }
 
 // ErrorResponse represents an API error response.
+//
+//nolint:errname
 type ErrorResponse struct {
 	StatusCode int    `json:"-"`
 	Code       string `json:"code"`
@@ -112,14 +123,16 @@ func (c *BaseClient) doRequest(ctx context.Context, method, path string, body in
 }
 
 func (c *BaseClient) parseResponse(resp *http.Response, result interface{}) error {
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode >= httpErrorStatusCode {
 		var apiResp APIResponse
 		if err := json.Unmarshal(body, &apiResp); err != nil {
 			return &ErrorResponse{

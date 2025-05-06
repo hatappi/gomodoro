@@ -17,13 +17,15 @@ func ErrorHandler() func(next http.Handler) http.Handler {
 
 			defer func() {
 				if err := recover(); err != nil {
-					logger.Error(fmt.Errorf("Panic recovered"), "Panic recovered", "error", err)
+					logger.Error(fmt.Errorf("panic recovered"), "panic recovered", "error", err)
 
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
-					json.NewEncoder(w).Encode(map[string]string{
+					if err := json.NewEncoder(w).Encode(map[string]string{
 						"error": "Internal server error",
-					})
+					}); err != nil {
+						logger.Error(err, "failed to encode error response")
+					}
 				}
 			}()
 

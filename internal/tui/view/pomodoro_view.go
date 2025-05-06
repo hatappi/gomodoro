@@ -5,7 +5,6 @@ import (
 	"context"
 
 	"github.com/hatappi/gomodoro/internal/config"
-	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
@@ -27,7 +26,7 @@ func NewPomodoroView(cfg *config.Config, sc screen.Client) *PomodoroView {
 }
 
 // SelectNextTask displays options for continuing or changing tasks after a pomodoro cycle.
-func (v *PomodoroView) SelectNextTask(ctx context.Context, currentTask *core.Task) (constants.PomodoroAction, error) {
+func (v *PomodoroView) SelectNextTask(_ context.Context) (constants.PomodoroAction, error) {
 	w, h := v.screenClient.ScreenSize()
 	draw.Sentence(
 		v.screenClient.GetScreen(),

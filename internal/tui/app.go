@@ -3,6 +3,7 @@ package tui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -19,6 +20,11 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
 	"github.com/hatappi/gomodoro/internal/tui/view"
+)
+
+// Constants for timer control.
+const (
+	continueTimerSignal = -1 // Signal to continue timer processing
 )
 
 // App is the main TUI application controller.
@@ -211,7 +217,7 @@ func (a *App) Run(ctx context.Context) error {
 			go cf(ctx, task.Title, pomodoro.Phase == event.PomodoroPhaseWork, res.elapsedTime)
 		}
 
-		action, err := a.pomodoroView.SelectNextTask(ctx, task)
+		action, err := a.pomodoroView.SelectNextTask(ctx)
 		if err != nil {
 			return err
 		}
@@ -228,13 +234,15 @@ func (a *App) Run(ctx context.Context) error {
 				return err
 			}
 			task = newTask
+		case constants.PomodoroActionNone:
+			// no action
 		}
 	}
 }
 
 // Finish cleans up resources when the app is closed.
-func (a *App) Finish() {
-	_, _ = a.pomodoroClient.Stop(context.Background())
+func (a *App) Finish(ctx context.Context) {
+	_, _ = a.pomodoroClient.Stop(ctx)
 	a.screenClient.Finish()
 }
 
@@ -245,62 +253,76 @@ func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 		return nil, err
 	}
 
-	var task *core.Task
-
-	if len(tasks) > 0 {
-		var action constants.TaskAction
-		task, action, err = a.taskView.SelectTaskName(ctx, tasks)
-		if err != nil {
-			return nil, err
-		}
-
-		switch action {
-		case constants.TaskActionCancel:
-			return nil, gomodoro_error.ErrCancel
-		case constants.TaskActionDelete:
-			if task != nil {
-				// Delete task
-				if err := a.deleteTask(ctx, task.ID); err != nil {
-					return nil, err
-				}
-
-				// Reload tasks after deletion
-				tasks, err = a.loadTasks(ctx)
-				if err != nil {
-					return nil, err
-				}
-
-				// If no tasks left, create a new one
-				if len(tasks) == 0 {
-					task = nil
-				} else {
-					// Reselect after deletion
-					task, _, err = a.taskView.SelectTaskName(ctx, tasks)
-					if err != nil {
-						return nil, err
-					}
-				}
-			}
-		case constants.TaskActionNew:
-			task = nil
-		}
+	if len(tasks) == 0 {
+		return a.handleNewTask(ctx)
 	}
 
+	task, action, err := a.taskView.SelectTaskName(ctx, tasks)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.processTaskAction(ctx, task, action)
+}
+
+// processTaskAction handles the action selected by the user for a task.
+func (a *App) processTaskAction(ctx context.Context, task *core.Task, action constants.TaskAction) (*core.Task, error) {
+	switch action {
+	case constants.TaskActionCancel:
+		return nil, gomodoro_error.ErrCancel
+
+	case constants.TaskActionDelete:
+		return a.handleDeleteTask(ctx, task)
+
+	case constants.TaskActionNew:
+		return a.handleNewTask(ctx)
+
+	case constants.TaskActionNone:
+		// No action, return selected task
+		return task, nil
+	}
+
+	return task, nil
+}
+
+// handleDeleteTask deletes a task and returns a new selected task.
+func (a *App) handleDeleteTask(ctx context.Context, task *core.Task) (*core.Task, error) {
 	if task == nil {
-		// Create new task
-		name, err := a.taskView.CreateTaskName(ctx)
-		if err != nil {
-			return nil, err
-		}
+		//nolint:nilnil
+		return nil, nil
+	}
 
-		task, err = a.createTask(ctx, name)
-		if err != nil {
-			return nil, err
-		}
+	if err := a.deleteTask(ctx, task.ID); err != nil {
+		return nil, err
+	}
 
-		if err := a.saveTask(ctx, task); err != nil {
-			return nil, err
-		}
+	tasks, err := a.loadTasks(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(tasks) == 0 {
+		return a.handleNewTask(ctx)
+	}
+
+	task, _, err = a.taskView.SelectTaskName(ctx, tasks)
+	return task, err
+}
+
+// handleNewTask creates a new task.
+func (a *App) handleNewTask(ctx context.Context) (*core.Task, error) {
+	name, err := a.taskView.CreateTaskName(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	task, err := a.createTask(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := a.saveTask(ctx, task); err != nil {
+		return nil, err
 	}
 
 	return task, nil
@@ -384,35 +406,12 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	for {
 		select {
 		case e := <-a.screenClient.GetEventChan():
-			action, err := a.timerView.HandleScreenEvent(ctx, e)
+			elapsedTime, err := a.handleScreenEvent(ctx, e)
 			if err != nil {
-				if err == gomodoro_error.ErrCancel {
-					elapsedTime, err := a.getCurrentElapsedTime(ctx)
-					if err != nil {
-						log.FromContext(ctx).Error(err, "failed to get current elapsed time")
-						return 0, gomodoro_error.ErrCancel
-					}
-					return elapsedTime, gomodoro_error.ErrCancel
-				}
-				return 0, err
+				return elapsedTime, err
 			}
-
-			switch action {
-			case constants.TimerActionCancel:
-				elapsedTime, err := a.getCurrentElapsedTime(ctx)
-				if err != nil {
-					log.FromContext(ctx).Error(err, "failed to get current elapsed time")
-					return 0, gomodoro_error.ErrCancel
-				}
-				return elapsedTime, gomodoro_error.ErrCancel
-			case constants.TimerActionStop:
-				_, stopErr := a.pomodoroClient.Stop(ctx)
-				if stopErr != nil {
-					log.FromContext(ctx).Error(stopErr, "failed to stop pomodoro")
-					return 0, stopErr
-				}
-			case constants.TimerActionToggle:
-				a.toggleTimer(ctx)
+			if elapsedTime != continueTimerSignal {
+				return elapsedTime, nil
 			}
 
 		case e := <-ch:
@@ -420,44 +419,103 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			if !ok {
 				continue
 			}
-			log.FromContext(ctx).Info("event", "event", ev, "remainSec", ev.RemainingTime.Seconds())
 
-			remainSec := int(ev.RemainingTime.Seconds())
-
-			err := a.timerView.DrawTimer(ctx, remainSec, taskName, ev.Phase, ev.Type == event.PomodoroPaused)
+			elapsedTime, err := a.handlePomodoroEvent(ctx, ev, taskName)
 			if err != nil {
-				if err != gomodoro_error.ErrScreenSmall {
-					return 0, err
-				}
-
-				a.screenClient.Clear()
-				w, h := a.screenClient.ScreenSize()
-				a.errorView.DrawSmallScreen(ctx, w, h)
-
-				for {
-					e := <-a.screenClient.GetEventChan()
-					switch e.(type) {
-					case screen.EventCancel:
-						elapsedTime, err := a.getCurrentElapsedTime(ctx)
-						if err != nil {
-							log.FromContext(ctx).Error(err, "failed to get current elapsed time")
-							return 0, gomodoro_error.ErrCancel
-						}
-						return elapsedTime, gomodoro_error.ErrCancel
-					case screen.EventScreenResize:
-						return a.runTimer(ctx, taskName)
-					}
-				}
+				return elapsedTime, err
 			}
-
-			if ev.Type == event.PomodoroCompleted || ev.Type == event.PomodoroStopped {
-				elapsedTime, err := a.getCurrentElapsedTime(ctx)
-				if err != nil {
-					log.FromContext(ctx).Error(err, "failed to get current elapsed time")
-					return 0, err
-				}
+			if elapsedTime != continueTimerSignal {
 				return elapsedTime, nil
 			}
+		}
+	}
+}
+
+// handleScreenEvent processes screen events and returns elapsed time and error if action is completed.
+func (a *App) handleScreenEvent(ctx context.Context, e interface{}) (int, error) {
+	action, err := a.timerView.HandleScreenEvent(ctx, e)
+	if err != nil {
+		if errors.Is(err, gomodoro_error.ErrCancel) {
+			elapsedTime, timeErr := a.getCurrentElapsedTime(ctx)
+			if timeErr != nil {
+				log.FromContext(ctx).Error(timeErr, "failed to get current elapsed time")
+				return 0, gomodoro_error.ErrCancel
+			}
+			return elapsedTime, gomodoro_error.ErrCancel
+		}
+		return 0, err
+	}
+
+	switch action {
+	case constants.TimerActionCancel:
+		elapsedTime, err := a.getCurrentElapsedTime(ctx)
+		if err != nil {
+			log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+			return 0, gomodoro_error.ErrCancel
+		}
+		return elapsedTime, gomodoro_error.ErrCancel
+	case constants.TimerActionStop:
+		_, stopErr := a.pomodoroClient.Stop(ctx)
+		if stopErr != nil {
+			log.FromContext(ctx).Error(stopErr, "failed to stop pomodoro")
+			return 0, stopErr
+		}
+	case constants.TimerActionToggle:
+		a.toggleTimer(ctx)
+	case constants.TimerActionNone:
+		// no action
+	}
+
+	return continueTimerSignal, nil // Signal to continue processing
+}
+
+// handlePomodoroEvent processes pomodoro events and handles UI rendering.
+func (a *App) handlePomodoroEvent(ctx context.Context, ev event.PomodoroEvent, taskName string) (int, error) {
+	log.FromContext(ctx).Info("event", "event", ev, "remainSec", ev.RemainingTime.Seconds())
+
+	remainSec := int(ev.RemainingTime.Seconds())
+
+	err := a.timerView.DrawTimer(ctx, remainSec, taskName, ev.Phase, ev.Type == event.PomodoroPaused)
+	if err != nil {
+		if !errors.Is(err, gomodoro_error.ErrScreenSmall) {
+			return 0, err
+		}
+
+		return a.handleSmallScreen(ctx, taskName)
+	}
+
+	if ev.Type == event.PomodoroCompleted || ev.Type == event.PomodoroStopped {
+		elapsedTime, err := a.getCurrentElapsedTime(ctx)
+		if err != nil {
+			log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+			return 0, err
+		}
+		return elapsedTime, nil
+	}
+
+	return continueTimerSignal, nil // Signal to continue processing
+}
+
+// handleSmallScreen handles the case when the screen is too small.
+func (a *App) handleSmallScreen(ctx context.Context, taskName string) (int, error) {
+	a.screenClient.Clear()
+	w, h := a.screenClient.ScreenSize()
+	if err := a.errorView.DrawSmallScreen(ctx, w, h); err != nil {
+		log.FromContext(ctx).Error(err, "failed to draw small screen")
+	}
+
+	for {
+		e := <-a.screenClient.GetEventChan()
+		switch e.(type) {
+		case screen.EventCancel:
+			elapsedTime, err := a.getCurrentElapsedTime(ctx)
+			if err != nil {
+				log.FromContext(ctx).Error(err, "failed to get current elapsed time")
+				return 0, gomodoro_error.ErrCancel
+			}
+			return elapsedTime, gomodoro_error.ErrCancel
+		case screen.EventScreenResize:
+			return a.runTimer(ctx, taskName)
 		}
 	}
 }

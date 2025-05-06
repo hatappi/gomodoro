@@ -48,12 +48,18 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) error {
 
 // RespondWithError sends an error response.
 func RespondWithError(w http.ResponseWriter, status int, code, message string) {
-	WriteJSON(w, status, NewErrorResponse(code, message))
+	if err := WriteJSON(w, status, NewErrorResponse(code, message)); err != nil {
+		// If we can't write the error response, log it and write a simpler error
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // RespondWithJSON sends a success response.
 func RespondWithJSON(w http.ResponseWriter, status int, data interface{}) {
-	WriteJSON(w, status, NewSuccessResponse(data))
+	if err := WriteJSON(w, status, NewSuccessResponse(data)); err != nil {
+		// If we can't write the JSON response, log it and write a simpler error
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // Timestamp represents a custom time format for JSON serialization.

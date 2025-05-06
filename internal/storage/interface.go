@@ -22,9 +22,11 @@ type PomodoroPhase string
 
 const (
 	// PomodoroPhaseWork indicates a work period.
-	PomodoroPhaseWork       PomodoroPhase = "work"
+	PomodoroPhaseWork PomodoroPhase = "work"
+	// PomodoroPhaseShortBreak indicates a short break period.
 	PomodoroPhaseShortBreak PomodoroPhase = "short_break"
-	PomodoroPhaseLongBreak  PomodoroPhase = "long_break"
+	// PomodoroPhaseLongBreak indicates a long break period.
+	PomodoroPhaseLongBreak PomodoroPhase = "long_break"
 )
 
 // Pomodoro represents a pomodoro session that can be persisted.

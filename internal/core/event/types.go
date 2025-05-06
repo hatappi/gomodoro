@@ -6,6 +6,8 @@ import (
 )
 
 // EventType represents the type of an event.
+//
+//nolint:revive
 type EventType string
 
 const (
@@ -32,6 +34,7 @@ const (
 	TaskCompleted EventType = "task.completed"
 )
 
+// AllEventTypes contains a list of all available event types in the system.
 var AllEventTypes = []EventType{
 	PomodoroStarted, PomodoroPaused, PomodoroResumed,
 	PomodoroCompleted, PomodoroStopped, PomodoroTick,
@@ -60,9 +63,12 @@ const (
 type PomodoroPhase string
 
 const (
-	PomodoroPhaseWork       PomodoroPhase = "work"
+	// PomodoroPhaseWork represents the work/focus phase of a pomodoro session.
+	PomodoroPhaseWork PomodoroPhase = "work"
+	// PomodoroPhaseShortBreak represents the short break phase between pomodoro sessions.
 	PomodoroPhaseShortBreak PomodoroPhase = "short_break"
-	PomodoroPhaseLongBreak  PomodoroPhase = "long_break"
+	// PomodoroPhaseLongBreak represents the long break phase after completing multiple pomodoro sessions.
+	PomodoroPhaseLongBreak PomodoroPhase = "long_break"
 )
 
 // PomodoroEvent represents events related to pomodoro sessions.

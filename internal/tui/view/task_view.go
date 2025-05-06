@@ -63,7 +63,7 @@ func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition
 }
 
 // SelectTaskName displays a list of tasks and allows the user to select one.
-func (v *TaskView) SelectTaskName(ctx context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
+func (v *TaskView) SelectTaskName(_ context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
 	offset := 0
 	cursorPosition := 0
 	for {
@@ -129,7 +129,7 @@ func (v *TaskView) SelectTaskName(ctx context.Context, tasks []*core.Task) (*cor
 }
 
 // CreateTaskName displays an input prompt for creating a new task.
-func (v *TaskView) CreateTaskName(ctx context.Context) (string, error) {
+func (v *TaskView) CreateTaskName(_ context.Context) (string, error) {
 	newTaskName := []rune{}
 	s := v.screenClient.GetScreen()
 	for {

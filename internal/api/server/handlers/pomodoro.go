@@ -35,6 +35,7 @@ type PomodoroResponse struct {
 	ElapsedTime   int                 `json:"elapsed_time_sec"`
 }
 
+// StartPomodoroRequest represents the request body for starting a new pomodoro timer.
 type StartPomodoroRequest struct {
 	WorkDuration      int    `json:"work_duration_sec"`
 	BreakDuration     int    `json:"break_duration_sec"`
@@ -42,6 +43,7 @@ type StartPomodoroRequest struct {
 	TaskID            string `json:"task_id,omitempty"`
 }
 
+// GetCurrentPomodoro handles GET requests for the current pomodoro state.
 func (h *PomodoroHandler) GetCurrentPomodoro(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -62,6 +64,7 @@ func (h *PomodoroHandler) GetCurrentPomodoro(w http.ResponseWriter, r *http.Requ
 	RespondWithJSON(w, http.StatusOK, response)
 }
 
+// StartPomodoro handles POST requests to start a new pomodoro timer.
 func (h *PomodoroHandler) StartPomodoro(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -77,7 +80,13 @@ func (h *PomodoroHandler) StartPomodoro(w http.ResponseWriter, r *http.Request) 
 	breakDurationTime := time.Duration(req.BreakDuration) * time.Second
 	longBreakDurationTime := time.Duration(req.LongBreakDuration) * time.Second
 
-	pomodoro, err := h.pomodoroService.StartPomodoro(ctx, workDurationTime, breakDurationTime, longBreakDurationTime, req.TaskID)
+	pomodoro, err := h.pomodoroService.StartPomodoro(
+		ctx,
+		workDurationTime,
+		breakDurationTime,
+		longBreakDurationTime,
+		req.TaskID,
+	)
 	if err != nil {
 		logger.Error(err, "Failed to start pomodoro")
 		RespondWithError(w, http.StatusInternalServerError, "internal_error", "Failed to start pomodoro")
@@ -88,6 +97,7 @@ func (h *PomodoroHandler) StartPomodoro(w http.ResponseWriter, r *http.Request) 
 	RespondWithJSON(w, http.StatusCreated, response)
 }
 
+// PausePomodoro handles POST requests to pause the current active pomodoro timer.
 func (h *PomodoroHandler) PausePomodoro(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -115,6 +125,7 @@ func (h *PomodoroHandler) PausePomodoro(w http.ResponseWriter, r *http.Request) 
 	RespondWithJSON(w, http.StatusOK, response)
 }
 
+// ResumePomodoro handles POST requests to resume a paused pomodoro timer.
 func (h *PomodoroHandler) ResumePomodoro(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -142,6 +153,7 @@ func (h *PomodoroHandler) ResumePomodoro(w http.ResponseWriter, r *http.Request)
 	RespondWithJSON(w, http.StatusOK, response)
 }
 
+// StopPomodoro handles POST requests to stop the current active pomodoro timer.
 func (h *PomodoroHandler) StopPomodoro(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)

@@ -68,9 +68,11 @@ func (s *Server) setupMiddleware() {
 
 // setupRoutes configures the routes for the server.
 func (s *Server) setupRoutes() {
-	s.router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+	s.router.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			s.logger.Error(err, "Failed to write health check response")
+		}
 	})
 
 	s.router.Route("/api", func(r chi.Router) {

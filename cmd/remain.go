@@ -12,6 +12,9 @@ import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
+// secondsPerMinute represents the number of seconds in a minute.
+const secondsPerMinute = 60
+
 func newRemainCmd() *cobra.Command {
 	remainCmd := &cobra.Command{
 		Use:   "remain",
@@ -28,7 +31,11 @@ func newRemainCmd() *cobra.Command {
 			}
 
 			factory := client.NewFactory(cfg.API)
-			defer factory.Close()
+			defer func() {
+				// Since remain.go command is often used in status bars,
+				// we don't want to print errors to stdout, so we just ignore the error here
+				_ = factory.Close()
+			}()
 
 			pomodoroClient := factory.Pomodoro()
 
@@ -50,8 +57,8 @@ func newRemainCmd() *cobra.Command {
 
 			var remainingStr string
 			if slices.Contains([]event.PomodoroState{event.PomodoroStateActive, event.PomodoroStatePaused}, pomodoro.State) {
-				minutes := pomodoro.RemainingTime / 60
-				seconds := pomodoro.RemainingTime % 60
+				minutes := pomodoro.RemainingTime / secondsPerMinute
+				seconds := pomodoro.RemainingTime % secondsPerMinute
 
 				remainingStr = fmt.Sprintf("%02d:%02d", minutes, seconds)
 			} else {

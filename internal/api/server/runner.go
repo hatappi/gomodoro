@@ -15,6 +15,11 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage/file"
 )
 
+const (
+	// serverShutdownTimeout is the maximum time to wait for the server to shut down gracefully.
+	serverShutdownTimeout = 5 * time.Second
+)
+
 // Runner manages API server lifecycle.
 type Runner struct {
 	config    *config.Config
@@ -99,7 +104,7 @@ func (r *Runner) Stop(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 	logger.Info("Stopping API server...")
 
-	stopCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	stopCtx, cancel := context.WithTimeout(ctx, serverShutdownTimeout)
 	defer cancel()
 
 	err := server.Stop(stopCtx)
@@ -124,7 +129,11 @@ func (r *Runner) IsRunning() bool {
 func (r *Runner) EnsureRunning(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 	clientFactory := client.NewFactory(r.config.API)
-	defer clientFactory.Close()
+	defer func() {
+		if err := clientFactory.Close(); err != nil {
+			logger.Error(err, "Failed to close client factory")
+		}
+	}()
 
 	_, err := clientFactory.Pomodoro().GetCurrent(ctx)
 	if err == nil {

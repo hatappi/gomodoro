@@ -29,9 +29,12 @@ func NewWebSocketClient(url string) *WebSocketClientImpl {
 
 // Connect connects to the WebSocket server.
 func (c *WebSocketClientImpl) Connect() error {
-	conn, _, err := websocket.DefaultDialer.Dial(c.url, nil)
+	conn, resp, err := websocket.DefaultDialer.Dial(c.url, nil)
 	if err != nil {
 		return err
+	}
+	if resp != nil {
+		_ = resp.Body.Close()
 	}
 
 	c.mu.Lock()
@@ -47,7 +50,7 @@ func (c *WebSocketClientImpl) Connect() error {
 // readPump continuously reads messages from the WebSocket connection.
 func (c *WebSocketClientImpl) readPump() {
 	defer func() {
-		c.conn.Close()
+		_ = c.conn.Close()
 	}()
 
 	for {

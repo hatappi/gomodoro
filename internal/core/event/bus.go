@@ -10,6 +10,8 @@ import (
 type Handler func(event interface{})
 
 // EventBus is an interface for event publishing and subscription.
+//
+//nolint:revive
 type EventBus interface {
 	// Publish sends an event to all subscribers of that event type
 	Publish(event EventInfo)
@@ -23,7 +25,8 @@ type EventBus interface {
 	// SubscribeMulti registers a handler for multiple event types and returns a slice of subscription IDs
 	SubscribeMulti(eventTypes []string, handler Handler) []string
 
-	// SubscribeChannel registers handlers for multiple event types and returns a channel to receive events and an unsubscribe function
+	// SubscribeChannel registers handlers for multiple event types
+	// Returns a channel to receive events and an unsubscribe function
 	SubscribeChannel(eventTypes []string) (<-chan interface{}, func())
 }
 

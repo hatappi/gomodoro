@@ -25,6 +25,9 @@ const (
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
 	// DefaultUnixDomainScoketPath default unix domain socket file path.
 	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
+
+	// DefaultAPITimeout default timeout for API operations in seconds.
+	DefaultAPITimeout = 10
 )
 
 // Config config for gomodoro.
@@ -39,6 +42,7 @@ type Config struct {
 	API                  APIConfig      `mapstructure:"api"`
 }
 
+// APIConfig contains configuration options for the API server.
 type APIConfig struct {
 	Addr           string        `mapstructure:"addr"`
 	ReadTimeout    time.Duration `mapstructure:"read_timeout"`
@@ -108,9 +112,9 @@ func DefaultConfig() *Config {
 			Cursor:              tcell.ColorGreen,
 		},
 		API: APIConfig{
-			ReadTimeout:    time.Second * 10,
-			WriteTimeout:   time.Second * 10,
-			RequestTimeout: time.Second * 10,
+			ReadTimeout:    time.Second * DefaultAPITimeout,
+			WriteTimeout:   time.Second * DefaultAPITimeout,
+			RequestTimeout: time.Second * DefaultAPITimeout,
 		},
 	}
 }

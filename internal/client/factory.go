@@ -8,6 +8,9 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
+// Default timeout duration in seconds.
+const defaultTimeoutSeconds = 10
+
 // Factory provides a convenient way to create and manage API clients.
 type Factory struct {
 	pomodoro *PomodoroClient
@@ -18,7 +21,7 @@ type Factory struct {
 // NewFactory creates a new client factory with the given API configuration and options.
 func NewFactory(apiConfig config.APIConfig) *Factory {
 	httpClientOpts := []Option{
-		WithTimeout(10 * time.Second),
+		WithTimeout(defaultTimeoutSeconds * time.Second),
 	}
 
 	factory := &Factory{

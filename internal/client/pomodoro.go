@@ -48,9 +48,13 @@ func (c *PomodoroClient) GetCurrent(ctx context.Context) (*PomodoroResponse, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// Handle 404 or empty response case
 	if resp.StatusCode == http.StatusNotFound || resp.ContentLength == 0 {
+		//nolint:nilnil
 		return nil, nil
 	}
 
@@ -63,7 +67,12 @@ func (c *PomodoroClient) GetCurrent(ctx context.Context) (*PomodoroResponse, err
 }
 
 // Start begins a new pomodoro session.
-func (c *PomodoroClient) Start(ctx context.Context, workDuration, breakDuration time.Duration, longBreakDuration time.Duration, taskID string) (*PomodoroResponse, error) {
+func (c *PomodoroClient) Start(
+	ctx context.Context,
+	workDuration, breakDuration time.Duration,
+	longBreakDuration time.Duration,
+	taskID string,
+) (*PomodoroResponse, error) {
 	req := StartPomodoroRequest{
 		WorkDuration:      int(workDuration.Seconds()),
 		BreakDuration:     int(breakDuration.Seconds()),
@@ -75,6 +84,9 @@ func (c *PomodoroClient) Start(ctx context.Context, workDuration, breakDuration 
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result PomodoroResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -90,6 +102,9 @@ func (c *PomodoroClient) Pause(ctx context.Context) (*PomodoroResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result PomodoroResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -105,6 +120,9 @@ func (c *PomodoroClient) Resume(ctx context.Context) (*PomodoroResponse, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result PomodoroResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -120,6 +138,9 @@ func (c *PomodoroClient) Stop(ctx context.Context) (*PomodoroResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result PomodoroResponse
 	if err := c.parseResponse(resp, &result); err != nil {

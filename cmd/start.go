@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -87,19 +88,23 @@ func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	}
 
 	clientFactory := client.NewFactory(cfg.API)
-	defer clientFactory.Close()
+	defer func() {
+		if err := clientFactory.Close(); err != nil {
+			logger.Error(err, "Failed to close client factory")
+		}
+	}()
 
 	app, err := tui.NewApp(cfg, clientFactory, opts...)
 	if err != nil {
 		logger.Error(err, "Failed to create TUI App")
 		return err
 	}
-	defer app.Finish()
+	defer app.Finish(ctx)
 
 	logger.Info("Starting Pomodoro session...")
 	startErr := app.Run(ctx)
 	if startErr != nil {
-		if startErr == gomodoro_error.ErrCancel {
+		if errors.Is(startErr, gomodoro_error.ErrCancel) {
 			logger.Info("Pomodoro session canceled by user.")
 			return nil
 		}

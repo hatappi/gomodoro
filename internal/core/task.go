@@ -34,7 +34,7 @@ func NewTaskService(storage storage.TaskStorage, eventBus event.EventBus) *TaskS
 }
 
 // CreateTask creates a new task.
-func (s *TaskService) CreateTask(ctx context.Context, title string) (*Task, error) {
+func (s *TaskService) CreateTask(_ context.Context, title string) (*Task, error) {
 	if title == "" {
 		return nil, fmt.Errorf("task title cannot be empty")
 	}
@@ -55,6 +55,7 @@ func (s *TaskService) CreateTask(ctx context.Context, title string) (*Task, erro
 	return s.storageTaskToCore(task), nil
 }
 
+// GetAllTasks retrieves all tasks.
 func (s *TaskService) GetAllTasks() ([]*Task, error) {
 	tasks, err := s.storage.GetTasks()
 	if err != nil {
@@ -69,6 +70,7 @@ func (s *TaskService) GetAllTasks() ([]*Task, error) {
 	return result, nil
 }
 
+// GetTaskByID retrieves a task by its ID.
 func (s *TaskService) GetTaskByID(id string) (*Task, error) {
 	task, err := s.storage.GetTaskByID(id)
 	if err != nil {
@@ -78,7 +80,8 @@ func (s *TaskService) GetTaskByID(id string) (*Task, error) {
 	return s.storageTaskToCore(task), nil
 }
 
-func (s *TaskService) UpdateTask(ctx context.Context, id string, title string, completed bool) (*Task, error) {
+// UpdateTask updates an existing task with the provided information.
+func (s *TaskService) UpdateTask(_ context.Context, id string, title string, completed bool) (*Task, error) {
 	task, err := s.storage.GetTaskByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get task: %w", err)
@@ -105,7 +108,8 @@ func (s *TaskService) UpdateTask(ctx context.Context, id string, title string, c
 	return s.storageTaskToCore(task), nil
 }
 
-func (s *TaskService) DeleteTask(ctx context.Context, id string) error {
+// DeleteTask removes a task from storage by its ID.
+func (s *TaskService) DeleteTask(_ context.Context, id string) error {
 	task, err := s.storage.GetTaskByID(id)
 	if err != nil {
 		return fmt.Errorf("failed to get task: %w", err)

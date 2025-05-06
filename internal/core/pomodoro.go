@@ -47,7 +47,13 @@ func NewPomodoroService(storage storage.PomodoroStorage, eventBus event.EventBus
 }
 
 // StartPomodoro begins a new pomodoro session.
-func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, breakDuration time.Duration, longBreakDuration time.Duration, taskID string) (*Pomodoro, error) {
+func (s *PomodoroService) StartPomodoro(
+	ctx context.Context,
+	workDuration,
+	breakDuration time.Duration,
+	longBreakDuration time.Duration,
+	taskID string,
+) (*Pomodoro, error) {
 	latestPomodoro, err := s.GetLatestPomodoro()
 	if err != nil {
 		return nil, fmt.Errorf("failed to check for latest pomodoro: %w", err)
@@ -57,30 +63,12 @@ func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, break
 		return nil, fmt.Errorf("latest pomodoro session already exists")
 	}
 
-	var phase storage.PomodoroPhase
-	var duration time.Duration
-	var phaseCount int
-
-	if latestPomodoro == nil {
-		phase = storage.PomodoroPhaseWork
-		duration = workDuration
-		phaseCount = 1
-	} else {
-		phaseCount = latestPomodoro.PhaseCount + 1
-
-		if slices.Contains([]event.PomodoroPhase{event.PomodoroPhaseShortBreak, event.PomodoroPhaseLongBreak}, latestPomodoro.Phase) {
-			phase = storage.PomodoroPhaseWork
-			duration = workDuration
-		} else {
-			if time.Duration(phaseCount)%6 == 0 {
-				phase = storage.PomodoroPhaseLongBreak
-				duration = longBreakDuration
-			} else {
-				phase = storage.PomodoroPhaseShortBreak
-				duration = breakDuration
-			}
-		}
-	}
+	phase, duration, phaseCount := s.determinePhaseAndDuration(
+		latestPomodoro,
+		workDuration,
+		breakDuration,
+		longBreakDuration,
+	)
 
 	pomodoro := &storage.Pomodoro{
 		ID:                uuid.New().String(),
@@ -107,7 +95,7 @@ func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, break
 }
 
 // PausePomodoro pauses an active pomodoro session.
-func (s *PomodoroService) PausePomodoro(ctx context.Context, id string) (*Pomodoro, error) {
+func (s *PomodoroService) PausePomodoro(_ context.Context, id string) (*Pomodoro, error) {
 	s.stopTimer()
 
 	active, err := s.storage.GetActivePomodoro()
@@ -165,7 +153,7 @@ func (s *PomodoroService) ResumePomodoro(ctx context.Context, id string) (*Pomod
 }
 
 // StopPomodoro stops the current pomodoro session.
-func (s *PomodoroService) StopPomodoro(ctx context.Context, id string) error {
+func (s *PomodoroService) StopPomodoro(_ context.Context, id string) error {
 	s.stopTimer()
 
 	active, err := s.storage.GetActivePomodoro()
@@ -189,7 +177,7 @@ func (s *PomodoroService) StopPomodoro(ctx context.Context, id string) error {
 }
 
 // DeletePomodoro deletes a pomodoro session by ID.
-func (s *PomodoroService) DeletePomodoro(ctx context.Context, id string) error {
+func (s *PomodoroService) DeletePomodoro(_ context.Context, id string) error {
 	err := s.storage.DeletePomodoro(id)
 	if err != nil {
 		return fmt.Errorf("failed to delete pomodoro: %w", err)
@@ -205,6 +193,7 @@ func (s *PomodoroService) GetActivePomodoro() (*Pomodoro, error) {
 	}
 
 	if pomodoro == nil {
+		//nolint:nilnil
 		return nil, nil
 	}
 
@@ -219,6 +208,7 @@ func (s *PomodoroService) GetLatestPomodoro() (*Pomodoro, error) {
 	}
 
 	if pomodoro == nil {
+		//nolint:nilnil
 		return nil, nil
 	}
 
@@ -241,7 +231,12 @@ func (s *PomodoroService) startTimer(ctx context.Context, id string, duration ti
 			case <-s.ticker.C:
 				remainingSecs--
 
-				pomodoro, err := s.storage.UpdatePomodoroState(id, storage.PomodoroStateActive, remainingSecs, int(originalDuration.Seconds())-remainingSecs)
+				pomodoro, err := s.storage.UpdatePomodoroState(
+					id,
+					storage.PomodoroStateActive,
+					remainingSecs,
+					int(originalDuration.Seconds())-remainingSecs,
+				)
 				if err != nil {
 					log.FromContext(ctx).Error(err, "Failed to update pomodoro time")
 				}
@@ -249,7 +244,12 @@ func (s *PomodoroService) startTimer(ctx context.Context, id string, duration ti
 				s.publishPomodoroEvent(event.PomodoroTick, pomodoro)
 
 				if remainingSecs <= 0 {
-					pomodoro, err := s.storage.UpdatePomodoroState(id, storage.PomodoroStateFinished, 0, int(originalDuration.Seconds()))
+					pomodoro, err := s.storage.UpdatePomodoroState(
+						id,
+						storage.PomodoroStateFinished,
+						0,
+						int(originalDuration.Seconds()),
+					)
 					if err != nil {
 						log.FromContext(ctx).Error(err, "Failed to update pomodoro state")
 					}
@@ -317,4 +317,27 @@ func (s *PomodoroService) storagePomodoroToCore(p *storage.Pomodoro) *Pomodoro {
 		PhaseCount:    p.PhaseCount,
 		TaskID:        p.TaskID,
 	}
+}
+
+func (s *PomodoroService) determinePhaseAndDuration(
+	latestPomodoro *Pomodoro,
+	workDuration, breakDuration,
+	longBreakDuration time.Duration,
+) (storage.PomodoroPhase, time.Duration, int) {
+	if latestPomodoro == nil {
+		return storage.PomodoroPhaseWork, workDuration, 1
+	}
+
+	phaseCount := latestPomodoro.PhaseCount + 1
+
+	breakPhases := []event.PomodoroPhase{event.PomodoroPhaseShortBreak, event.PomodoroPhaseLongBreak}
+	if slices.Contains(breakPhases, latestPomodoro.Phase) {
+		return storage.PomodoroPhaseWork, workDuration, phaseCount
+	}
+
+	if time.Duration(phaseCount)%6 == 0 {
+		return storage.PomodoroPhaseLongBreak, longBreakDuration, phaseCount
+	}
+
+	return storage.PomodoroPhaseShortBreak, breakDuration, phaseCount
 }

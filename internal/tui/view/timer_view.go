@@ -33,11 +33,18 @@ func NewTimerView(cfg *config.Config, sc screen.Client) *TimerView {
 }
 
 const (
-	marginTileRate = 16
+	marginTileRate     = 16
+	timerPaddingFactor = 2 // Factor used for centering the timer
 )
 
 // DrawTimer renders the timer UI with the current time and state.
-func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, phase event.PomodoroPhase, isPaused bool) error {
+func (v *TimerView) DrawTimer(
+	ctx context.Context,
+	duration int,
+	title string,
+	phase event.PomodoroPhase,
+	isPaused bool,
+) error {
 	screen := v.screenClient.GetScreen()
 
 	screenWidth, screenHeight := v.screenClient.ScreenSize()
@@ -62,8 +69,8 @@ func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, p
 	timerWidth := draw.TimerBaseWidth * mag
 	timerHeight := draw.TimerBaseHeight * mag
 
-	timerPaddingWidth := (timerRenderWidth - timerWidth) / 2
-	timerPaddingHeight := (timerRenderHeight - timerHeight) / 2
+	timerPaddingWidth := (timerRenderWidth - timerWidth) / timerPaddingFactor
+	timerPaddingHeight := (timerRenderHeight - timerHeight) / timerPaddingFactor
 
 	x := int(math.Round(leftMargin + timerPaddingWidth))
 	y := int(math.Round(topMargin + timerPaddingHeight))
@@ -111,7 +118,7 @@ func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, p
 }
 
 // HandleScreenEvent processes user input events.
-func (v *TimerView) HandleScreenEvent(ctx context.Context, e interface{}) (constants.TimerAction, error) {
+func (v *TimerView) HandleScreenEvent(_ context.Context, e interface{}) (constants.TimerAction, error) {
 	switch ev := e.(type) {
 	case screen.EventCancel:
 		return constants.TimerActionCancel, gomodoro_error.ErrCancel

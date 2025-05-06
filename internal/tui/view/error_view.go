@@ -24,7 +24,7 @@ func NewErrorView(cfg *config.Config, sc screen.Client) *ErrorView {
 }
 
 // DrawSmallScreen displays a message when the screen size is too small.
-func (v *ErrorView) DrawSmallScreen(ctx context.Context, w, h int) error {
+func (v *ErrorView) DrawSmallScreen(_ context.Context, w, h int) error {
 	screen := v.screenClient.GetScreen()
 
 	//nolint:mnd

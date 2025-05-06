@@ -40,6 +40,9 @@ func (c *TaskClient) GetAll(ctx context.Context) ([]TaskResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result []TaskResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -55,6 +58,9 @@ func (c *TaskClient) Get(ctx context.Context, id string) (*TaskResponse, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result TaskResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -74,6 +80,9 @@ func (c *TaskClient) Create(ctx context.Context, title string) (*TaskResponse, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result TaskResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -94,6 +103,9 @@ func (c *TaskClient) Update(ctx context.Context, id, title string, completed boo
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result TaskResponse
 	if err := c.parseResponse(resp, &result); err != nil {
@@ -109,6 +121,9 @@ func (c *TaskClient) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result struct {
 		Success bool `json:"success"`

@@ -47,7 +47,11 @@ And add a task using the editor.
 			}()
 
 			clientFactory := client.NewFactory(cfg.API)
-			defer clientFactory.Close()
+			defer func() {
+				if err := clientFactory.Close(); err != nil {
+					log.FromContext(ctx).Error(err, "Failed to close client factory")
+				}
+			}()
 
 			taskClient := clientFactory.Task()
 
