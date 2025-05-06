@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
@@ -20,7 +21,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/view"
 )
 
-// App is the main TUI application controller
+// App is the main TUI application controller.
 type App struct {
 	// Configuration and clients
 	config         *config.Config
@@ -45,31 +46,31 @@ type App struct {
 	completeFuncs []func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int)
 }
 
-// Option is a function that configures the App
+// Option is a function that configures the App.
 type Option func(*App)
 
-// WithWorkSec sets the work duration in seconds
+// WithWorkSec sets the work duration in seconds.
 func WithWorkSec(s int) Option {
 	return func(a *App) {
 		a.workSec = s
 	}
 }
 
-// WithShortBreakSec sets the short break duration in seconds
+// WithShortBreakSec sets the short break duration in seconds.
 func WithShortBreakSec(s int) Option {
 	return func(a *App) {
 		a.shortBreakSec = s
 	}
 }
 
-// WithLongBreakSec sets the long break duration in seconds
+// WithLongBreakSec sets the long break duration in seconds.
 func WithLongBreakSec(s int) Option {
 	return func(a *App) {
 		a.longBreakSec = s
 	}
 }
 
-// WithNotify adds desktop notification functionality
+// WithNotify adds desktop notification functionality.
 func WithNotify() Option {
 	return func(a *App) {
 		a.completeFuncs = append(
@@ -90,7 +91,7 @@ func WithNotify() Option {
 	}
 }
 
-// WithRecordToggl adds Toggl time tracking functionality
+// WithRecordToggl adds Toggl time tracking functionality.
 func WithRecordToggl(togglClient *toggl.Client) Option {
 	return func(a *App) {
 		a.completeFuncs = append(
@@ -110,7 +111,7 @@ func WithRecordToggl(togglClient *toggl.Client) Option {
 	}
 }
 
-// WithRecordPixela adds Pixela tracking functionality
+// WithRecordPixela adds Pixela tracking functionality.
 func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 	return func(a *App) {
 		a.completeFuncs = append(
@@ -128,7 +129,7 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 	}
 }
 
-// NewApp creates a new TUI application instance
+// NewApp creates a new TUI application instance.
 func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
 	pomodoroClient := clientFactory.Pomodoro()
 	taskClient := clientFactory.Task()
@@ -169,7 +170,7 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 	return app, nil
 }
 
-// Run starts the TUI application main loop
+// Run starts the TUI application main loop.
 func (a *App) Run(ctx context.Context) error {
 	a.screenClient.StartPollEvent(ctx)
 
@@ -231,13 +232,13 @@ func (a *App) Run(ctx context.Context) error {
 	}
 }
 
-// Finish cleans up resources when the app is closed
+// Finish cleans up resources when the app is closed.
 func (a *App) Finish() {
 	_, _ = a.pomodoroClient.Stop(context.Background())
 	a.screenClient.Finish()
 }
 
-// selectTask handles task selection and creation
+// selectTask handles task selection and creation.
 func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 	tasks, err := a.loadTasks(ctx)
 	if err != nil {
@@ -305,7 +306,7 @@ func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 	return task, nil
 }
 
-// loadTasks loads tasks from the API
+// loadTasks loads tasks from the API.
 func (a *App) loadTasks(ctx context.Context) ([]*core.Task, error) {
 	responses, err := a.taskAPIClient.GetAll(ctx)
 	if err != nil {
@@ -324,7 +325,7 @@ func (a *App) loadTasks(ctx context.Context) ([]*core.Task, error) {
 	return tasks, nil
 }
 
-// createTask creates a new task
+// createTask creates a new task.
 func (a *App) createTask(ctx context.Context, name string) (*core.Task, error) {
 	resp, err := a.taskAPIClient.Create(ctx, name)
 	if err != nil {
@@ -341,12 +342,12 @@ func (a *App) createTask(ctx context.Context, name string) (*core.Task, error) {
 	return task, nil
 }
 
-// deleteTask deletes a task by ID
+// deleteTask deletes a task by ID.
 func (a *App) deleteTask(ctx context.Context, taskID string) error {
 	return a.taskAPIClient.Delete(ctx, taskID)
 }
 
-// saveTask saves changes to a task
+// saveTask saves changes to a task.
 func (a *App) saveTask(ctx context.Context, task *core.Task) error {
 	var resp *client.TaskResponse
 	var err error
@@ -369,7 +370,7 @@ func (a *App) saveTask(ctx context.Context, task *core.Task) error {
 	return nil
 }
 
-// runTimer handles the timer display and events
+// runTimer handles the timer display and events.
 func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	ch, unsubscribe := a.eventBus.SubscribeChannel([]string{
 		string(event.PomodoroTick),
@@ -461,7 +462,7 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	}
 }
 
-// getCurrentElapsedTime retrieves elapsed time from current pomodoro session
+// getCurrentElapsedTime retrieves elapsed time from current pomodoro session.
 func (a *App) getCurrentElapsedTime(ctx context.Context) (int, error) {
 	current, err := a.pomodoroClient.GetCurrent(ctx)
 	if err != nil {
@@ -470,7 +471,7 @@ func (a *App) getCurrentElapsedTime(ctx context.Context) (int, error) {
 	return current.ElapsedTime, nil
 }
 
-// toggleTimer toggles the timer between paused and running states
+// toggleTimer toggles the timer between paused and running states.
 func (a *App) toggleTimer(ctx context.Context) {
 	currPomodoro, _ := a.pomodoroClient.GetCurrent(ctx)
 	if currPomodoro == nil {

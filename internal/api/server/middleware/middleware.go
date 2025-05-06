@@ -9,7 +9,7 @@ import (
 	"github.com/hatappi/go-kit/log"
 )
 
-// ErrorHandler is middleware that catches panics and returns appropriate error responses
+// ErrorHandler is middleware that catches panics and returns appropriate error responses.
 func ErrorHandler() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +32,7 @@ func ErrorHandler() func(next http.Handler) http.Handler {
 	}
 }
 
-// ContentType is middleware for setting content type
+// ContentType is middleware for setting content type.
 func ContentType(contentType string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func ContentType(contentType string) func(next http.Handler) http.Handler {
 	}
 }
 
-// JSONContentType sets the content type to application/json
+// JSONContentType sets the content type to application/json.
 func JSONContentType(next http.Handler) http.Handler {
 	return ContentType("application/json")(next)
 }

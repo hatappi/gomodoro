@@ -6,23 +6,25 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/core"
 )
 
-// TaskHandler handles task-related API endpoints
+// TaskHandler handles task-related API endpoints.
 type TaskHandler struct {
 	taskService *core.TaskService
 }
 
-// NewTaskHandler creates a new task handler
+// NewTaskHandler creates a new task handler.
 func NewTaskHandler(taskService *core.TaskService) *TaskHandler {
 	return &TaskHandler{
 		taskService: taskService,
 	}
 }
 
-// TaskResponse represents the response structure for task endpoints
+// TaskResponse represents the response structure for task endpoints.
 type TaskResponse struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
@@ -30,13 +32,13 @@ type TaskResponse struct {
 	Completed bool      `json:"completed"`
 }
 
-// TaskRequest represents the request structure for creating/updating a task
+// TaskRequest represents the request structure for creating/updating a task.
 type TaskRequest struct {
 	Title     string `json:"title"`
 	Completed bool   `json:"completed,omitempty"`
 }
 
-// GetTasks handles GET /api/tasks
+// GetTasks handles GET /api/tasks.
 func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -56,7 +58,7 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, taskResponses)
 }
 
-// GetTask handles GET /api/tasks/:id
+// GetTask handles GET /api/tasks/:id.
 func (h *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -77,7 +79,7 @@ func (h *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, convertTaskToResponse(task))
 }
 
-// CreateTask handles POST /api/tasks
+// CreateTask handles POST /api/tasks.
 func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -104,7 +106,7 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusCreated, convertTaskToResponse(task))
 }
 
-// UpdateTask handles PUT /api/tasks/:id
+// UpdateTask handles PUT /api/tasks/:id.
 func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -144,7 +146,7 @@ func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, convertTaskToResponse(updatedTask))
 }
 
-// DeleteTask handles DELETE /api/tasks/:id
+// DeleteTask handles DELETE /api/tasks/:id.
 func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := log.FromContext(ctx)
@@ -172,7 +174,7 @@ func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, map[string]bool{"success": true})
 }
 
-// Helper function to convert core.Task to TaskResponse
+// Helper function to convert core.Task to TaskResponse.
 func convertTaskToResponse(t *core.Task) TaskResponse {
 	return TaskResponse{
 		ID:        t.ID,

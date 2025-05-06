@@ -5,10 +5,11 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+
 	ev "github.com/hatappi/gomodoro/internal/core/event"
 )
 
-// WebSocketClientImpl is the actual WebSocket client implementation
+// WebSocketClientImpl is the actual WebSocket client implementation.
 type WebSocketClientImpl struct {
 	url             string
 	conn            *websocket.Conn
@@ -17,7 +18,7 @@ type WebSocketClientImpl struct {
 	done            chan struct{}
 }
 
-// NewWebSocketClient creates a new WebSocket client
+// NewWebSocketClient creates a new WebSocket client.
 func NewWebSocketClient(url string) *WebSocketClientImpl {
 	return &WebSocketClientImpl{
 		url:             url,
@@ -26,7 +27,7 @@ func NewWebSocketClient(url string) *WebSocketClientImpl {
 	}
 }
 
-// Connect connects to the WebSocket server
+// Connect connects to the WebSocket server.
 func (c *WebSocketClientImpl) Connect() error {
 	conn, _, err := websocket.DefaultDialer.Dial(c.url, nil)
 	if err != nil {
@@ -43,7 +44,7 @@ func (c *WebSocketClientImpl) Connect() error {
 	return nil
 }
 
-// readPump continuously reads messages from the WebSocket connection
+// readPump continuously reads messages from the WebSocket connection.
 func (c *WebSocketClientImpl) readPump() {
 	defer func() {
 		c.conn.Close()
@@ -71,7 +72,7 @@ func (c *WebSocketClientImpl) readPump() {
 	}
 }
 
-// Send sends an event to the WebSocket server
+// Send sends an event to the WebSocket server.
 func (c *WebSocketClientImpl) Send(event ev.WebSocketEvent) error {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -83,7 +84,7 @@ func (c *WebSocketClientImpl) Send(event ev.WebSocketEvent) error {
 	return c.conn.WriteJSON(event)
 }
 
-// OnMessage registers a handler for received messages
+// OnMessage registers a handler for received messages.
 func (c *WebSocketClientImpl) OnMessage(handler func(event ev.WebSocketEvent)) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -91,7 +92,7 @@ func (c *WebSocketClientImpl) OnMessage(handler func(event ev.WebSocketEvent)) {
 	c.messageHandlers = append(c.messageHandlers, handler)
 }
 
-// Close closes the WebSocket connection
+// Close closes the WebSocket connection.
 func (c *WebSocketClientImpl) Close() error {
 	close(c.done)
 

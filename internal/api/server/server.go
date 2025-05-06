@@ -18,7 +18,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
-// Server represents the API server
+// Server represents the API server.
 type Server struct {
 	config           *config.APIConfig
 	router           *chi.Mux
@@ -30,7 +30,7 @@ type Server struct {
 	webSocketHandler *EventWebSocketHandler
 }
 
-// NewServer creates a new API server instance
+// NewServer creates a new API server instance.
 func NewServer(
 	config *config.APIConfig,
 	logger logr.Logger,
@@ -57,7 +57,7 @@ func NewServer(
 	return server
 }
 
-// setupMiddleware configures the middleware for the server
+// setupMiddleware configures the middleware for the server.
 func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.RequestID)
 	s.router.Use(middleware.RealIP)
@@ -66,7 +66,7 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(servermiddleware.ErrorHandler())
 }
 
-// setupRoutes configures the routes for the server
+// setupRoutes configures the routes for the server.
 func (s *Server) setupRoutes() {
 	s.router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -98,7 +98,7 @@ func (s *Server) setupRoutes() {
 	})
 }
 
-// Stop gracefully shuts down the HTTP server
+// Stop gracefully shuts down the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.logger.Info("Stopping API server")
 
@@ -111,7 +111,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-// Listen starts listening on the configured address and returns a net.Listener
+// Listen starts listening on the configured address and returns a net.Listener.
 func (s *Server) Listen() (net.Listener, error) {
 	s.httpServer = &http.Server{
 		Addr:         s.config.Addr,
@@ -129,7 +129,7 @@ func (s *Server) Listen() (net.Listener, error) {
 	return ln, nil
 }
 
-// Serve starts serving HTTP requests using the provided listener
+// Serve starts serving HTTP requests using the provided listener.
 func (s *Server) Serve(ln net.Listener) error {
 	s.logger.Info("Serving API server")
 	if err := s.httpServer.Serve(ln); err != nil && err != http.ErrServerClosed {

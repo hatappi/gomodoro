@@ -6,10 +6,10 @@ import (
 	"sync"
 )
 
-// Handler is a function that handles an event
+// Handler is a function that handles an event.
 type Handler func(event interface{})
 
-// EventBus is an interface for event publishing and subscription
+// EventBus is an interface for event publishing and subscription.
 type EventBus interface {
 	// Publish sends an event to all subscribers of that event type
 	Publish(event EventInfo)
@@ -27,7 +27,7 @@ type EventBus interface {
 	SubscribeChannel(eventTypes []string) (<-chan interface{}, func())
 }
 
-// WebSocketClient defines WebSocket client functionality needed by the event bus
+// WebSocketClient defines WebSocket client functionality needed by the event bus.
 type WebSocketClient interface {
 	Connect() error
 	Send(event WebSocketEvent) error
@@ -35,21 +35,21 @@ type WebSocketClient interface {
 	Close() error
 }
 
-// DefaultEventBus is the standard implementation of EventBus
+// DefaultEventBus is the standard implementation of EventBus.
 type DefaultEventBus struct {
 	subscribers map[string]map[string]Handler
 	mu          sync.RWMutex
 	idCounter   int
 }
 
-// NewEventBus creates a new event bus instance
+// NewEventBus creates a new event bus instance.
 func NewEventBus() *DefaultEventBus {
 	return &DefaultEventBus{
 		subscribers: make(map[string]map[string]Handler),
 	}
 }
 
-// Publish sends an event to all subscribers of that event type
+// Publish sends an event to all subscribers of that event type.
 func (b *DefaultEventBus) Publish(event EventInfo) {
 	eventType := string(event.GetEventType())
 
@@ -63,7 +63,7 @@ func (b *DefaultEventBus) Publish(event EventInfo) {
 	}
 }
 
-// Subscribe registers a handler for a specific event type and returns a subscription ID
+// Subscribe registers a handler for a specific event type and returns a subscription ID.
 func (b *DefaultEventBus) Subscribe(eventType string, handler Handler) string {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -79,7 +79,7 @@ func (b *DefaultEventBus) Subscribe(eventType string, handler Handler) string {
 	return id
 }
 
-// Unsubscribe removes a handler for a specific event type using the subscription ID
+// Unsubscribe removes a handler for a specific event type using the subscription ID.
 func (b *DefaultEventBus) Unsubscribe(subscriptionID string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()

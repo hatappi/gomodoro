@@ -14,7 +14,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage"
 )
 
-// FileStorage implements storage.Storage using local JSON files
+// FileStorage implements storage.Storage using local JSON files.
 type FileStorage struct {
 	pomodoroFile string
 	tasksFile    string
@@ -23,7 +23,7 @@ type FileStorage struct {
 	mu           sync.Mutex
 }
 
-// NewFileStorage creates a new file storage instance
+// NewFileStorage creates a new file storage instance.
 func NewFileStorage(baseDir string) (storage.Storage, error) {
 	if baseDir == "" {
 		home, err := homedir.Dir()
@@ -34,7 +34,7 @@ func NewFileStorage(baseDir string) (storage.Storage, error) {
 		baseDir = filepath.Join(home, ".gomodoro")
 	}
 
-	if err := os.MkdirAll(baseDir, 0755); err != nil {
+	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create directory: %w", err)
 	}
 
@@ -54,7 +54,7 @@ func (f *FileStorage) lock() error {
 		return nil
 	}
 
-	lockFile, err := os.OpenFile(f.lockFile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	lockFile, err := os.OpenFile(f.lockFile, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 
 	if os.IsExist(err) {
 		return fmt.Errorf("failed to acquire lock, file is locked by another process")
@@ -108,7 +108,7 @@ func (f *FileStorage) withFileLock(fn func() error) error {
 	return fn()
 }
 
-// SavePomodoro persists a pomodoro to the file
+// SavePomodoro persists a pomodoro to the file.
 func (f *FileStorage) SavePomodoro(pomodoro *storage.Pomodoro) error {
 	return f.withFileLock(func() error {
 		data, err := json.MarshalIndent(pomodoro, "", "  ")
@@ -116,7 +116,7 @@ func (f *FileStorage) SavePomodoro(pomodoro *storage.Pomodoro) error {
 			return fmt.Errorf("failed to marshal pomodoro: %w", err)
 		}
 
-		if err := os.WriteFile(f.pomodoroFile, data, 0644); err != nil {
+		if err := os.WriteFile(f.pomodoroFile, data, 0o644); err != nil {
 			return fmt.Errorf("failed to write pomodoro file: %w", err)
 		}
 
@@ -124,7 +124,7 @@ func (f *FileStorage) SavePomodoro(pomodoro *storage.Pomodoro) error {
 	})
 }
 
-// GetLatestPomodoro retrieves the latest pomodoro
+// GetLatestPomodoro retrieves the latest pomodoro.
 func (f *FileStorage) GetLatestPomodoro() (*storage.Pomodoro, error) {
 	var pomodoro *storage.Pomodoro
 
@@ -155,7 +155,7 @@ func (f *FileStorage) GetLatestPomodoro() (*storage.Pomodoro, error) {
 	return pomodoro, err
 }
 
-// GetActivePomodoro retrieves the current active pomodoro
+// GetActivePomodoro retrieves the current active pomodoro.
 func (f *FileStorage) GetActivePomodoro() (*storage.Pomodoro, error) {
 	var pomodoro *storage.Pomodoro
 
@@ -188,7 +188,7 @@ func (f *FileStorage) GetActivePomodoro() (*storage.Pomodoro, error) {
 	return pomodoro, err
 }
 
-// UpdatePomodoroState updates the state and remaining time of a pomodoro
+// UpdatePomodoroState updates the state and remaining time of a pomodoro.
 func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState, remainSec int, elapsedSec int) (*storage.Pomodoro, error) {
 	var pomodoro *storage.Pomodoro
 
@@ -219,7 +219,7 @@ func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState
 			return fmt.Errorf("failed to marshal updated pomodoro: %w", err)
 		}
 
-		if err := os.WriteFile(f.pomodoroFile, updatedData, 0644); err != nil {
+		if err := os.WriteFile(f.pomodoroFile, updatedData, 0o644); err != nil {
 			return fmt.Errorf("failed to write updated pomodoro file: %w", err)
 		}
 
@@ -229,7 +229,7 @@ func (f *FileStorage) UpdatePomodoroState(id string, state storage.PomodoroState
 	return pomodoro, err
 }
 
-// DeletePomodoro deletes the pomodoro session file if the ID matches the current session
+// DeletePomodoro deletes the pomodoro session file if the ID matches the current session.
 func (f *FileStorage) DeletePomodoro(id string) error {
 	return f.withFileLock(func() error {
 		if _, err := os.Stat(f.pomodoroFile); os.IsNotExist(err) {
@@ -261,7 +261,7 @@ func (f *FileStorage) DeletePomodoro(id string) error {
 	})
 }
 
-// SaveTask persists a task to the tasks file
+// SaveTask persists a task to the tasks file.
 func (f *FileStorage) SaveTask(task *storage.Task) error {
 	return f.withFileLock(func() error {
 		tasks, err := f.readTasks()
@@ -286,7 +286,7 @@ func (f *FileStorage) SaveTask(task *storage.Task) error {
 	})
 }
 
-// GetTasks retrieves all tasks
+// GetTasks retrieves all tasks.
 func (f *FileStorage) GetTasks() ([]*storage.Task, error) {
 	var tasks []*storage.Task
 
@@ -299,7 +299,7 @@ func (f *FileStorage) GetTasks() ([]*storage.Task, error) {
 	return tasks, err
 }
 
-// GetTaskByID retrieves a specific task by ID
+// GetTaskByID retrieves a specific task by ID.
 func (f *FileStorage) GetTaskByID(id string) (*storage.Task, error) {
 	var foundTask *storage.Task
 
@@ -322,7 +322,7 @@ func (f *FileStorage) GetTaskByID(id string) (*storage.Task, error) {
 	return foundTask, err
 }
 
-// UpdateTask updates an existing task
+// UpdateTask updates an existing task.
 func (f *FileStorage) UpdateTask(task *storage.Task) error {
 	return f.withFileLock(func() error {
 		tasks, err := f.readTasks()
@@ -400,7 +400,7 @@ func (f *FileStorage) writeTasks(tasks []*storage.Task) error {
 		return fmt.Errorf("failed to marshal tasks: %w", err)
 	}
 
-	if err := os.WriteFile(f.tasksFile, data, 0644); err != nil {
+	if err := os.WriteFile(f.tasksFile, data, 0o644); err != nil {
 		return fmt.Errorf("failed to write tasks file: %w", err)
 	}
 

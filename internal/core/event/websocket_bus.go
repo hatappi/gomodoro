@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-// WebSocketEvent is the event structure sent/received over WebSocket
+// WebSocketEvent is the event structure sent/received over WebSocket.
 type WebSocketEvent struct {
 	EventType string          `json:"type"`
 	Payload   json.RawMessage `json:"payload"`

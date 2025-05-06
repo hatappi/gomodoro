@@ -5,29 +5,29 @@ import (
 	"time"
 )
 
-// PomodoroState represents the current state of a pomodoro timer
+// PomodoroState represents the current state of a pomodoro timer.
 type PomodoroState string
 
 const (
-	// PomodoroStateActive indicates a running pomodoro
+	// PomodoroStateActive indicates a running pomodoro.
 	PomodoroStateActive PomodoroState = "active"
-	// PomodoroStatePaused indicates a paused pomodoro
+	// PomodoroStatePaused indicates a paused pomodoro.
 	PomodoroStatePaused PomodoroState = "paused"
-	// PomodoroStateFinished indicates a completed pomodoro
+	// PomodoroStateFinished indicates a completed pomodoro.
 	PomodoroStateFinished PomodoroState = "finished"
 )
 
-// PomodoroPhase represents whether the current period is work or break
+// PomodoroPhase represents whether the current period is work or break.
 type PomodoroPhase string
 
 const (
-	// PomodoroPhaseWork indicates a work period
+	// PomodoroPhaseWork indicates a work period.
 	PomodoroPhaseWork       PomodoroPhase = "work"
 	PomodoroPhaseShortBreak PomodoroPhase = "short_break"
 	PomodoroPhaseLongBreak  PomodoroPhase = "long_break"
 )
 
-// Pomodoro represents a pomodoro session that can be persisted
+// Pomodoro represents a pomodoro session that can be persisted.
 type Pomodoro struct {
 	ID                string        `json:"id"`
 	State             PomodoroState `json:"state"`
@@ -42,7 +42,7 @@ type Pomodoro struct {
 	TaskID            string        `json:"task_id,omitempty"`
 }
 
-// Task represents a task that can be persisted
+// Task represents a task that can be persisted.
 type Task struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
@@ -50,7 +50,7 @@ type Task struct {
 	Completed bool      `json:"completed"`
 }
 
-// PomodoroStorage defines the interface for pomodoro persistence operations
+// PomodoroStorage defines the interface for pomodoro persistence operations.
 type PomodoroStorage interface {
 	// SavePomodoro stores a pomodoro session
 	SavePomodoro(pomodoro *Pomodoro) error
@@ -68,7 +68,7 @@ type PomodoroStorage interface {
 	DeletePomodoro(id string) error
 }
 
-// TaskStorage defines the interface for task persistence operations
+// TaskStorage defines the interface for task persistence operations.
 type TaskStorage interface {
 	// SaveTask stores a task
 	SaveTask(task *Task) error
@@ -86,7 +86,7 @@ type TaskStorage interface {
 	DeleteTask(id string) error
 }
 
-// Storage is the combined interface for all storage operations
+// Storage is the combined interface for all storage operations.
 type Storage interface {
 	PomodoroStorage
 	TaskStorage

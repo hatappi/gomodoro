@@ -15,7 +15,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage/file"
 )
 
-// Runner manages API server lifecycle
+// Runner manages API server lifecycle.
 type Runner struct {
 	config    *config.Config
 	server    *Server
@@ -23,14 +23,14 @@ type Runner struct {
 	mu        sync.Mutex
 }
 
-// NewRunner creates a new server runner
+// NewRunner creates a new server runner.
 func NewRunner(config *config.Config) *Runner {
 	return &Runner{
 		config: config,
 	}
 }
 
-// Start initializes and starts the API server
+// Start initializes and starts the API server.
 func (r *Runner) Start(ctx context.Context) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -86,7 +86,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop gracefully stops the API server
+// Stop gracefully stops the API server.
 func (r *Runner) Stop(ctx context.Context) error {
 	r.mu.Lock()
 	if !r.isRunning || r.server == nil {
@@ -112,7 +112,7 @@ func (r *Runner) Stop(ctx context.Context) error {
 	return err
 }
 
-// IsRunning returns true if the server is running
+// IsRunning returns true if the server is running.
 func (r *Runner) IsRunning() bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()

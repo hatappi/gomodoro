@@ -9,6 +9,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core/event"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
@@ -17,13 +18,13 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
-// TimerView handles rendering of the timer UI
+// TimerView handles rendering of the timer UI.
 type TimerView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
-// NewTimerView creates a new timer view instance
+// NewTimerView creates a new timer view instance.
 func NewTimerView(cfg *config.Config, sc screen.Client) *TimerView {
 	return &TimerView{
 		config:       cfg,
@@ -35,7 +36,7 @@ const (
 	marginTileRate = 16
 )
 
-// DrawTimer renders the timer UI with the current time and state
+// DrawTimer renders the timer UI with the current time and state.
 func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, phase event.PomodoroPhase, isPaused bool) error {
 	screen := v.screenClient.GetScreen()
 
@@ -109,7 +110,7 @@ func (v *TimerView) DrawTimer(ctx context.Context, duration int, title string, p
 	return nil
 }
 
-// HandleScreenEvent processes user input events
+// HandleScreenEvent processes user input events.
 func (v *TimerView) HandleScreenEvent(ctx context.Context, e interface{}) (constants.TimerAction, error) {
 	switch ev := e.(type) {
 	case screen.EventCancel:

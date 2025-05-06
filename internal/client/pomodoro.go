@@ -10,19 +10,19 @@ import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
-// PomodoroClient provides methods for interacting with pomodoro-related API endpoints
+// PomodoroClient provides methods for interacting with pomodoro-related API endpoints.
 type PomodoroClient struct {
 	*BaseClient
 }
 
-// NewPomodoroClient creates a new pomodoro client
+// NewPomodoroClient creates a new pomodoro client.
 func NewPomodoroClient(baseURL string, options ...Option) *PomodoroClient {
 	return &PomodoroClient{
 		BaseClient: NewBaseClient(baseURL, options...),
 	}
 }
 
-// PomodoroResponse represents the response from pomodoro-related API endpoints
+// PomodoroResponse represents the response from pomodoro-related API endpoints.
 type PomodoroResponse struct {
 	ID            string              `json:"id"`
 	State         event.PomodoroState `json:"state"` // Use event.PomodoroState for type safety
@@ -34,7 +34,7 @@ type PomodoroResponse struct {
 	PhaseCount    int                 `json:"phase_count"`
 }
 
-// StartPomodoroRequest represents the request for starting a new pomodoro
+// StartPomodoroRequest represents the request for starting a new pomodoro.
 type StartPomodoroRequest struct {
 	WorkDuration      int    `json:"work_duration_sec"`       // in seconds
 	BreakDuration     int    `json:"break_duration_sec"`      // in seconds
@@ -42,7 +42,7 @@ type StartPomodoroRequest struct {
 	TaskID            string `json:"task_id,omitempty"`
 }
 
-// GetCurrent retrieves the current active pomodoro session
+// GetCurrent retrieves the current active pomodoro session.
 func (c *PomodoroClient) GetCurrent(ctx context.Context) (*PomodoroResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, "/api/pomodoro", nil)
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *PomodoroClient) GetCurrent(ctx context.Context) (*PomodoroResponse, err
 	return &result, nil
 }
 
-// Start begins a new pomodoro session
+// Start begins a new pomodoro session.
 func (c *PomodoroClient) Start(ctx context.Context, workDuration, breakDuration time.Duration, longBreakDuration time.Duration, taskID string) (*PomodoroResponse, error) {
 	req := StartPomodoroRequest{
 		WorkDuration:      int(workDuration.Seconds()),
@@ -84,7 +84,7 @@ func (c *PomodoroClient) Start(ctx context.Context, workDuration, breakDuration 
 	return &result, nil
 }
 
-// Pause pauses the current active pomodoro session
+// Pause pauses the current active pomodoro session.
 func (c *PomodoroClient) Pause(ctx context.Context) (*PomodoroResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodPost, "/api/pomodoro/pause", nil)
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *PomodoroClient) Pause(ctx context.Context) (*PomodoroResponse, error) {
 	return &result, nil
 }
 
-// Resume resumes a paused pomodoro session
+// Resume resumes a paused pomodoro session.
 func (c *PomodoroClient) Resume(ctx context.Context) (*PomodoroResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodPost, "/api/pomodoro/resume", nil)
 	if err != nil {
@@ -114,7 +114,7 @@ func (c *PomodoroClient) Resume(ctx context.Context) (*PomodoroResponse, error) 
 	return &result, nil
 }
 
-// Stop ends the current pomodoro session
+// Stop ends the current pomodoro session.
 func (c *PomodoroClient) Stop(ctx context.Context) (*PomodoroResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodDelete, "/api/pomodoro", nil)
 	if err != nil {

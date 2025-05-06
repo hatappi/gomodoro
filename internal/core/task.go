@@ -11,7 +11,7 @@ import (
 	"github.com/hatappi/gomodoro/internal/storage"
 )
 
-// Task represents a task with its current state
+// Task represents a task with its current state.
 type Task struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
@@ -19,13 +19,13 @@ type Task struct {
 	Completed bool      `json:"completed"`
 }
 
-// TaskService provides operations for managing tasks
+// TaskService provides operations for managing tasks.
 type TaskService struct {
 	storage  storage.TaskStorage
 	eventBus event.EventBus
 }
 
-// NewTaskService creates a new task service instance
+// NewTaskService creates a new task service instance.
 func NewTaskService(storage storage.TaskStorage, eventBus event.EventBus) *TaskService {
 	return &TaskService{
 		storage:  storage,
@@ -33,7 +33,7 @@ func NewTaskService(storage storage.TaskStorage, eventBus event.EventBus) *TaskS
 	}
 }
 
-// CreateTask creates a new task
+// CreateTask creates a new task.
 func (s *TaskService) CreateTask(ctx context.Context, title string) (*Task, error) {
 	if title == "" {
 		return nil, fmt.Errorf("task title cannot be empty")

@@ -18,13 +18,13 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
-// TaskView handles task listing and selection UI
+// TaskView handles task listing and selection UI.
 type TaskView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
-// NewTaskView creates a new task view instance
+// NewTaskView creates a new task view instance.
 func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 	return &TaskView{
 		config:       cfg,
@@ -32,7 +32,7 @@ func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 	}
 }
 
-// RenderTasks displays the task list
+// RenderTasks displays the task list.
 func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition int) {
 	w, h := v.screenClient.ScreenSize()
 
@@ -62,7 +62,7 @@ func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition
 	)
 }
 
-// SelectTaskName displays a list of tasks and allows the user to select one
+// SelectTaskName displays a list of tasks and allows the user to select one.
 func (v *TaskView) SelectTaskName(ctx context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
 	offset := 0
 	cursorPosition := 0
@@ -128,7 +128,7 @@ func (v *TaskView) SelectTaskName(ctx context.Context, tasks []*core.Task) (*cor
 	}
 }
 
-// CreateTaskName displays an input prompt for creating a new task
+// CreateTaskName displays an input prompt for creating a new task.
 func (v *TaskView) CreateTaskName(ctx context.Context) (string, error) {
 	newTaskName := []rune{}
 	s := v.screenClient.GetScreen()

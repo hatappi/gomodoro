@@ -8,14 +8,14 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
-// Factory provides a convenient way to create and manage API clients
+// Factory provides a convenient way to create and manage API clients.
 type Factory struct {
 	pomodoro *PomodoroClient
 	task     *TaskClient
 	wsClient *WebSocketClientImpl
 }
 
-// NewFactory creates a new client factory with the given API configuration and options
+// NewFactory creates a new client factory with the given API configuration and options.
 func NewFactory(apiConfig config.APIConfig) *Factory {
 	httpClientOpts := []Option{
 		WithTimeout(10 * time.Second),
@@ -30,17 +30,17 @@ func NewFactory(apiConfig config.APIConfig) *Factory {
 	return factory
 }
 
-// Pomodoro returns a client for interacting with Pomodoro API endpoints
+// Pomodoro returns a client for interacting with Pomodoro API endpoints.
 func (f *Factory) Pomodoro() *PomodoroClient {
 	return f.pomodoro
 }
 
-// Task returns a client for interacting with Task API endpoints
+// Task returns a client for interacting with Task API endpoints.
 func (f *Factory) Task() *TaskClient {
 	return f.task
 }
 
-// WebSocket returns a client for interacting with WebSocket endpoint
+// WebSocket returns a client for interacting with WebSocket endpoint.
 func (f *Factory) WebSocket() (*WebSocketClientImpl, error) {
 	if err := f.wsClient.Connect(); err != nil {
 		return nil, fmt.Errorf("failed to connect WebSocket: %w", err)

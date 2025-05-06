@@ -6,23 +6,24 @@ import (
 	"time"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
-// PomodoroHandler handles pomodoro-related API endpoints
+// PomodoroHandler handles pomodoro-related API endpoints.
 type PomodoroHandler struct {
 	pomodoroService *core.PomodoroService
 }
 
-// NewPomodoroHandler creates a new pomodoro handler
+// NewPomodoroHandler creates a new pomodoro handler.
 func NewPomodoroHandler(pomodoroService *core.PomodoroService) *PomodoroHandler {
 	return &PomodoroHandler{
 		pomodoroService: pomodoroService,
 	}
 }
 
-// PomodoroResponse represents the response structure for pomodoro endpoints
+// PomodoroResponse represents the response structure for pomodoro endpoints.
 type PomodoroResponse struct {
 	ID            string              `json:"id"`
 	State         event.PomodoroState `json:"state"`

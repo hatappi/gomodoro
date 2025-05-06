@@ -10,11 +10,12 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/core/event"
 	"github.com/hatappi/gomodoro/internal/storage"
 )
 
-// Pomodoro represents a pomodoro session with its current state
+// Pomodoro represents a pomodoro session with its current state.
 type Pomodoro struct {
 	ID            string              `json:"id"`
 	State         event.PomodoroState `json:"state"`
@@ -28,7 +29,7 @@ type Pomodoro struct {
 	TaskID        string              `json:"task_id,omitempty"`
 }
 
-// PomodoroService provides operations for managing pomodoro sessions
+// PomodoroService provides operations for managing pomodoro sessions.
 type PomodoroService struct {
 	storage  storage.PomodoroStorage
 	eventBus event.EventBus
@@ -36,7 +37,7 @@ type PomodoroService struct {
 	stopChan chan struct{}
 }
 
-// NewPomodoroService creates a new pomodoro service instance
+// NewPomodoroService creates a new pomodoro service instance.
 func NewPomodoroService(storage storage.PomodoroStorage, eventBus event.EventBus) *PomodoroService {
 	return &PomodoroService{
 		storage:  storage,
@@ -45,7 +46,7 @@ func NewPomodoroService(storage storage.PomodoroStorage, eventBus event.EventBus
 	}
 }
 
-// StartPomodoro begins a new pomodoro session
+// StartPomodoro begins a new pomodoro session.
 func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, breakDuration time.Duration, longBreakDuration time.Duration, taskID string) (*Pomodoro, error) {
 	latestPomodoro, err := s.GetLatestPomodoro()
 	if err != nil {
@@ -105,7 +106,7 @@ func (s *PomodoroService) StartPomodoro(ctx context.Context, workDuration, break
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// PausePomodoro pauses an active pomodoro session
+// PausePomodoro pauses an active pomodoro session.
 func (s *PomodoroService) PausePomodoro(ctx context.Context, id string) (*Pomodoro, error) {
 	s.stopTimer()
 
@@ -134,7 +135,7 @@ func (s *PomodoroService) PausePomodoro(ctx context.Context, id string) (*Pomodo
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// ResumePomodoro resumes a paused pomodoro session
+// ResumePomodoro resumes a paused pomodoro session.
 func (s *PomodoroService) ResumePomodoro(ctx context.Context, id string) (*Pomodoro, error) {
 	active, err := s.storage.GetActivePomodoro()
 	if err != nil {
@@ -163,7 +164,7 @@ func (s *PomodoroService) ResumePomodoro(ctx context.Context, id string) (*Pomod
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// StopPomodoro stops the current pomodoro session
+// StopPomodoro stops the current pomodoro session.
 func (s *PomodoroService) StopPomodoro(ctx context.Context, id string) error {
 	s.stopTimer()
 
@@ -187,7 +188,7 @@ func (s *PomodoroService) StopPomodoro(ctx context.Context, id string) error {
 	return nil
 }
 
-// DeletePomodoro deletes a pomodoro session by ID
+// DeletePomodoro deletes a pomodoro session by ID.
 func (s *PomodoroService) DeletePomodoro(ctx context.Context, id string) error {
 	err := s.storage.DeletePomodoro(id)
 	if err != nil {
@@ -196,7 +197,7 @@ func (s *PomodoroService) DeletePomodoro(ctx context.Context, id string) error {
 	return nil
 }
 
-// GetActivePomodoro retrieves the current active pomodoro session if any
+// GetActivePomodoro retrieves the current active pomodoro session if any.
 func (s *PomodoroService) GetActivePomodoro() (*Pomodoro, error) {
 	pomodoro, err := s.storage.GetActivePomodoro()
 	if err != nil {
@@ -210,7 +211,7 @@ func (s *PomodoroService) GetActivePomodoro() (*Pomodoro, error) {
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// GetLatestPomodoro retrieves the most recent pomodoro session
+// GetLatestPomodoro retrieves the most recent pomodoro session.
 func (s *PomodoroService) GetLatestPomodoro() (*Pomodoro, error) {
 	pomodoro, err := s.storage.GetLatestPomodoro()
 	if err != nil {
@@ -224,7 +225,7 @@ func (s *PomodoroService) GetLatestPomodoro() (*Pomodoro, error) {
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// startTimer starts the timer for a pomodoro session
+// startTimer starts the timer for a pomodoro session.
 func (s *PomodoroService) startTimer(ctx context.Context, id string, duration time.Duration) {
 	s.stopTimer()
 
@@ -266,7 +267,7 @@ func (s *PomodoroService) startTimer(ctx context.Context, id string, duration ti
 	}()
 }
 
-// stopTimer stops any running timer
+// stopTimer stops any running timer.
 func (s *PomodoroService) stopTimer() {
 	if s.ticker != nil {
 		s.ticker.Stop()
@@ -279,7 +280,7 @@ func (s *PomodoroService) stopTimer() {
 	}
 }
 
-// publishPomodoroEvent publishes a pomodoro event to the event bus
+// publishPomodoroEvent publishes a pomodoro event to the event bus.
 func (s *PomodoroService) publishPomodoroEvent(eventType event.EventType, p *storage.Pomodoro) {
 	e := event.PomodoroEvent{
 		BaseEvent: event.BaseEvent{
@@ -298,7 +299,7 @@ func (s *PomodoroService) publishPomodoroEvent(eventType event.EventType, p *sto
 	s.eventBus.Publish(e)
 }
 
-// storagePomodoroToCore converts a storage.Pomodoro to a core.Pomodoro
+// storagePomodoroToCore converts a storage.Pomodoro to a core.Pomodoro.
 func (s *PomodoroService) storagePomodoroToCore(p *storage.Pomodoro) *Pomodoro {
 	if p == nil {
 		return nil

@@ -12,13 +12,13 @@ import (
 	"github.com/hatappi/gomodoro/internal/tui/screen/draw"
 )
 
-// PomodoroView handles pomodoro session UI components
+// PomodoroView handles pomodoro session UI components.
 type PomodoroView struct {
 	config       *config.Config
 	screenClient screen.Client
 }
 
-// NewPomodoroView creates a new pomodoro view instance
+// NewPomodoroView creates a new pomodoro view instance.
 func NewPomodoroView(cfg *config.Config, sc screen.Client) *PomodoroView {
 	return &PomodoroView{
 		config:       cfg,
@@ -26,7 +26,7 @@ func NewPomodoroView(cfg *config.Config, sc screen.Client) *PomodoroView {
 	}
 }
 
-// SelectNextTask displays options for continuing or changing tasks after a pomodoro cycle
+// SelectNextTask displays options for continuing or changing tasks after a pomodoro cycle.
 func (v *PomodoroView) SelectNextTask(ctx context.Context, currentTask *core.Task) (constants.PomodoroAction, error) {
 	w, h := v.screenClient.ScreenSize()
 	draw.Sentence(

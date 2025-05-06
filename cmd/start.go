@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/api/server"
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/config"

@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-// TaskClient provides methods for interacting with task-related API endpoints
+// TaskClient provides methods for interacting with task-related API endpoints.
 type TaskClient struct {
 	*BaseClient
 }
 
-// NewTaskClient creates a new task client
+// NewTaskClient creates a new task client.
 func NewTaskClient(baseURL string, options ...Option) *TaskClient {
 	return &TaskClient{
 		BaseClient: NewBaseClient(baseURL, options...),
 	}
 }
 
-// TaskResponse represents the response structure for task endpoints
+// TaskResponse represents the response structure for task endpoints.
 type TaskResponse struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
@@ -28,13 +28,13 @@ type TaskResponse struct {
 	Completed bool      `json:"completed"`
 }
 
-// TaskRequest represents the request structure for creating/updating a task
+// TaskRequest represents the request structure for creating/updating a task.
 type TaskRequest struct {
 	Title     string `json:"title"`
 	Completed bool   `json:"completed,omitempty"`
 }
 
-// GetAll retrieves all tasks
+// GetAll retrieves all tasks.
 func (c *TaskClient) GetAll(ctx context.Context) ([]TaskResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, "/api/tasks", nil)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *TaskClient) GetAll(ctx context.Context) ([]TaskResponse, error) {
 	return result, nil
 }
 
-// Get retrieves a specific task by ID
+// Get retrieves a specific task by ID.
 func (c *TaskClient) Get(ctx context.Context, id string) (*TaskResponse, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, fmt.Sprintf("/api/tasks/%s", id), nil)
 	if err != nil {
@@ -64,7 +64,7 @@ func (c *TaskClient) Get(ctx context.Context, id string) (*TaskResponse, error) 
 	return &result, nil
 }
 
-// Create creates a new task
+// Create creates a new task.
 func (c *TaskClient) Create(ctx context.Context, title string) (*TaskResponse, error) {
 	req := TaskRequest{
 		Title: title,
@@ -83,7 +83,7 @@ func (c *TaskClient) Create(ctx context.Context, title string) (*TaskResponse, e
 	return &result, nil
 }
 
-// Update updates an existing task
+// Update updates an existing task.
 func (c *TaskClient) Update(ctx context.Context, id, title string, completed bool) (*TaskResponse, error) {
 	req := TaskRequest{
 		Title:     title,
@@ -103,7 +103,7 @@ func (c *TaskClient) Update(ctx context.Context, id, title string, completed boo
 	return &result, nil
 }
 
-// Delete removes a task by ID
+// Delete removes a task by ID.
 func (c *TaskClient) Delete(ctx context.Context, id string) error {
 	resp, err := c.doRequest(ctx, http.MethodDelete, fmt.Sprintf("/api/tasks/%s", id), nil)
 	if err != nil {

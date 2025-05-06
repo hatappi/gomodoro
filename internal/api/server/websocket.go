@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/gorilla/websocket"
+
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
