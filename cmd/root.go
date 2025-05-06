@@ -57,13 +57,6 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().String("log-level", "error", "log Level (default is error)")
 	cobra.CheckErr(viper.BindPFlag("log_level", rootCmd.PersistentFlags().Lookup("log-level")))
 
-	rootCmd.PersistentFlags().String(
-		"unix-domain-socket-path",
-		config.DefaultUnixDomainScoketPath,
-		"unix domain socket path",
-	)
-	cobra.CheckErr(viper.BindPFlag("unix_domain_socket_path", rootCmd.PersistentFlags().Lookup("unix-domain-socket-path")))
-
 	return rootCmd
 }
 
