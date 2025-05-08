@@ -1,0 +1,11 @@
+extend type Query {
+  health: HealthStatus!
+}
+
+type HealthStatus {
+  # Message indicating the health status
+  message: String!
+
+  # Current server timestamp (time.RFC3339Nano)
+  timestamp: Time!
+}
