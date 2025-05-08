@@ -7,10 +7,16 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-logr/logr"
 
+	"github.com/hatappi/gomodoro/graph"
+	"github.com/hatappi/gomodoro/graph/resolver"
 	"github.com/hatappi/gomodoro/internal/api/server/handlers"
 	servermiddleware "github.com/hatappi/gomodoro/internal/api/server/middleware"
 	"github.com/hatappi/gomodoro/internal/config"
@@ -53,6 +59,7 @@ func NewServer(
 	server.webSocketHandler.SetupEventSubscription()
 	server.setupMiddleware()
 	server.setupRoutes()
+	server.setupGraphQL()
 
 	return server
 }
@@ -97,6 +104,23 @@ func (s *Server) setupRoutes() {
 		})
 
 		r.HandleFunc("/events/ws", s.webSocketHandler.ServeHTTP)
+	})
+}
+
+// setupGraphQL initializes the GraphQL handler and routes.
+func (s *Server) setupGraphQL() {
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver.Resolver{}}))
+
+	srv.AddTransport(transport.Websocket{})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+
+	srv.Use(extension.Introspection{})
+
+	s.router.Route("/graphql", func(r chi.Router) {
+		r.Handle("/query", srv)
+		r.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql/query"))
 	})
 }
 
