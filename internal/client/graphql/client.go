@@ -7,6 +7,7 @@ import (
 	"time"
 
 	gqllib "github.com/Khan/genqlient/graphql"
+
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
@@ -35,6 +36,7 @@ func (c *ClientWrapper) ConnectSubscription(ctx context.Context) (<-chan error, 
 	defer c.subscriptionClientMu.Unlock()
 
 	if c.isSubscriptionClientStarted {
+		//nolint:nilnil
 		return nil, nil
 	}
 
@@ -78,7 +80,7 @@ func (c *ClientWrapper) DisconnectSubscription() error {
 func (c *ClientWrapper) SubscribeToEvents(
 	ctx context.Context,
 	input EventReceivedInput,
-) (eventStream <-chan interface{}, subscriptionID string, err error) {
+) (<-chan interface{}, string, error) {
 	c.subscriptionClientMu.Lock()
 	isStarted := c.isSubscriptionClientStarted
 	c.subscriptionClientMu.Unlock()
@@ -114,7 +116,16 @@ func (c *ClientWrapper) SubscribeToEvents(
 			case "EventPomodoroPayload":
 				if pomodoroPayload, ok := payload.(*OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload); ok {
 					domainEventType := convertToDomainEventType(event.EventType)
-					eventChan <- event.PomodoroState(domainEventType, pomodoroPayload.State, pomodoroPayload.Id, pomodoroPayload.TaskId, pomodoroPayload.RemainingTime, pomodoroPayload.ElapsedTime, pomodoroPayload.Phase, pomodoroPayload.PhaseCount)
+					eventChan <- event.PomodoroState(
+						domainEventType,
+						pomodoroPayload.State,
+						pomodoroPayload.Id,
+						pomodoroPayload.TaskId,
+						pomodoroPayload.RemainingTime,
+						pomodoroPayload.ElapsedTime,
+						pomodoroPayload.Phase,
+						pomodoroPayload.PhaseCount,
+					)
 				}
 			case "EventTaskPayload":
 				if taskPayload, ok := payload.(*OnEventReceivedEventReceivedEventPayloadEventTaskPayload); ok {
@@ -128,7 +139,7 @@ func (c *ClientWrapper) SubscribeToEvents(
 	return eventChan, id, nil
 }
 
-// Convert GraphQL EventType to domain EventType
+// Convert GraphQL EventType to domain EventType.
 func convertToDomainEventType(eventType EventType) event.EventType {
 	switch eventType {
 	case EventTypePomodoroStarted:
@@ -156,7 +167,7 @@ func convertToDomainEventType(eventType EventType) event.EventType {
 	}
 }
 
-// Helper to convert GraphQL pomodoro event to domain PomodoroEvent
+// Helper to convert GraphQL pomodoro event to domain PomodoroEvent.
 func (OnEventReceivedEventReceivedEvent) PomodoroState(
 	eventType event.EventType,
 	state PomodoroState,

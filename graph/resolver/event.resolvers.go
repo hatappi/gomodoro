@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/graph/model"
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
@@ -138,7 +139,7 @@ func toModelPhase(t event.PomodoroPhase) model.PomodoroPhase {
 	}
 }
 
-// toModelEventType converts event.EventType to model.EventType
+// toModelEventType converts event.EventType to model.EventType.
 func toModelEventType(t event.EventType) model.EventType {
 	switch t {
 	case event.PomodoroStarted:

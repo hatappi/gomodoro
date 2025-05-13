@@ -41,6 +41,7 @@ linters-settings:
       - github.com\/gdamore\/tcell\.Screen
       - github.com\/gdamore\/tcell\/v2\.Screen
       - github.com\/mitchellh\/mapstructure\.DecodeHookFunc
+      - github.com\/Khan\/genqlient\/graphql.WSConn
       - net
 
   forbidigo:

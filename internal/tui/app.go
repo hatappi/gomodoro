@@ -175,7 +175,7 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 
 // Run starts the TUI application main loop.
 func (a *App) Run(ctx context.Context) error {
-	ctx, cancelCtx := context.WithCancel(context.Background())
+	ctx, cancelCtx := context.WithCancel(ctx)
 	defer cancelCtx()
 
 	a.screenClient.StartPollEvent(ctx)
@@ -417,7 +417,11 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer a.graphqlClient.Unsubscribe(subID)
+	defer func() {
+		if err := a.graphqlClient.Unsubscribe(subID); err != nil {
+			log.FromContext(ctx).Error(err, "failed to unsubscribe from events")
+		}
+	}()
 
 	for {
 		select {

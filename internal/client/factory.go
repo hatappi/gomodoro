@@ -8,6 +8,7 @@ import (
 
 	gqllib "github.com/Khan/genqlient/graphql"
 	"github.com/gorilla/websocket"
+
 	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 )
