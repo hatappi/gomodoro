@@ -3,8 +3,47 @@
 package model
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 )
+
+type EventPayload interface {
+	IsEventPayload()
+}
+
+type Event struct {
+	EventCategory EventCategory `json:"eventCategory"`
+	EventType     EventType     `json:"eventType"`
+	Payload       EventPayload  `json:"payload"`
+}
+
+type EventPomodoroPayload struct {
+	ID            string        `json:"id"`
+	State         PomodoroState `json:"state"`
+	RemainingTime int32         `json:"remainingTime"`
+	ElapsedTime   int32         `json:"elapsedTime"`
+	TaskID        *string       `json:"taskId,omitempty"`
+	Phase         PomodoroPhase `json:"phase"`
+	PhaseCount    int32         `json:"phaseCount"`
+}
+
+func (EventPomodoroPayload) IsEventPayload() {}
+
+type EventReceivedInput struct {
+	EventCategory []EventCategory `json:"eventCategory,omitempty"`
+	EventTypes    []EventType     `json:"eventTypes,omitempty"`
+}
+
+type EventTaskPayload struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Completed bool   `json:"completed"`
+}
+
+func (EventTaskPayload) IsEventPayload() {}
 
 type HealthStatus struct {
 	Message   string    `json:"message"`
@@ -18,4 +57,244 @@ type Query struct {
 }
 
 type Subscription struct {
+}
+
+type EventCategory string
+
+const (
+	EventCategoryPomodoro EventCategory = "POMODORO"
+	EventCategoryTask     EventCategory = "TASK"
+)
+
+var AllEventCategory = []EventCategory{
+	EventCategoryPomodoro,
+	EventCategoryTask,
+}
+
+func (e EventCategory) IsValid() bool {
+	switch e {
+	case EventCategoryPomodoro, EventCategoryTask:
+		return true
+	}
+	return false
+}
+
+func (e EventCategory) String() string {
+	return string(e)
+}
+
+func (e *EventCategory) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EventCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EventCategory", str)
+	}
+	return nil
+}
+
+func (e EventCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EventCategory) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EventCategory) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type EventType string
+
+const (
+	EventTypePomodoroStarted   EventType = "POMODORO_STARTED"
+	EventTypePomodoroPaused    EventType = "POMODORO_PAUSED"
+	EventTypePomodoroResumed   EventType = "POMODORO_RESUMED"
+	EventTypePomodoroCompleted EventType = "POMODORO_COMPLETED"
+	EventTypePomodoroStopped   EventType = "POMODORO_STOPPED"
+	EventTypePomodoroTick      EventType = "POMODORO_TICK"
+	EventTypeTaskCreated       EventType = "TASK_CREATED"
+	EventTypeTaskUpdated       EventType = "TASK_UPDATED"
+	EventTypeTaskDeleted       EventType = "TASK_DELETED"
+	EventTypeTaskCompleted     EventType = "TASK_COMPLETED"
+)
+
+var AllEventType = []EventType{
+	EventTypePomodoroStarted,
+	EventTypePomodoroPaused,
+	EventTypePomodoroResumed,
+	EventTypePomodoroCompleted,
+	EventTypePomodoroStopped,
+	EventTypePomodoroTick,
+	EventTypeTaskCreated,
+	EventTypeTaskUpdated,
+	EventTypeTaskDeleted,
+	EventTypeTaskCompleted,
+}
+
+func (e EventType) IsValid() bool {
+	switch e {
+	case EventTypePomodoroStarted, EventTypePomodoroPaused, EventTypePomodoroResumed, EventTypePomodoroCompleted, EventTypePomodoroStopped, EventTypePomodoroTick, EventTypeTaskCreated, EventTypeTaskUpdated, EventTypeTaskDeleted, EventTypeTaskCompleted:
+		return true
+	}
+	return false
+}
+
+func (e EventType) String() string {
+	return string(e)
+}
+
+func (e *EventType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EventType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EventType", str)
+	}
+	return nil
+}
+
+func (e EventType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EventType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EventType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PomodoroPhase string
+
+const (
+	PomodoroPhaseWork       PomodoroPhase = "WORK"
+	PomodoroPhaseShortBreak PomodoroPhase = "SHORT_BREAK"
+	PomodoroPhaseLongBreak  PomodoroPhase = "LONG_BREAK"
+)
+
+var AllPomodoroPhase = []PomodoroPhase{
+	PomodoroPhaseWork,
+	PomodoroPhaseShortBreak,
+	PomodoroPhaseLongBreak,
+}
+
+func (e PomodoroPhase) IsValid() bool {
+	switch e {
+	case PomodoroPhaseWork, PomodoroPhaseShortBreak, PomodoroPhaseLongBreak:
+		return true
+	}
+	return false
+}
+
+func (e PomodoroPhase) String() string {
+	return string(e)
+}
+
+func (e *PomodoroPhase) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PomodoroPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PomodoroPhase", str)
+	}
+	return nil
+}
+
+func (e PomodoroPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PomodoroPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PomodoroPhase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PomodoroState string
+
+const (
+	PomodoroStateActive   PomodoroState = "ACTIVE"
+	PomodoroStatePaused   PomodoroState = "PAUSED"
+	PomodoroStateFinished PomodoroState = "FINISHED"
+)
+
+var AllPomodoroState = []PomodoroState{
+	PomodoroStateActive,
+	PomodoroStatePaused,
+	PomodoroStateFinished,
+}
+
+func (e PomodoroState) IsValid() bool {
+	switch e {
+	case PomodoroStateActive, PomodoroStatePaused, PomodoroStateFinished:
+		return true
+	}
+	return false
+}
+
+func (e PomodoroState) String() string {
+	return string(e)
+}
+
+func (e *PomodoroState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PomodoroState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PomodoroState", str)
+	}
+	return nil
+}
+
+func (e PomodoroState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PomodoroState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PomodoroState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

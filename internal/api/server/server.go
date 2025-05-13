@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -14,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-logr/logr"
+	"github.com/gorilla/websocket"
 
 	"github.com/hatappi/gomodoro/graph"
 	"github.com/hatappi/gomodoro/graph/resolver"
@@ -59,7 +61,7 @@ func NewServer(
 	server.webSocketHandler.SetupEventSubscription()
 	server.setupMiddleware()
 	server.setupRoutes()
-	server.setupGraphQL()
+	server.setupGraphQL(eventBus)
 
 	return server
 }
@@ -69,7 +71,6 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.RequestID)
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.Recoverer)
-	s.router.Use(middleware.Timeout(s.config.RequestTimeout))
 	s.router.Use(servermiddleware.ErrorHandler())
 }
 
@@ -108,13 +109,20 @@ func (s *Server) setupRoutes() {
 }
 
 // setupGraphQL initializes the GraphQL handler and routes.
-func (s *Server) setupGraphQL() {
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver.Resolver{}}))
+func (s *Server) setupGraphQL(eventBus event.EventBus) {
+	resolver := &resolver.Resolver{
+		EventBus: eventBus,
+	}
 
-	srv.AddTransport(transport.Websocket{})
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
+
+	srv.AddTransport(transport.Websocket{
+		Upgrader: websocket.Upgrader{CheckOrigin: func(_ *http.Request) bool { return true }},
+	})
 
 	srv.Use(extension.Introspection{})
 

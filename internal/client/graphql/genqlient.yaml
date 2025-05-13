@@ -1,0 +1,7 @@
+schema:
+  - ../../../graph/schema/*.graphqls
+operations:
+  - queries/*.graphql
+
+generated: generated.go
+package: graphql

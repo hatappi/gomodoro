@@ -50,6 +50,28 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Event struct {
+		EventCategory func(childComplexity int) int
+		EventType     func(childComplexity int) int
+		Payload       func(childComplexity int) int
+	}
+
+	EventPomodoroPayload struct {
+		ElapsedTime   func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Phase         func(childComplexity int) int
+		PhaseCount    func(childComplexity int) int
+		RemainingTime func(childComplexity int) int
+		State         func(childComplexity int) int
+		TaskID        func(childComplexity int) int
+	}
+
+	EventTaskPayload struct {
+		Completed func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Title     func(childComplexity int) int
+	}
+
 	HealthStatus struct {
 		Message   func(childComplexity int) int
 		Timestamp func(childComplexity int) int
@@ -65,7 +87,8 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		Noop func(childComplexity int) int
+		EventReceived func(childComplexity int, input model.EventReceivedInput) int
+		Noop          func(childComplexity int) int
 	}
 }
 
@@ -78,6 +101,7 @@ type QueryResolver interface {
 }
 type SubscriptionResolver interface {
 	Noop(ctx context.Context) (<-chan *string, error)
+	EventReceived(ctx context.Context, input model.EventReceivedInput) (<-chan *model.Event, error)
 }
 
 type executableSchema struct {
@@ -98,6 +122,97 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Event.eventCategory":
+		if e.complexity.Event.EventCategory == nil {
+			break
+		}
+
+		return e.complexity.Event.EventCategory(childComplexity), true
+
+	case "Event.eventType":
+		if e.complexity.Event.EventType == nil {
+			break
+		}
+
+		return e.complexity.Event.EventType(childComplexity), true
+
+	case "Event.payload":
+		if e.complexity.Event.Payload == nil {
+			break
+		}
+
+		return e.complexity.Event.Payload(childComplexity), true
+
+	case "EventPomodoroPayload.elapsedTime":
+		if e.complexity.EventPomodoroPayload.ElapsedTime == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.ElapsedTime(childComplexity), true
+
+	case "EventPomodoroPayload.id":
+		if e.complexity.EventPomodoroPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.ID(childComplexity), true
+
+	case "EventPomodoroPayload.phase":
+		if e.complexity.EventPomodoroPayload.Phase == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.Phase(childComplexity), true
+
+	case "EventPomodoroPayload.phaseCount":
+		if e.complexity.EventPomodoroPayload.PhaseCount == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.PhaseCount(childComplexity), true
+
+	case "EventPomodoroPayload.remainingTime":
+		if e.complexity.EventPomodoroPayload.RemainingTime == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.RemainingTime(childComplexity), true
+
+	case "EventPomodoroPayload.state":
+		if e.complexity.EventPomodoroPayload.State == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.State(childComplexity), true
+
+	case "EventPomodoroPayload.taskId":
+		if e.complexity.EventPomodoroPayload.TaskID == nil {
+			break
+		}
+
+		return e.complexity.EventPomodoroPayload.TaskID(childComplexity), true
+
+	case "EventTaskPayload.completed":
+		if e.complexity.EventTaskPayload.Completed == nil {
+			break
+		}
+
+		return e.complexity.EventTaskPayload.Completed(childComplexity), true
+
+	case "EventTaskPayload.id":
+		if e.complexity.EventTaskPayload.ID == nil {
+			break
+		}
+
+		return e.complexity.EventTaskPayload.ID(childComplexity), true
+
+	case "EventTaskPayload.title":
+		if e.complexity.EventTaskPayload.Title == nil {
+			break
+		}
+
+		return e.complexity.EventTaskPayload.Title(childComplexity), true
 
 	case "HealthStatus.message":
 		if e.complexity.HealthStatus.Message == nil {
@@ -134,6 +249,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Noop(childComplexity), true
 
+	case "Subscription.eventReceived":
+		if e.complexity.Subscription.EventReceived == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_eventReceived_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.EventReceived(childComplexity, args["input"].(model.EventReceivedInput)), true
+
 	case "Subscription.noop":
 		if e.complexity.Subscription.Noop == nil {
 			break
@@ -148,7 +275,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputEventReceivedInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -261,7 +390,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "schema/health.graphqls" "schema/schema.graphqls"
+//go:embed "schema/event.graphqls" "schema/health.graphqls" "schema/schema.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -273,6 +402,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "schema/event.graphqls", Input: sourceData("schema/event.graphqls"), BuiltIn: false},
 	{Name: "schema/health.graphqls", Input: sourceData("schema/health.graphqls"), BuiltIn: false},
 	{Name: "schema/schema.graphqls", Input: sourceData("schema/schema.graphqls"), BuiltIn: false},
 }
@@ -302,6 +432,29 @@ func (ec *executionContext) field_Query___type_argsName(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Subscription_eventReceived_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Subscription_eventReceived_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Subscription_eventReceived_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.EventReceivedInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventReceivedInput(ctx, tmp)
+	}
+
+	var zeroVal model.EventReceivedInput
 	return zeroVal, nil
 }
 
@@ -404,6 +557,575 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Event_eventCategory(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_eventCategory(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventCategory, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.EventCategory)
+	fc.Result = res
+	return ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_eventCategory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type EventCategory does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_eventType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EventType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.EventType)
+	fc.Result = res
+	return ec.marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_eventType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type EventType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Event_payload(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_payload(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Payload, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.EventPayload)
+	fc.Result = res
+	return ec.marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_payload(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type EventPayload does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_id(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_state(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_state(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.PomodoroState)
+	fc.Result = res
+	return ec.marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_state(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type PomodoroState does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_remainingTime(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_remainingTime(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RemainingTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_remainingTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_elapsedTime(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_elapsedTime(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ElapsedTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_elapsedTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_taskId(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_taskId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaskID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_taskId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_phase(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_phase(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phase, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.PomodoroPhase)
+	fc.Result = res
+	return ec.marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_phase(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type PomodoroPhase does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventPomodoroPayload_phaseCount(ctx context.Context, field graphql.CollectedField, obj *model.EventPomodoroPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventPomodoroPayload_phaseCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhaseCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventPomodoroPayload_phaseCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventPomodoroPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventTaskPayload_id(ctx context.Context, field graphql.CollectedField, obj *model.EventTaskPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventTaskPayload_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventTaskPayload_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventTaskPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventTaskPayload_title(ctx context.Context, field graphql.CollectedField, obj *model.EventTaskPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventTaskPayload_title(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventTaskPayload_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventTaskPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventTaskPayload_completed(ctx context.Context, field graphql.CollectedField, obj *model.EventTaskPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventTaskPayload_completed(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Completed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventTaskPayload_completed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventTaskPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _HealthStatus_message(ctx context.Context, field graphql.CollectedField, obj *model.HealthStatus) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_HealthStatus_message(ctx, field)
@@ -807,6 +1529,83 @@ func (ec *executionContext) fieldContext_Subscription_noop(_ context.Context, fi
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_eventReceived(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_eventReceived(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().EventReceived(rctx, fc.Args["input"].(model.EventReceivedInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		select {
+		case res, ok := <-resTmp.(<-chan *model.Event):
+			if !ok {
+				return nil
+			}
+			return graphql.WriterFunc(func(w io.Writer) {
+				w.Write([]byte{'{'})
+				graphql.MarshalString(field.Alias).MarshalGQL(w)
+				w.Write([]byte{':'})
+				ec.marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res).MarshalGQL(w)
+				w.Write([]byte{'}'})
+			})
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_eventReceived(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "eventCategory":
+				return ec.fieldContext_Event_eventCategory(ctx, field)
+			case "eventType":
+				return ec.fieldContext_Event_eventType(ctx, field)
+			case "payload":
+				return ec.fieldContext_Event_payload(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_eventReceived_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2762,13 +3561,234 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputEventReceivedInput(ctx context.Context, obj any) (model.EventReceivedInput, error) {
+	var it model.EventReceivedInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"eventCategory", "eventTypes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "eventCategory":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventCategory"))
+			data, err := ec.unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EventCategory = data
+		case "eventTypes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventTypes"))
+			data, err := ec.unmarshalOEventType2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EventTypes = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _EventPayload(ctx context.Context, sel ast.SelectionSet, obj model.EventPayload) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.EventTaskPayload:
+		return ec._EventTaskPayload(ctx, sel, &obj)
+	case *model.EventTaskPayload:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._EventTaskPayload(ctx, sel, obj)
+	case model.EventPomodoroPayload:
+		return ec._EventPomodoroPayload(ctx, sel, &obj)
+	case *model.EventPomodoroPayload:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._EventPomodoroPayload(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var eventImplementors = []string{"Event"}
+
+func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj *model.Event) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Event")
+		case "eventCategory":
+			out.Values[i] = ec._Event_eventCategory(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "eventType":
+			out.Values[i] = ec._Event_eventType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "payload":
+			out.Values[i] = ec._Event_payload(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var eventPomodoroPayloadImplementors = []string{"EventPomodoroPayload", "EventPayload"}
+
+func (ec *executionContext) _EventPomodoroPayload(ctx context.Context, sel ast.SelectionSet, obj *model.EventPomodoroPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventPomodoroPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EventPomodoroPayload")
+		case "id":
+			out.Values[i] = ec._EventPomodoroPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "state":
+			out.Values[i] = ec._EventPomodoroPayload_state(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "remainingTime":
+			out.Values[i] = ec._EventPomodoroPayload_remainingTime(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "elapsedTime":
+			out.Values[i] = ec._EventPomodoroPayload_elapsedTime(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "taskId":
+			out.Values[i] = ec._EventPomodoroPayload_taskId(ctx, field, obj)
+		case "phase":
+			out.Values[i] = ec._EventPomodoroPayload_phase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "phaseCount":
+			out.Values[i] = ec._EventPomodoroPayload_phaseCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var eventTaskPayloadImplementors = []string{"EventTaskPayload", "EventPayload"}
+
+func (ec *executionContext) _EventTaskPayload(ctx context.Context, sel ast.SelectionSet, obj *model.EventTaskPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, eventTaskPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EventTaskPayload")
+		case "id":
+			out.Values[i] = ec._EventTaskPayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "title":
+			out.Values[i] = ec._EventTaskPayload_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completed":
+			out.Values[i] = ec._EventTaskPayload_completed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var healthStatusImplementors = []string{"HealthStatus"}
 
@@ -2966,6 +3986,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	switch fields[0].Name {
 	case "noop":
 		return ec._Subscription_noop(ctx, fields[0])
+	case "eventReceived":
+		return ec._Subscription_eventReceived(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -3322,6 +4344,55 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
+	return ec._Event(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Event(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx context.Context, v any) (model.EventCategory, error) {
+	var res model.EventCategory
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx context.Context, sel ast.SelectionSet, v model.EventCategory) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventPayload(ctx context.Context, sel ast.SelectionSet, v model.EventPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EventPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventReceivedInput(ctx context.Context, v any) (model.EventReceivedInput, error) {
+	res, err := ec.unmarshalInputEventReceivedInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx context.Context, v any) (model.EventType, error) {
+	var res model.EventType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v model.EventType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNHealthStatus2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v model.HealthStatus) graphql.Marshaler {
 	return ec._HealthStatus(ctx, sel, &v)
 }
@@ -3334,6 +4405,58 @@ func (ec *executionContext) marshalNHealthStatus2ᚖgithubᚗcomᚋhatappiᚋgom
 		return graphql.Null
 	}
 	return ec._HealthStatus(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v any) (int32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt32(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, v any) (model.PomodoroPhase, error) {
+	var res model.PomodoroPhase
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, sel ast.SelectionSet, v model.PomodoroPhase) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, v any) (model.PomodoroState, error) {
+	var res model.PomodoroState
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, sel ast.SelectionSet, v model.PomodoroState) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -3648,6 +4771,154 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, v any) ([]model.EventCategory, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]model.EventCategory, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []model.EventCategory) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOEventType2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventTypeᚄ(ctx context.Context, v any) ([]model.EventType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]model.EventType, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOEventType2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []model.EventType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
 	return res
 }
 
