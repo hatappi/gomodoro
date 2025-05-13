@@ -18,8 +18,6 @@ type WebSocketEvent struct {
 // WebSocketEventBus implements the EventBus interface using WebSockets for communication.
 type WebSocketEventBus struct {
 	localBus *DefaultEventBus
-	wsClient WebSocketClient
-	isServer bool
 }
 
 // WebSocketClientConnection defines the interface for sending events through a WebSocket connection.
@@ -33,26 +31,7 @@ type WebSocketClientConnection interface {
 func NewServerWebSocketEventBus() EventBus {
 	return &WebSocketEventBus{
 		localBus: NewEventBus(),
-		wsClient: nil,
-		isServer: true,
 	}
-}
-
-// NewClientWebSocketEventBus creates a new EventBus for the client side that communicates over WebSockets.
-//
-//nolint:ireturn
-func NewClientWebSocketEventBus(wsClient WebSocketClient) EventBus {
-	bus := &WebSocketEventBus{
-		localBus: NewEventBus(),
-		wsClient: wsClient,
-		isServer: false,
-	}
-
-	wsClient.OnMessage(func(event WebSocketEvent) {
-		bus.handleRemoteEvent(event)
-	})
-
-	return bus
 }
 
 // EventInfo defines the interface for event information that can be published.
@@ -65,24 +44,6 @@ type EventInfo interface {
 // Publish sends an event both to local subscribers and over WebSocket to remote subscribers.
 func (b *WebSocketEventBus) Publish(event EventInfo) {
 	b.localBus.Publish(event)
-
-	payload, err := json.Marshal(event)
-	if err != nil {
-		return
-	}
-
-	wsEvent := WebSocketEvent{
-		EventType: string(event.GetEventType()),
-		Payload:   json.RawMessage(payload),
-	}
-
-	if !b.isServer && b.wsClient != nil {
-		if err := b.wsClient.Send(wsEvent); err != nil {
-			// We can't return an error from Publish as it doesn't have an error return,
-			// so we'll just silently fail here
-			return
-		}
-	}
 }
 
 // Subscribe registers a handler for a specific event type.

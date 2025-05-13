@@ -16,7 +16,6 @@ import (
 type Factory struct {
 	pomodoro         *PomodoroClient
 	task             *TaskClient
-	wsClient         *WebSocketClientImpl
 	gqlClientWrapper *graphql.ClientWrapper
 }
 
@@ -40,7 +39,6 @@ func NewFactory(apiConfig config.APIConfig) *Factory {
 	gqlClientWrapper := graphql.NewClientWrapper(queryClient, subscriptionClientImpl)
 
 	factory := &Factory{
-		wsClient:         NewWebSocketClient(fmt.Sprintf("ws://%s/api/events/ws", apiConfig.Addr)),
 		pomodoro:         NewPomodoroClient(fmt.Sprintf("http://%s", apiConfig.Addr)),
 		task:             NewTaskClient(fmt.Sprintf("http://%s", apiConfig.Addr)),
 		gqlClientWrapper: gqlClientWrapper,
@@ -59,14 +57,6 @@ func (f *Factory) Task() *TaskClient {
 	return f.task
 }
 
-// WebSocket returns a client for interacting with WebSocket endpoint.
-func (f *Factory) WebSocket() (*WebSocketClientImpl, error) {
-	if err := f.wsClient.Connect(); err != nil {
-		return nil, fmt.Errorf("failed to connect WebSocket: %w", err)
-	}
-	return f.wsClient, nil
-}
-
 // GraphQLClientWrapper provides access to the GraphQL client wrapper.
 func (f *Factory) GraphQLClient() *graphql.ClientWrapper {
 	return f.gqlClientWrapper
@@ -74,12 +64,6 @@ func (f *Factory) GraphQLClient() *graphql.ClientWrapper {
 
 // Close closes all open connections.
 func (f *Factory) Close() error {
-	if f.wsClient != nil {
-		if err := f.wsClient.Close(); err != nil {
-			return fmt.Errorf("failed to close WebSocket client: %w", err)
-		}
-	}
-
 	if f.gqlClientWrapper != nil {
 		if err := f.gqlClientWrapper.DisconnectSubscription(); err != nil {
 			return fmt.Errorf("failed to disconnect GraphQL subscription: %w", err)

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -28,14 +27,13 @@ import (
 
 // Server represents the API server.
 type Server struct {
-	config           *config.APIConfig
-	router           *chi.Mux
-	httpServer       *http.Server
-	logger           logr.Logger
-	pomodoroService  *core.PomodoroService
-	taskService      *core.TaskService
-	eventBus         event.EventBus
-	webSocketHandler *EventWebSocketHandler
+	config          *config.APIConfig
+	router          *chi.Mux
+	httpServer      *http.Server
+	logger          logr.Logger
+	pomodoroService *core.PomodoroService
+	taskService     *core.TaskService
+	eventBus        event.EventBus
 }
 
 // NewServer creates a new API server instance.
@@ -49,16 +47,14 @@ func NewServer(
 	router := chi.NewRouter()
 
 	server := &Server{
-		config:           config,
-		router:           router,
-		logger:           logger,
-		pomodoroService:  pomodoroService,
-		taskService:      taskService,
-		eventBus:         eventBus,
-		webSocketHandler: NewEventWebSocketHandler(logger, eventBus),
+		config:          config,
+		router:          router,
+		logger:          logger,
+		pomodoroService: pomodoroService,
+		taskService:     taskService,
+		eventBus:        eventBus,
 	}
 
-	server.webSocketHandler.SetupEventSubscription()
 	server.setupMiddleware()
 	server.setupRoutes()
 	server.setupGraphQL(eventBus)
@@ -103,8 +99,6 @@ func (s *Server) setupRoutes() {
 			r.Put("/{id}", taskHandler.UpdateTask)
 			r.Delete("/{id}", taskHandler.DeleteTask)
 		})
-
-		r.HandleFunc("/events/ws", s.webSocketHandler.ServeHTTP)
 	})
 }
 

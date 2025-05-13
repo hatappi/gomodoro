@@ -30,14 +30,6 @@ type EventBus interface {
 	SubscribeChannel(eventTypes []string) (<-chan interface{}, func())
 }
 
-// WebSocketClient defines WebSocket client functionality needed by the event bus.
-type WebSocketClient interface {
-	Connect() error
-	Send(event WebSocketEvent) error
-	OnMessage(handler func(event WebSocketEvent))
-	Close() error
-}
-
 // DefaultEventBus is the standard implementation of EventBus.
 type DefaultEventBus struct {
 	subscribers map[string]map[string]Handler
