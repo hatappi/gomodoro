@@ -28,7 +28,25 @@ func (r *subscriptionResolver) EventReceived(
 		defer close(outCh)
 		defer unsubscribe()
 
-		r.processEvents(ctx, busCh, outCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case e, ok := <-busCh:
+				if !ok {
+					return
+				}
+
+				switch evt := e.(type) {
+				case event.PomodoroEvent:
+					r.handlePomodoroEvent(ctx, evt, outCh)
+				case event.TaskEvent:
+					r.handleTaskEvent(ctx, evt, outCh)
+				default:
+					transport.AddSubscriptionError(ctx, gqlerror.Errorf("unknown event type: %T", evt))
+				}
+			}
+		}
 	}()
 
 	return outCh, nil
@@ -51,29 +69,6 @@ func getEventTypesFromInput(input model.EventReceivedInput) ([]event.EventType, 
 	}
 
 	return eventTypes, nil
-}
-
-// processEvents handles incoming events and sends them to the output channel.
-func (r *subscriptionResolver) processEvents(ctx context.Context, busCh <-chan interface{}, outCh chan<- *model.Event) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case e, ok := <-busCh:
-			if !ok {
-				return
-			}
-
-			switch evt := e.(type) {
-			case event.PomodoroEvent:
-				r.handlePomodoroEvent(ctx, evt, outCh)
-			case event.TaskEvent:
-				r.handleTaskEvent(ctx, evt, outCh)
-			default:
-				transport.AddSubscriptionError(ctx, gqlerror.Errorf("unknown event type: %T", evt))
-			}
-		}
-	}
 }
 
 // handlePomodoroEvent processes a pomodoro event.
