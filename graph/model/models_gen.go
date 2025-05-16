@@ -34,7 +34,6 @@ func (EventPomodoroPayload) IsEventPayload() {}
 
 type EventReceivedInput struct {
 	EventCategory []EventCategory `json:"eventCategory,omitempty"`
-	EventTypes    []EventType     `json:"eventTypes,omitempty"`
 }
 
 type EventTaskPayload struct {

@@ -411,7 +411,7 @@ func (a *App) saveTask(ctx context.Context, task *core.Task) error {
 
 // runTimer handles the timer display and events.
 func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
-	eventChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, graphql.EventReceivedInput{
+	eventChan, errChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, graphql.EventReceivedInput{
 		EventCategory: []graphql.EventCategory{graphql.EventCategoryPomodoro},
 	})
 	if err != nil {
@@ -451,6 +451,9 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			if elapsedTime != continueTimerSignal {
 				return elapsedTime, nil
 			}
+
+		case err := <-errChan:
+			return 0, err
 		}
 	}
 }

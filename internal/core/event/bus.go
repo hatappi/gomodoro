@@ -19,15 +19,15 @@ type EventBus interface {
 	Publish(event EventInfo)
 
 	// Subscribe registers a handler for a specific event type
-	Subscribe(eventType string, handler Handler) string
+	Subscribe(eventType EventType, handler Handler) string
 
 	// Unsubscribe removes a handler for a specific event type using the subscription ID
 	Unsubscribe(subscriptionID string)
 
 	// SubscribeMulti registers a handler for multiple event types and returns a slice of subscription IDs
-	SubscribeMulti(eventTypes []string, handler Handler) []string
+	SubscribeMulti(eventTypes []EventType, handler Handler) []string
 
 	// SubscribeChannel registers handlers for multiple event types
 	// Returns a channel to receive events and an unsubscribe function
-	SubscribeChannel(eventTypes []string) (<-chan interface{}, func())
+	SubscribeChannel(eventTypes []EventType) (<-chan interface{}, func())
 }

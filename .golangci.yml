@@ -42,6 +42,9 @@ linters-settings:
       - github.com\/gdamore\/tcell\/v2\.Screen
       - github.com\/mitchellh\/mapstructure\.DecodeHookFunc
       - github.com\/Khan\/genqlient\/graphql.WSConn
+      - github.com\/hatappi\/gomodoro\/graph.MutationResolver
+      - github.com\/hatappi\/gomodoro\/graph.QueryResolver
+      - github.com\/hatappi\/gomodoro\/graph.SubscriptionResolver
       - net
 
   forbidigo:
@@ -73,3 +76,8 @@ issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   new: false
+  exclude-files:
+  - internal/client/graphql/generated.go
+  - graph/generated.go
+  - graph/model/models_gen.go
+

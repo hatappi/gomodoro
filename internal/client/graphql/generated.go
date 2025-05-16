@@ -25,14 +25,10 @@ var AllEventCategory = []EventCategory{
 
 type EventReceivedInput struct {
 	EventCategory []EventCategory `json:"eventCategory"`
-	EventTypes    []EventType     `json:"eventTypes"`
 }
 
 // GetEventCategory returns EventReceivedInput.EventCategory, and is useful for accessing the field via an interface.
 func (v *EventReceivedInput) GetEventCategory() []EventCategory { return v.EventCategory }
-
-// GetEventTypes returns EventReceivedInput.EventTypes, and is useful for accessing the field via an interface.
-func (v *EventReceivedInput) GetEventTypes() []EventType { return v.EventTypes }
 
 type EventType string
 

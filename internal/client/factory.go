@@ -13,6 +13,11 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
+const (
+	// defaultHandshakeTimeout is the default timeout for WebSocket handshaking.
+	defaultHandshakeTimeout = 45 * time.Second
+)
+
 // Factory provides a convenient way to create and manage API clients.
 type Factory struct {
 	pomodoro         *PomodoroClient
@@ -26,7 +31,7 @@ func NewFactory(apiConfig config.APIConfig) *Factory {
 
 	underlyingGorillaDialer := &websocket.Dialer{
 		Proxy:            http.ProxyFromEnvironment,
-		HandshakeTimeout: 45 * time.Second,
+		HandshakeTimeout: defaultHandshakeTimeout,
 	}
 	wsDialerAdapter := graphql.NewGorillaWebSocketDialer(underlyingGorillaDialer)
 
@@ -58,7 +63,7 @@ func (f *Factory) Task() *TaskClient {
 	return f.task
 }
 
-// GraphQLClientWrapper provides access to the GraphQL client wrapper.
+// GraphQLClient returns access to the GraphQL client wrapper.
 func (f *Factory) GraphQLClient() *graphql.ClientWrapper {
 	return f.gqlClientWrapper
 }

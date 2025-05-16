@@ -56,7 +56,6 @@ type Event {
 
 input EventReceivedInput {
   eventCategory: [EventCategory!]
-  eventTypes: [EventType!]
 }
 
 extend type Subscription {
