@@ -10,6 +10,7 @@ import (
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
@@ -34,8 +35,7 @@ type App struct {
 	screenClient   screen.Client
 	pomodoroClient *client.PomodoroClient
 	taskAPIClient  *client.TaskClient
-	wsClient       event.WebSocketClient
-	eventBus       event.EventBus
+	graphqlClient  *graphql.ClientWrapper
 
 	// View components
 	timerView    *view.TimerView
@@ -139,10 +139,8 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
 	pomodoroClient := clientFactory.Pomodoro()
 	taskClient := clientFactory.Task()
-	wsClient, err := clientFactory.WebSocket()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create WebSocket client: %w", err)
-	}
+
+	gqlClient := clientFactory.GraphQLClient()
 
 	terminalScreen, err := screen.NewScreen(cfg)
 	if err != nil {
@@ -155,8 +153,7 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 		screenClient:   screenClient,
 		pomodoroClient: pomodoroClient,
 		taskAPIClient:  taskClient,
-		wsClient:       wsClient,
-		eventBus:       event.NewClientWebSocketEventBus(wsClient),
+		graphqlClient:  gqlClient,
 		workSec:        config.DefaultWorkSec,
 		shortBreakSec:  config.DefaultShortBreakSec,
 		longBreakSec:   config.DefaultLongBreakSec,
@@ -178,7 +175,27 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 
 // Run starts the TUI application main loop.
 func (a *App) Run(ctx context.Context) error {
+	ctx, cancelCtx := context.WithCancel(ctx)
+	defer cancelCtx()
+
 	a.screenClient.StartPollEvent(ctx)
+
+	connectionErrChan, err := a.graphqlClient.ConnectSubscription(ctx)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		if connectionErrChan == nil {
+			return
+		}
+
+		for err := range connectionErrChan {
+			log.FromContext(ctx).Info("Subscription connection error", "error", err)
+			cancelCtx()
+			return
+		}
+	}()
 
 	task, err := a.selectTask(ctx)
 	if err != nil {
@@ -394,14 +411,17 @@ func (a *App) saveTask(ctx context.Context, task *core.Task) error {
 
 // runTimer handles the timer display and events.
 func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
-	ch, unsubscribe := a.eventBus.SubscribeChannel([]string{
-		string(event.PomodoroTick),
-		string(event.PomodoroPaused),
-		string(event.PomodoroStarted),
-		string(event.PomodoroStopped),
-		string(event.PomodoroCompleted),
+	eventChan, errChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, graphql.EventReceivedInput{
+		EventCategory: []graphql.EventCategory{graphql.EventCategoryPomodoro},
 	})
-	defer unsubscribe()
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err := a.graphqlClient.Unsubscribe(subID); err != nil {
+			log.FromContext(ctx).Error(err, "failed to unsubscribe from events")
+		}
+	}()
 
 	for {
 		select {
@@ -414,8 +434,12 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 				return elapsedTime, nil
 			}
 
-		case e := <-ch:
-			ev, ok := e.(event.PomodoroEvent)
+		case eventData, ok := <-eventChan:
+			if !ok {
+				continue
+			}
+
+			ev, ok := eventData.(event.PomodoroEvent)
 			if !ok {
 				continue
 			}
@@ -427,6 +451,9 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			if elapsedTime != continueTimerSignal {
 				return elapsedTime, nil
 			}
+
+		case err := <-errChan:
+			return 0, err
 		}
 	}
 }

@@ -1,0 +1,23 @@
+subscription OnEventReceived($input: EventReceivedInput!) {
+  eventReceived(input: $input) {
+    eventCategory
+    eventType
+    payload {
+      __typename
+      ... on EventPomodoroPayload {
+        id
+        state
+        remainingTime
+        elapsedTime
+        taskId
+        phase
+        phaseCount
+      }
+      ... on EventTaskPayload {
+        id
+        title
+        completed
+      }
+    }
+  }
+}

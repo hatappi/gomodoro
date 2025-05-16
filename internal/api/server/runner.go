@@ -51,7 +51,7 @@ func (r *Runner) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to initialize file storage: %w", err)
 	}
 
-	eventBus := event.NewServerWebSocketEventBus()
+	eventBus := event.NewInMemoryBus()
 
 	taskService := core.NewTaskService(fileStorage, eventBus)
 	pomodoroService := core.NewPomodoroService(fileStorage, eventBus)
