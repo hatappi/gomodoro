@@ -1,6 +1,8 @@
 // Package graphql provides a GraphQL client implementation for interacting with the Gomodoro GraphQL API
 package graphql
 
+//go:generate go run github.com/Khan/genqlient ./genqlient.yaml
+
 import (
 	"context"
 	"fmt"

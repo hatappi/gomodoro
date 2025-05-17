@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/hatappi/gomodoro/graph/model"
+	"github.com/hatappi/gomodoro/internal/graph/model"
 )
 
 // Health is the resolver for the health field.

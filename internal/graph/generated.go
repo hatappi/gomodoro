@@ -16,9 +16,10 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/hatappi/gomodoro/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/hatappi/gomodoro/internal/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -451,7 +452,7 @@ func (ec *executionContext) field_Subscription_eventReceived_argsInput(
 ) (model.EventReceivedInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventReceivedInput(ctx, tmp)
+		return ec.unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventReceivedInput(ctx, tmp)
 	}
 
 	var zeroVal model.EventReceivedInput
@@ -586,7 +587,7 @@ func (ec *executionContext) _Event_eventCategory(ctx context.Context, field grap
 	}
 	res := resTmp.(model.EventCategory)
 	fc.Result = res
-	return ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, field.Selections, res)
+	return ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_eventCategory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -630,7 +631,7 @@ func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.
 	}
 	res := resTmp.(model.EventType)
 	fc.Result = res
-	return ec.marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx, field.Selections, res)
+	return ec.marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_eventType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -674,7 +675,7 @@ func (ec *executionContext) _Event_payload(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(model.EventPayload)
 	fc.Result = res
-	return ec.marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventPayload(ctx, field.Selections, res)
+	return ec.marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_payload(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -762,7 +763,7 @@ func (ec *executionContext) _EventPomodoroPayload_state(ctx context.Context, fie
 	}
 	res := resTmp.(model.PomodoroState)
 	fc.Result = res
-	return ec.marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx, field.Selections, res)
+	return ec.marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroState(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_state(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -935,7 +936,7 @@ func (ec *executionContext) _EventPomodoroPayload_phase(ctx context.Context, fie
 	}
 	res := resTmp.(model.PomodoroPhase)
 	fc.Result = res
-	return ec.marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx, field.Selections, res)
+	return ec.marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroPhase(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_phase(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1325,7 +1326,7 @@ func (ec *executionContext) _Query_health(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*model.HealthStatus)
 	fc.Result = res
-	return ec.marshalNHealthStatus2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐHealthStatus(ctx, field.Selections, res)
+	return ec.marshalNHealthStatus2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐHealthStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_health(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1569,7 +1570,7 @@ func (ec *executionContext) _Subscription_eventReceived(ctx context.Context, fie
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -3577,7 +3578,7 @@ func (ec *executionContext) unmarshalInputEventReceivedInput(ctx context.Context
 		switch k {
 		case "eventCategory":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventCategory"))
-			data, err := ec.unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx, v)
+			data, err := ec.unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategoryᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4337,11 +4338,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNEvent2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4351,17 +4352,17 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋhatappiᚋgomodoro�
 	return ec._Event(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx context.Context, v any) (model.EventCategory, error) {
+func (ec *executionContext) unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategory(ctx context.Context, v any) (model.EventCategory, error) {
 	var res model.EventCategory
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx context.Context, sel ast.SelectionSet, v model.EventCategory) graphql.Marshaler {
+func (ec *executionContext) marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategory(ctx context.Context, sel ast.SelectionSet, v model.EventCategory) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventPayload(ctx context.Context, sel ast.SelectionSet, v model.EventPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventPayload(ctx context.Context, sel ast.SelectionSet, v model.EventPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4371,26 +4372,26 @@ func (ec *executionContext) marshalNEventPayload2githubᚗcomᚋhatappiᚋgomodo
 	return ec._EventPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventReceivedInput(ctx context.Context, v any) (model.EventReceivedInput, error) {
+func (ec *executionContext) unmarshalNEventReceivedInput2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventReceivedInput(ctx context.Context, v any) (model.EventReceivedInput, error) {
 	res, err := ec.unmarshalInputEventReceivedInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx context.Context, v any) (model.EventType, error) {
+func (ec *executionContext) unmarshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventType(ctx context.Context, v any) (model.EventType, error) {
 	var res model.EventType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v model.EventType) graphql.Marshaler {
+func (ec *executionContext) marshalNEventType2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v model.EventType) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNHealthStatus2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v model.HealthStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNHealthStatus2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v model.HealthStatus) graphql.Marshaler {
 	return ec._HealthStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNHealthStatus2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v *model.HealthStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNHealthStatus2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v *model.HealthStatus) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4432,23 +4433,23 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, v any) (model.PomodoroPhase, error) {
+func (ec *executionContext) unmarshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, v any) (model.PomodoroPhase, error) {
 	var res model.PomodoroPhase
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, sel ast.SelectionSet, v model.PomodoroPhase) graphql.Marshaler {
+func (ec *executionContext) marshalNPomodoroPhase2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroPhase(ctx context.Context, sel ast.SelectionSet, v model.PomodoroPhase) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, v any) (model.PomodoroState, error) {
+func (ec *executionContext) unmarshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, v any) (model.PomodoroState, error) {
 	var res model.PomodoroState
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, sel ast.SelectionSet, v model.PomodoroState) graphql.Marshaler {
+func (ec *executionContext) marshalNPomodoroState2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoroState(ctx context.Context, sel ast.SelectionSet, v model.PomodoroState) graphql.Marshaler {
 	return v
 }
 
@@ -4767,7 +4768,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, v any) ([]model.EventCategory, error) {
+func (ec *executionContext) unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, v any) ([]model.EventCategory, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -4777,7 +4778,7 @@ func (ec *executionContext) unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋ
 	res := make([]model.EventCategory, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategory(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4785,7 +4786,7 @@ func (ec *executionContext) unmarshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋ
 	return res, nil
 }
 
-func (ec *executionContext) marshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []model.EventCategory) graphql.Marshaler {
+func (ec *executionContext) marshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []model.EventCategory) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4812,7 +4813,7 @@ func (ec *executionContext) marshalOEventCategory2ᚕgithubᚗcomᚋhatappiᚋgo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋgraphᚋmodelᚐEventCategory(ctx, sel, v[i])
+			ret[i] = ec.marshalNEventCategory2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEventCategory(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

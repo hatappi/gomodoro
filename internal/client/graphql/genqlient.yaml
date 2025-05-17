@@ -1,5 +1,5 @@
 schema:
-  - ../../../graph/schema/*.graphqls
+  - ../../../internal/graph/schema/*.graphqls
 operations:
   - queries/*.graphql
 
