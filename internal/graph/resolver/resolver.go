@@ -4,6 +4,7 @@ package resolver
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
+	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
 
@@ -14,4 +15,6 @@ import (
 // Resolver serves as the root resolver for the GraphQL schema.
 type Resolver struct {
 	EventBus event.EventBus
+
+	TaskService *core.TaskService
 }

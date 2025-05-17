@@ -1,0 +1,10 @@
+query GetAllTasks {
+  tasks {
+    totalCount
+    edges {
+      node {
+        ...Task
+      }
+    }
+  }
+}
