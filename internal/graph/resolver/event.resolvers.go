@@ -42,7 +42,7 @@ func (r *subscriptionResolver) EventReceived(ctx context.Context, input model.Ev
 				case event.PomodoroEvent:
 					ev, err := conv.ConvertPomodoroEventToModelEvent(evt)
 					if err != nil {
-						transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert pomodoro event: %w", err))
+						transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert pomodoro event: %s", err))
 						return
 					}
 
@@ -50,7 +50,7 @@ func (r *subscriptionResolver) EventReceived(ctx context.Context, input model.Ev
 				case event.TaskEvent:
 					ev, err := conv.ConvertTaskEventToModelEvent(evt)
 					if err != nil {
-						transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert task event: %w", err))
+						transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert task event: %s", err))
 						return
 					}
 
