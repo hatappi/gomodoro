@@ -1,7 +1,12 @@
 schema:
   - ../../../internal/graph/schema/*.graphqls
 operations:
+  - fragments/*.graphql
   - queries/*.graphql
 
-generated: generated.go
-package: graphql
+generated: generated/generated.go
+package: generated
+
+bindings:
+  Time:
+    type: time.Time

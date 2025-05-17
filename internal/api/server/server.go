@@ -90,22 +90,14 @@ func (s *Server) setupRoutes() {
 			r.Post("/resume", pomodoroHandler.ResumePomodoro)
 			r.Delete("/", pomodoroHandler.StopPomodoro)
 		})
-
-		taskHandler := handlers.NewTaskHandler(s.taskService)
-		r.Route("/tasks", func(r chi.Router) {
-			r.Get("/", taskHandler.GetTasks)
-			r.Post("/", taskHandler.CreateTask)
-			r.Get("/{id}", taskHandler.GetTask)
-			r.Put("/{id}", taskHandler.UpdateTask)
-			r.Delete("/{id}", taskHandler.DeleteTask)
-		})
 	})
 }
 
 // setupGraphQL initializes the GraphQL handler and routes.
 func (s *Server) setupGraphQL(eventBus event.EventBus) {
 	resolver := &resolver.Resolver{
-		EventBus: eventBus,
+		EventBus:    eventBus,
+		TaskService: s.taskService,
 	}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))

@@ -14,6 +14,10 @@ type EventPayload interface {
 	IsEventPayload()
 }
 
+type CreateTaskInput struct {
+	Title string `json:"title"`
+}
+
 type Event struct {
 	EventCategory EventCategory `json:"eventCategory"`
 	EventType     EventType     `json:"eventType"`
@@ -52,10 +56,41 @@ type HealthStatus struct {
 type Mutation struct {
 }
 
+type PageInfo struct {
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+	StartCursor     *string `json:"startCursor,omitempty"`
+	EndCursor       *string `json:"endCursor,omitempty"`
+}
+
 type Query struct {
 }
 
 type Subscription struct {
+}
+
+type Task struct {
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"createdAt"`
+	Completed bool      `json:"completed"`
+}
+
+type TaskConnection struct {
+	Edges      []*TaskEdge `json:"edges,omitempty"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	TotalCount int32       `json:"totalCount"`
+}
+
+type TaskEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Task  `json:"node,omitempty"`
+}
+
+type UpdateTaskInput struct {
+	ID        string  `json:"id"`
+	Title     *string `json:"title,omitempty"`
+	Completed *bool   `json:"completed,omitempty"`
 }
 
 type EventCategory string

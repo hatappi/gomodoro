@@ -53,7 +53,7 @@ And add a task using the editor.
 				}
 			}()
 
-			taskClient := clientFactory.Task()
+			gqlClient := clientFactory.GraphQLClient()
 
 			var newTasks []string
 			if len(args) > 0 {
@@ -76,7 +76,7 @@ And add a task using the editor.
 			}
 
 			for _, newTaskTitle := range newTasks {
-				task, err := taskClient.Create(ctx, newTaskTitle)
+				task, err := gqlClient.CreateTask(ctx, newTaskTitle)
 				if err != nil {
 					return fmt.Errorf("failed to create task '%s' via API: %w", newTaskTitle, err)
 				}

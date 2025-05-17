@@ -11,6 +11,7 @@ import (
 
 	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/client/graphql"
+	gqlgen "github.com/hatappi/gomodoro/internal/client/graphql/generated"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
@@ -34,7 +35,6 @@ type App struct {
 	config         *config.Config
 	screenClient   screen.Client
 	pomodoroClient *client.PomodoroClient
-	taskAPIClient  *client.TaskClient
 	graphqlClient  *graphql.ClientWrapper
 
 	// View components
@@ -138,7 +138,6 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 // NewApp creates a new TUI application instance.
 func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
 	pomodoroClient := clientFactory.Pomodoro()
-	taskClient := clientFactory.Task()
 
 	gqlClient := clientFactory.GraphQLClient()
 
@@ -152,7 +151,6 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 		config:         cfg,
 		screenClient:   screenClient,
 		pomodoroClient: pomodoroClient,
-		taskAPIClient:  taskClient,
 		graphqlClient:  gqlClient,
 		workSec:        config.DefaultWorkSec,
 		shortBreakSec:  config.DefaultShortBreakSec,
@@ -309,7 +307,7 @@ func (a *App) handleDeleteTask(ctx context.Context, task *core.Task) (*core.Task
 		return nil, nil
 	}
 
-	if err := a.deleteTask(ctx, task.ID); err != nil {
+	if err := a.graphqlClient.DeleteTask(ctx, task.ID); err != nil {
 		return nil, err
 	}
 
@@ -338,81 +336,33 @@ func (a *App) handleNewTask(ctx context.Context) (*core.Task, error) {
 		return nil, err
 	}
 
-	if err := a.saveTask(ctx, task); err != nil {
-		return nil, err
-	}
-
 	return task, nil
 }
 
 // loadTasks loads tasks from the API.
 func (a *App) loadTasks(ctx context.Context) ([]*core.Task, error) {
-	responses, err := a.taskAPIClient.GetAll(ctx)
+	tasks, err := a.graphqlClient.GetAllTasks(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tasks := make([]*core.Task, len(responses))
-	for i, resp := range responses {
-		tasks[i] = &core.Task{
-			ID:        resp.ID,
-			Title:     resp.Title,
-			CreatedAt: resp.CreatedAt,
-			Completed: resp.Completed,
-		}
-	}
 	return tasks, nil
 }
 
 // createTask creates a new task.
 func (a *App) createTask(ctx context.Context, name string) (*core.Task, error) {
-	resp, err := a.taskAPIClient.Create(ctx, name)
+	task, err := a.graphqlClient.CreateTask(ctx, name)
 	if err != nil {
 		return nil, err
-	}
-
-	task := &core.Task{
-		ID:        resp.ID,
-		Title:     resp.Title,
-		CreatedAt: resp.CreatedAt,
-		Completed: resp.Completed,
 	}
 
 	return task, nil
 }
 
-// deleteTask deletes a task by ID.
-func (a *App) deleteTask(ctx context.Context, taskID string) error {
-	return a.taskAPIClient.Delete(ctx, taskID)
-}
-
-// saveTask saves changes to a task.
-func (a *App) saveTask(ctx context.Context, task *core.Task) error {
-	var resp *client.TaskResponse
-	var err error
-
-	if task.ID == "" {
-		// Create new task
-		resp, err = a.taskAPIClient.Create(ctx, task.Title)
-	} else {
-		// Update existing task
-		resp, err = a.taskAPIClient.Update(ctx, task.ID, task.Title, task.Completed)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	// On success, set returned ID on task
-	task.ID = resp.ID
-
-	return nil
-}
-
 // runTimer handles the timer display and events.
 func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
-	eventChan, errChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, graphql.EventReceivedInput{
-		EventCategory: []graphql.EventCategory{graphql.EventCategoryPomodoro},
+	eventChan, errChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, gqlgen.EventReceivedInput{
+		EventCategory: []gqlgen.EventCategory{gqlgen.EventCategoryPomodoro},
 	})
 	if err != nil {
 		return 0, err
