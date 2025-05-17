@@ -7,7 +7,7 @@ package resolver
 import (
 	"context"
 
-	"github.com/hatappi/gomodoro/graph"
+	graph1 "github.com/hatappi/gomodoro/internal/graph"
 )
 
 // Noop is the resolver for the noop field.
@@ -33,17 +33,15 @@ func (r *subscriptionResolver) Noop(ctx context.Context) (<-chan *string, error)
 	return ch, nil
 }
 
-// Mutation returns graph.MutationResolver implementation.
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
+// Mutation returns graph1.MutationResolver implementation.
+func (r *Resolver) Mutation() graph1.MutationResolver { return &mutationResolver{r} }
 
-// Query returns graph.QueryResolver implementation.
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+// Query returns graph1.QueryResolver implementation.
+func (r *Resolver) Query() graph1.QueryResolver { return &queryResolver{r} }
 
-// Subscription returns graph.SubscriptionResolver implementation.
-func (r *Resolver) Subscription() graph.SubscriptionResolver { return &subscriptionResolver{r} }
+// Subscription returns graph1.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() graph1.SubscriptionResolver { return &subscriptionResolver{r} }
 
-type (
-	mutationResolver     struct{ *Resolver }
-	queryResolver        struct{ *Resolver }
-	subscriptionResolver struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

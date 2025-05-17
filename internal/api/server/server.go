@@ -16,13 +16,13 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/gorilla/websocket"
 
-	"github.com/hatappi/gomodoro/graph"
-	"github.com/hatappi/gomodoro/graph/resolver"
 	"github.com/hatappi/gomodoro/internal/api/server/handlers"
 	servermiddleware "github.com/hatappi/gomodoro/internal/api/server/middleware"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
+	"github.com/hatappi/gomodoro/internal/graph"
+	"github.com/hatappi/gomodoro/internal/graph/resolver"
 )
 
 // Server represents the API server.

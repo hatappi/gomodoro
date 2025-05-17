@@ -1,6 +1,8 @@
 // Package resolver is the resolver package for the GraphQL schema.
 package resolver
 
+//go:generate go run github.com/99designs/gqlgen generate
+
 import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 )

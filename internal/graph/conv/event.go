@@ -1,59 +1,15 @@
-package resolver
+// Package conv provides functions for converting between different event types.
+package conv
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
-	"github.com/hatappi/gomodoro/graph/model"
 	"github.com/hatappi/gomodoro/internal/core/event"
+	"github.com/hatappi/gomodoro/internal/graph/model"
 )
 
-// EventReceived is the resolver for the eventReceived field.
-func (r *subscriptionResolver) EventReceived(
-	ctx context.Context,
-	input model.EventReceivedInput,
-) (<-chan *model.Event, error) {
-	eventTypes, err := getEventTypesFromInput(input)
-	if err != nil {
-		return nil, err
-	}
-
-	busCh, unsubscribe := r.EventBus.SubscribeChannel(eventTypes)
-	outCh := make(chan *model.Event)
-
-	go func() {
-		defer close(outCh)
-		defer unsubscribe()
-
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case e, ok := <-busCh:
-				if !ok {
-					return
-				}
-
-				switch evt := e.(type) {
-				case event.PomodoroEvent:
-					r.handlePomodoroEvent(ctx, evt, outCh)
-				case event.TaskEvent:
-					r.handleTaskEvent(ctx, evt, outCh)
-				default:
-					transport.AddSubscriptionError(ctx, gqlerror.Errorf("unknown event type: %T", evt))
-				}
-			}
-		}
-	}()
-
-	return outCh, nil
-}
-
-// getEventTypesFromInput extracts event types from input.
-func getEventTypesFromInput(input model.EventReceivedInput) ([]event.EventType, error) {
+// GetEventTypesFromInput extracts event types from input.
+func GetEventTypesFromInput(input model.EventReceivedInput) ([]event.EventType, error) {
 	var eventTypes []event.EventType
 
 	for _, cat := range input.EventCategory {
@@ -71,28 +27,21 @@ func getEventTypesFromInput(input model.EventReceivedInput) ([]event.EventType, 
 	return eventTypes, nil
 }
 
-// handlePomodoroEvent processes a pomodoro event.
-func (r *subscriptionResolver) handlePomodoroEvent(
-	ctx context.Context,
-	evt event.PomodoroEvent,
-	outCh chan<- *model.Event,
-) {
+// ConvertPomodoroEventToModelEvent processes a pomodoro event.
+func ConvertPomodoroEventToModelEvent(evt event.PomodoroEvent) (*model.Event, error) {
 	state, err := convertEventPomodoroStateToModel(evt.State)
 	if err != nil {
-		transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert pomodoro state: %s", err))
-		return
+		return nil, fmt.Errorf("failed to convert pomodoro state: %w", err)
 	}
 
 	phase, err := convertEventPomodoroPhaseToModel(evt.Phase)
 	if err != nil {
-		transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert pomodoro phase: %s", err))
-		return
+		return nil, fmt.Errorf("failed to convert pomodoro phase: %w", err)
 	}
 
 	eventType, err := convertEventTypeToModel(evt.BaseEvent.Type)
 	if err != nil {
-		transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert event type: %s", err))
-		return
+		return nil, fmt.Errorf("failed to convert event type: %w", err)
 	}
 
 	payload := &model.EventPomodoroPayload{
@@ -105,19 +54,18 @@ func (r *subscriptionResolver) handlePomodoroEvent(
 		PhaseCount:    int32(evt.PhaseCount), // #nosec G115
 	}
 
-	outCh <- &model.Event{
+	return &model.Event{
 		EventCategory: model.EventCategoryPomodoro,
 		EventType:     eventType,
 		Payload:       payload,
-	}
+	}, nil
 }
 
-// handleTaskEvent processes a task event.
-func (r *subscriptionResolver) handleTaskEvent(ctx context.Context, evt event.TaskEvent, outCh chan<- *model.Event) {
+// ConvertTaskEventToModelEvent processes a task event.
+func ConvertTaskEventToModelEvent(evt event.TaskEvent) (*model.Event, error) {
 	eventType, err := convertEventTypeToModel(evt.BaseEvent.Type)
 	if err != nil {
-		transport.AddSubscriptionError(ctx, gqlerror.Errorf("failed to convert event type: %s", err))
-		return
+		return nil, fmt.Errorf("failed to convert event type: %w", err)
 	}
 
 	payload := &model.EventTaskPayload{
@@ -126,11 +74,11 @@ func (r *subscriptionResolver) handleTaskEvent(ctx context.Context, evt event.Ta
 		Completed: evt.Completed,
 	}
 
-	outCh <- &model.Event{
+	return &model.Event{
 		EventCategory: model.EventCategoryTask,
 		EventType:     eventType,
 		Payload:       payload,
-	}
+	}, nil
 }
 
 func convertModelEventCategoryToEventTypes(mcat model.EventCategory) ([]event.EventType, error) {
