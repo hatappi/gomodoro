@@ -28,9 +28,9 @@ func FromPomodoro(pomodoro *core.Pomodoro) (*model.Pomodoro, error) {
 		TaskID:    pomodoro.TaskID,
 		StartTime: pomodoro.StartTime,
 		Phase:     phase,
-		//nolint:gosec
-		PhaseCount:       int32(pomodoro.PhaseCount),
-		RemainingTimeSec: int32(pomodoro.RemainingTime.Seconds()),
-		ElapsedTimeSec:   int32(pomodoro.ElapsedTime.Seconds()),
+
+		PhaseCount:       pomodoro.PhaseCount,
+		RemainingTimeSec: int(pomodoro.RemainingTime.Seconds()),
+		ElapsedTimeSec:   int(pomodoro.ElapsedTime.Seconds()),
 	}, nil
 }

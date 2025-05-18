@@ -27,11 +27,11 @@ type Event struct {
 type EventPomodoroPayload struct {
 	ID            string        `json:"id"`
 	State         PomodoroState `json:"state"`
-	RemainingTime int32         `json:"remainingTime"`
-	ElapsedTime   int32         `json:"elapsedTime"`
+	RemainingTime int           `json:"remainingTime"`
+	ElapsedTime   int           `json:"elapsedTime"`
 	TaskID        *string       `json:"taskId,omitempty"`
 	Phase         PomodoroPhase `json:"phase"`
-	PhaseCount    int32         `json:"phaseCount"`
+	PhaseCount    int           `json:"phaseCount"`
 }
 
 func (EventPomodoroPayload) IsEventPayload() {}
@@ -69,18 +69,18 @@ type Pomodoro struct {
 	TaskID           string        `json:"taskId"`
 	StartTime        time.Time     `json:"startTime"`
 	Phase            PomodoroPhase `json:"phase"`
-	PhaseCount       int32         `json:"phaseCount"`
-	RemainingTimeSec int32         `json:"remainingTimeSec"`
-	ElapsedTimeSec   int32         `json:"elapsedTimeSec"`
+	PhaseCount       int           `json:"phaseCount"`
+	RemainingTimeSec int           `json:"remainingTimeSec"`
+	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
 }
 
 type Query struct {
 }
 
 type StartPomodoroInput struct {
-	WorkDurationSec      int32  `json:"workDurationSec"`
-	BreakDurationSec     int32  `json:"breakDurationSec"`
-	LongBreakDurationSec int32  `json:"longBreakDurationSec"`
+	WorkDurationSec      int    `json:"workDurationSec"`
+	BreakDurationSec     int    `json:"breakDurationSec"`
+	LongBreakDurationSec int    `json:"longBreakDurationSec"`
 	TaskID               string `json:"taskId"`
 }
 
@@ -97,7 +97,7 @@ type Task struct {
 type TaskConnection struct {
 	Edges      []*TaskEdge `json:"edges,omitempty"`
 	PageInfo   *PageInfo   `json:"pageInfo"`
-	TotalCount int32       `json:"totalCount"`
+	TotalCount int         `json:"totalCount"`
 }
 
 type TaskEdge struct {

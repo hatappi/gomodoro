@@ -1223,9 +1223,9 @@ func (ec *executionContext) _EventPomodoroPayload_remainingTime(ctx context.Cont
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_remainingTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1267,9 +1267,9 @@ func (ec *executionContext) _EventPomodoroPayload_elapsedTime(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_elapsedTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1396,9 +1396,9 @@ func (ec *executionContext) _EventPomodoroPayload_phaseCount(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_phaseCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2514,9 +2514,9 @@ func (ec *executionContext) _Pomodoro_phaseCount(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Pomodoro_phaseCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2558,9 +2558,9 @@ func (ec *executionContext) _Pomodoro_remainingTimeSec(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Pomodoro_remainingTimeSec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2602,9 +2602,9 @@ func (ec *executionContext) _Pomodoro_elapsedTimeSec(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Pomodoro_elapsedTimeSec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3447,9 +3447,9 @@ func (ec *executionContext) _TaskConnection_totalCount(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TaskConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5581,21 +5581,21 @@ func (ec *executionContext) unmarshalInputStartPomodoroInput(ctx context.Context
 		switch k {
 		case "workDurationSec":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workDurationSec"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.WorkDurationSec = data
 		case "breakDurationSec":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("breakDurationSec"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.BreakDurationSec = data
 		case "longBreakDurationSec":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("longBreakDurationSec"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6835,14 +6835,14 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v any) (int32, error) {
-	res, err := graphql.UnmarshalInt32(v)
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
 	_ = sel
-	res := graphql.MarshalInt32(v)
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
