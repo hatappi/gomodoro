@@ -63,7 +63,25 @@ type PageInfo struct {
 	EndCursor       *string `json:"endCursor,omitempty"`
 }
 
+type Pomodoro struct {
+	ID               string        `json:"id"`
+	State            PomodoroState `json:"state"`
+	TaskID           string        `json:"taskId"`
+	StartTime        time.Time     `json:"startTime"`
+	Phase            PomodoroPhase `json:"phase"`
+	PhaseCount       int32         `json:"phaseCount"`
+	RemainingTimeSec int32         `json:"remainingTimeSec"`
+	ElapsedTimeSec   int32         `json:"elapsedTimeSec"`
+}
+
 type Query struct {
+}
+
+type StartPomodoroInput struct {
+	WorkDurationSec      int32  `json:"workDurationSec"`
+	BreakDurationSec     int32  `json:"breakDurationSec"`
+	LongBreakDurationSec int32  `json:"longBreakDurationSec"`
+	TaskID               string `json:"taskId"`
 }
 
 type Subscription struct {

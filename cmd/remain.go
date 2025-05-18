@@ -37,10 +37,10 @@ func newRemainCmd() *cobra.Command {
 				_ = factory.Close()
 			}()
 
-			pomodoroClient := factory.Pomodoro()
+			gqlClient := factory.GraphQLClient()
 
 			ctx := cmd.Context()
-			pomodoro, err := pomodoroClient.GetCurrent(ctx)
+			pomodoro, err := gqlClient.GetCurrentPomodoro(ctx)
 			if err != nil {
 				if !ignoreError {
 					return err

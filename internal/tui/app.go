@@ -32,10 +32,9 @@ const (
 // App is the main TUI application controller.
 type App struct {
 	// Configuration and clients
-	config         *config.Config
-	screenClient   screen.Client
-	pomodoroClient *client.PomodoroClient
-	graphqlClient  *graphql.ClientWrapper
+	config        *config.Config
+	screenClient  screen.Client
+	graphqlClient *graphql.ClientWrapper
 
 	// View components
 	timerView    *view.TimerView
@@ -137,8 +136,6 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 
 // NewApp creates a new TUI application instance.
 func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
-	pomodoroClient := clientFactory.Pomodoro()
-
 	gqlClient := clientFactory.GraphQLClient()
 
 	terminalScreen, err := screen.NewScreen(cfg)
@@ -148,13 +145,12 @@ func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (
 	screenClient := screen.NewClient(terminalScreen)
 
 	app := &App{
-		config:         cfg,
-		screenClient:   screenClient,
-		pomodoroClient: pomodoroClient,
-		graphqlClient:  gqlClient,
-		workSec:        config.DefaultWorkSec,
-		shortBreakSec:  config.DefaultShortBreakSec,
-		longBreakSec:   config.DefaultLongBreakSec,
+		config:        cfg,
+		screenClient:  screenClient,
+		graphqlClient: gqlClient,
+		workSec:       config.DefaultWorkSec,
+		shortBreakSec: config.DefaultShortBreakSec,
+		longBreakSec:  config.DefaultLongBreakSec,
 	}
 
 	// Apply all options
@@ -215,7 +211,12 @@ func (a *App) Run(ctx context.Context) error {
 			resultCh <- timerResult{elapsedTime: elapsedTime, err: err}
 		}()
 
-		pomodoro, err := a.pomodoroClient.Start(ctx, workDuration, breakDuration, longBreakDuration, task.ID)
+		pomodoro, err := a.graphqlClient.StartPomodoro(ctx, gqlgen.StartPomodoroInput{
+			WorkDurationSec:      int(workDuration.Seconds()),
+			BreakDurationSec:     int(breakDuration.Seconds()),
+			LongBreakDurationSec: int(longBreakDuration.Seconds()),
+			TaskId:               task.ID,
+		})
 		if err != nil {
 			return err
 		}
@@ -257,7 +258,7 @@ func (a *App) Run(ctx context.Context) error {
 
 // Finish cleans up resources when the app is closed.
 func (a *App) Finish(ctx context.Context) {
-	_, _ = a.pomodoroClient.Stop(ctx)
+	_, _ = a.graphqlClient.StopPomodoro(ctx)
 	a.screenClient.Finish()
 }
 
@@ -432,7 +433,7 @@ func (a *App) handleScreenEvent(ctx context.Context, e interface{}) (int, error)
 		}
 		return elapsedTime, gomodoro_error.ErrCancel
 	case constants.TimerActionStop:
-		_, stopErr := a.pomodoroClient.Stop(ctx)
+		_, stopErr := a.graphqlClient.StopPomodoro(ctx)
 		if stopErr != nil {
 			log.FromContext(ctx).Error(stopErr, "failed to stop pomodoro")
 			return 0, stopErr
@@ -499,23 +500,24 @@ func (a *App) handleSmallScreen(ctx context.Context, taskName string) (int, erro
 
 // getCurrentElapsedTime retrieves elapsed time from current pomodoro session.
 func (a *App) getCurrentElapsedTime(ctx context.Context) (int, error) {
-	current, err := a.pomodoroClient.GetCurrent(ctx)
+	current, err := a.graphqlClient.GetCurrentPomodoro(ctx)
 	if err != nil {
 		return 0, err
 	}
-	return current.ElapsedTime, nil
+
+	return int(current.ElapsedTime.Seconds()), nil
 }
 
 // toggleTimer toggles the timer between paused and running states.
 func (a *App) toggleTimer(ctx context.Context) {
-	currPomodoro, _ := a.pomodoroClient.GetCurrent(ctx)
-	if currPomodoro == nil {
+	currentPomodoro, _ := a.graphqlClient.GetCurrentPomodoro(ctx)
+	if currentPomodoro == nil {
 		return
 	}
 
-	if currPomodoro.State == "paused" {
-		_, _ = a.pomodoroClient.Resume(ctx)
+	if currentPomodoro.State == event.PomodoroStatePaused {
+		_, _ = a.graphqlClient.ResumePomodoro(ctx)
 	} else {
-		_, _ = a.pomodoroClient.Pause(ctx)
+		_, _ = a.graphqlClient.PausePomodoro(ctx)
 	}
 }

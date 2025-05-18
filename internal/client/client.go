@@ -2,11 +2,7 @@
 package client
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 )
@@ -14,9 +10,6 @@ import (
 const (
 	// defaultClientTimeout is the default timeout for HTTP client requests.
 	defaultClientTimeout = 10 * time.Second
-
-	// httpErrorStatusCode is the status code threshold for HTTP errors.
-	httpErrorStatusCode = 400
 )
 
 // Config represents configuration for API clients.
@@ -92,96 +85,4 @@ type ErrorResponse struct {
 
 func (e *ErrorResponse) Error() string {
 	return fmt.Sprintf("API error (%d): %s - %s", e.StatusCode, e.Code, e.Message)
-}
-
-func (c *BaseClient) doRequest(ctx context.Context, method, path string, body interface{}) (*http.Response, error) {
-	url := c.baseURL + path
-
-	var bodyReader io.Reader
-	if body != nil {
-		jsonBody, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal request body: %w", err)
-		}
-		bodyReader = bytes.NewBuffer(jsonBody)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to do request: %w", err)
-	}
-
-	return resp, nil
-}
-
-func (c *BaseClient) parseResponse(resp *http.Response, result interface{}) error {
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if resp.StatusCode >= httpErrorStatusCode {
-		var apiResp APIResponse
-		if err := json.Unmarshal(body, &apiResp); err != nil {
-			return &ErrorResponse{
-				StatusCode: resp.StatusCode,
-				Code:       "unknown_error",
-				Message:    string(body),
-			}
-		}
-
-		if apiResp.Error != nil {
-			return &ErrorResponse{
-				StatusCode: resp.StatusCode,
-				Code:       apiResp.Error.Code,
-				Message:    apiResp.Error.Message,
-			}
-		}
-
-		return &ErrorResponse{
-			StatusCode: resp.StatusCode,
-			Code:       "unknown_error",
-			Message:    "Unknown error occurred",
-		}
-	}
-
-	if result == nil {
-		return nil
-	}
-
-	var apiResp APIResponse
-	apiResp.Data = result
-
-	if err := json.Unmarshal(body, &apiResp); err != nil {
-		return fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	if !apiResp.Success {
-		if apiResp.Error != nil {
-			return &ErrorResponse{
-				StatusCode: resp.StatusCode,
-				Code:       apiResp.Error.Code,
-				Message:    apiResp.Error.Message,
-			}
-		}
-		return &ErrorResponse{
-			StatusCode: resp.StatusCode,
-			Code:       "unknown_error",
-			Message:    "API reported failure but no error details provided",
-		}
-	}
-
-	return nil
 }

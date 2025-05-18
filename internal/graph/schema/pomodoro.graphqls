@@ -1,0 +1,28 @@
+type Pomodoro {
+  id: ID!
+  state: PomodoroState!
+  taskId: ID!
+  startTime: Time!
+  phase: PomodoroPhase!
+  phaseCount: Int!
+  remainingTimeSec: Int!
+  elapsedTimeSec: Int!
+}
+
+input StartPomodoroInput {
+  workDurationSec: Int!
+  breakDurationSec: Int!
+  longBreakDurationSec: Int!
+  taskId: ID!
+}
+
+extend type Query {
+  currentPomodoro: Pomodoro
+}
+
+extend type Mutation {
+  startPomodoro(input: StartPomodoroInput!): Pomodoro
+  pausePomodoro: Pomodoro
+  resumePomodoro: Pomodoro
+  stopPomodoro: Pomodoro
+}

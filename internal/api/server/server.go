@@ -16,7 +16,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/gorilla/websocket"
 
-	"github.com/hatappi/gomodoro/internal/api/server/handlers"
 	servermiddleware "github.com/hatappi/gomodoro/internal/api/server/middleware"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
@@ -81,23 +80,15 @@ func (s *Server) setupRoutes() {
 
 	s.router.Route("/api", func(r chi.Router) {
 		r.Use(servermiddleware.JSONContentType)
-
-		pomodoroHandler := handlers.NewPomodoroHandler(s.pomodoroService)
-		r.Route("/pomodoro", func(r chi.Router) {
-			r.Get("/", pomodoroHandler.GetCurrentPomodoro)
-			r.Post("/start", pomodoroHandler.StartPomodoro)
-			r.Post("/pause", pomodoroHandler.PausePomodoro)
-			r.Post("/resume", pomodoroHandler.ResumePomodoro)
-			r.Delete("/", pomodoroHandler.StopPomodoro)
-		})
 	})
 }
 
 // setupGraphQL initializes the GraphQL handler and routes.
 func (s *Server) setupGraphQL(eventBus event.EventBus) {
 	resolver := &resolver.Resolver{
-		EventBus:    eventBus,
-		TaskService: s.taskService,
+		EventBus:        eventBus,
+		TaskService:     s.taskService,
+		PomodoroService: s.pomodoroService,
 	}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))

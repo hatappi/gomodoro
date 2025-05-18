@@ -20,7 +20,6 @@ const (
 
 // Factory provides a convenient way to create and manage API clients.
 type Factory struct {
-	pomodoro         *PomodoroClient
 	gqlClientWrapper *graphql.ClientWrapper
 }
 
@@ -44,16 +43,10 @@ func NewFactory(apiConfig config.APIConfig) *Factory {
 	gqlClientWrapper := graphql.NewClientWrapper(queryClient, subscriptionClientImpl)
 
 	factory := &Factory{
-		pomodoro:         NewPomodoroClient(fmt.Sprintf("http://%s", apiConfig.Addr)),
 		gqlClientWrapper: gqlClientWrapper,
 	}
 
 	return factory
-}
-
-// Pomodoro returns a client for interacting with Pomodoro API endpoints.
-func (f *Factory) Pomodoro() *PomodoroClient {
-	return f.pomodoro
 }
 
 // GraphQLClient returns access to the GraphQL client wrapper.

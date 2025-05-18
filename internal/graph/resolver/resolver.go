@@ -16,5 +16,6 @@ import (
 type Resolver struct {
 	EventBus event.EventBus
 
-	TaskService *core.TaskService
+	TaskService     *core.TaskService
+	PomodoroService *core.PomodoroService
 }
