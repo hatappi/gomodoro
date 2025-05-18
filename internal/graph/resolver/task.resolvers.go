@@ -59,7 +59,7 @@ func (r *queryResolver) Tasks(ctx context.Context) (*model.TaskConnection, error
 
 	return &model.TaskConnection{
 		Edges:      edges,
-		TotalCount: int32(len(tasks)),
+		TotalCount: len(tasks),
 		PageInfo: &model.PageInfo{
 			StartCursor:     conv.ToPointer(edges[0].Cursor),
 			EndCursor:       conv.ToPointer(edges[len(edges)-1].Cursor),
