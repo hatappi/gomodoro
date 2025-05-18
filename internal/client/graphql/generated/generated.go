@@ -251,6 +251,116 @@ func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) __premarshalJSON()
 	return &retval, nil
 }
 
+// GetCurrentPomodoroCurrentPomodoro includes the requested fields of the GraphQL type Pomodoro.
+type GetCurrentPomodoroCurrentPomodoro struct {
+	PomodoroDetails `json:"-"`
+}
+
+// GetId returns GetCurrentPomodoroCurrentPomodoro.Id, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetId() string { return v.PomodoroDetails.Id }
+
+// GetState returns GetCurrentPomodoroCurrentPomodoro.State, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetState() PomodoroState { return v.PomodoroDetails.State }
+
+// GetTaskId returns GetCurrentPomodoroCurrentPomodoro.TaskId, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetTaskId() string { return v.PomodoroDetails.TaskId }
+
+// GetStartTime returns GetCurrentPomodoroCurrentPomodoro.StartTime, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetStartTime() time.Time {
+	return v.PomodoroDetails.StartTime
+}
+
+// GetPhase returns GetCurrentPomodoroCurrentPomodoro.Phase, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetPhase() PomodoroPhase { return v.PomodoroDetails.Phase }
+
+// GetPhaseCount returns GetCurrentPomodoroCurrentPomodoro.PhaseCount, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
+
+// GetRemainingTimeSec returns GetCurrentPomodoroCurrentPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetRemainingTimeSec() int {
+	return v.PomodoroDetails.RemainingTimeSec
+}
+
+// GetElapsedTimeSec returns GetCurrentPomodoroCurrentPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetElapsedTimeSec() int {
+	return v.PomodoroDetails.ElapsedTimeSec
+}
+
+func (v *GetCurrentPomodoroCurrentPomodoro) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetCurrentPomodoroCurrentPomodoro
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetCurrentPomodoroCurrentPomodoro = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.PomodoroDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetCurrentPomodoroCurrentPomodoro struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTimeSec int `json:"remainingTimeSec"`
+
+	ElapsedTimeSec int `json:"elapsedTimeSec"`
+}
+
+func (v *GetCurrentPomodoroCurrentPomodoro) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetCurrentPomodoroCurrentPomodoro) __premarshalJSON() (*__premarshalGetCurrentPomodoroCurrentPomodoro, error) {
+	var retval __premarshalGetCurrentPomodoroCurrentPomodoro
+
+	retval.Id = v.PomodoroDetails.Id
+	retval.State = v.PomodoroDetails.State
+	retval.TaskId = v.PomodoroDetails.TaskId
+	retval.StartTime = v.PomodoroDetails.StartTime
+	retval.Phase = v.PomodoroDetails.Phase
+	retval.PhaseCount = v.PomodoroDetails.PhaseCount
+	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
+	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	return &retval, nil
+}
+
+// GetCurrentPomodoroResponse is returned by GetCurrentPomodoro on success.
+type GetCurrentPomodoroResponse struct {
+	CurrentPomodoro GetCurrentPomodoroCurrentPomodoro `json:"currentPomodoro"`
+}
+
+// GetCurrentPomodoro returns GetCurrentPomodoroResponse.CurrentPomodoro, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroResponse) GetCurrentPomodoro() GetCurrentPomodoroCurrentPomodoro {
+	return v.CurrentPomodoro
+}
+
 // GetTaskResponse is returned by GetTask on success.
 type GetTaskResponse struct {
 	Task GetTaskTask `json:"task"`
@@ -573,6 +683,146 @@ func (v *OnEventReceivedResponse) GetEventReceived() OnEventReceivedEventReceive
 	return v.EventReceived
 }
 
+// PausePomodoroPausePomodoro includes the requested fields of the GraphQL type Pomodoro.
+type PausePomodoroPausePomodoro struct {
+	PomodoroDetails `json:"-"`
+}
+
+// GetId returns PausePomodoroPausePomodoro.Id, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetId() string { return v.PomodoroDetails.Id }
+
+// GetState returns PausePomodoroPausePomodoro.State, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetState() PomodoroState { return v.PomodoroDetails.State }
+
+// GetTaskId returns PausePomodoroPausePomodoro.TaskId, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetTaskId() string { return v.PomodoroDetails.TaskId }
+
+// GetStartTime returns PausePomodoroPausePomodoro.StartTime, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetStartTime() time.Time { return v.PomodoroDetails.StartTime }
+
+// GetPhase returns PausePomodoroPausePomodoro.Phase, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetPhase() PomodoroPhase { return v.PomodoroDetails.Phase }
+
+// GetPhaseCount returns PausePomodoroPausePomodoro.PhaseCount, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
+
+// GetRemainingTimeSec returns PausePomodoroPausePomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetRemainingTimeSec() int {
+	return v.PomodoroDetails.RemainingTimeSec
+}
+
+// GetElapsedTimeSec returns PausePomodoroPausePomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+
+func (v *PausePomodoroPausePomodoro) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PausePomodoroPausePomodoro
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PausePomodoroPausePomodoro = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.PomodoroDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPausePomodoroPausePomodoro struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTimeSec int `json:"remainingTimeSec"`
+
+	ElapsedTimeSec int `json:"elapsedTimeSec"`
+}
+
+func (v *PausePomodoroPausePomodoro) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PausePomodoroPausePomodoro) __premarshalJSON() (*__premarshalPausePomodoroPausePomodoro, error) {
+	var retval __premarshalPausePomodoroPausePomodoro
+
+	retval.Id = v.PomodoroDetails.Id
+	retval.State = v.PomodoroDetails.State
+	retval.TaskId = v.PomodoroDetails.TaskId
+	retval.StartTime = v.PomodoroDetails.StartTime
+	retval.Phase = v.PomodoroDetails.Phase
+	retval.PhaseCount = v.PomodoroDetails.PhaseCount
+	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
+	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	return &retval, nil
+}
+
+// PausePomodoroResponse is returned by PausePomodoro on success.
+type PausePomodoroResponse struct {
+	PausePomodoro PausePomodoroPausePomodoro `json:"pausePomodoro"`
+}
+
+// GetPausePomodoro returns PausePomodoroResponse.PausePomodoro, and is useful for accessing the field via an interface.
+func (v *PausePomodoroResponse) GetPausePomodoro() PausePomodoroPausePomodoro { return v.PausePomodoro }
+
+// PomodoroDetails includes the GraphQL fields of Pomodoro requested by the fragment PomodoroDetails.
+type PomodoroDetails struct {
+	Id               string        `json:"id"`
+	State            PomodoroState `json:"state"`
+	TaskId           string        `json:"taskId"`
+	StartTime        time.Time     `json:"startTime"`
+	Phase            PomodoroPhase `json:"phase"`
+	PhaseCount       int           `json:"phaseCount"`
+	RemainingTimeSec int           `json:"remainingTimeSec"`
+	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
+}
+
+// GetId returns PomodoroDetails.Id, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetId() string { return v.Id }
+
+// GetState returns PomodoroDetails.State, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetState() PomodoroState { return v.State }
+
+// GetTaskId returns PomodoroDetails.TaskId, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetTaskId() string { return v.TaskId }
+
+// GetStartTime returns PomodoroDetails.StartTime, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetStartTime() time.Time { return v.StartTime }
+
+// GetPhase returns PomodoroDetails.Phase, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetPhase() PomodoroPhase { return v.Phase }
+
+// GetPhaseCount returns PomodoroDetails.PhaseCount, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetPhaseCount() int { return v.PhaseCount }
+
+// GetRemainingTimeSec returns PomodoroDetails.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetRemainingTimeSec() int { return v.RemainingTimeSec }
+
+// GetElapsedTimeSec returns PomodoroDetails.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetElapsedTimeSec() int { return v.ElapsedTimeSec }
+
 type PomodoroPhase string
 
 const (
@@ -599,6 +849,341 @@ var AllPomodoroState = []PomodoroState{
 	PomodoroStateActive,
 	PomodoroStatePaused,
 	PomodoroStateFinished,
+}
+
+// ResumePomodoroResponse is returned by ResumePomodoro on success.
+type ResumePomodoroResponse struct {
+	ResumePomodoro ResumePomodoroResumePomodoro `json:"resumePomodoro"`
+}
+
+// GetResumePomodoro returns ResumePomodoroResponse.ResumePomodoro, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResponse) GetResumePomodoro() ResumePomodoroResumePomodoro {
+	return v.ResumePomodoro
+}
+
+// ResumePomodoroResumePomodoro includes the requested fields of the GraphQL type Pomodoro.
+type ResumePomodoroResumePomodoro struct {
+	PomodoroDetails `json:"-"`
+}
+
+// GetId returns ResumePomodoroResumePomodoro.Id, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetId() string { return v.PomodoroDetails.Id }
+
+// GetState returns ResumePomodoroResumePomodoro.State, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetState() PomodoroState { return v.PomodoroDetails.State }
+
+// GetTaskId returns ResumePomodoroResumePomodoro.TaskId, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetTaskId() string { return v.PomodoroDetails.TaskId }
+
+// GetStartTime returns ResumePomodoroResumePomodoro.StartTime, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetStartTime() time.Time { return v.PomodoroDetails.StartTime }
+
+// GetPhase returns ResumePomodoroResumePomodoro.Phase, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetPhase() PomodoroPhase { return v.PomodoroDetails.Phase }
+
+// GetPhaseCount returns ResumePomodoroResumePomodoro.PhaseCount, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
+
+// GetRemainingTimeSec returns ResumePomodoroResumePomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetRemainingTimeSec() int {
+	return v.PomodoroDetails.RemainingTimeSec
+}
+
+// GetElapsedTimeSec returns ResumePomodoroResumePomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetElapsedTimeSec() int {
+	return v.PomodoroDetails.ElapsedTimeSec
+}
+
+func (v *ResumePomodoroResumePomodoro) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ResumePomodoroResumePomodoro
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ResumePomodoroResumePomodoro = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.PomodoroDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalResumePomodoroResumePomodoro struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTimeSec int `json:"remainingTimeSec"`
+
+	ElapsedTimeSec int `json:"elapsedTimeSec"`
+}
+
+func (v *ResumePomodoroResumePomodoro) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ResumePomodoroResumePomodoro) __premarshalJSON() (*__premarshalResumePomodoroResumePomodoro, error) {
+	var retval __premarshalResumePomodoroResumePomodoro
+
+	retval.Id = v.PomodoroDetails.Id
+	retval.State = v.PomodoroDetails.State
+	retval.TaskId = v.PomodoroDetails.TaskId
+	retval.StartTime = v.PomodoroDetails.StartTime
+	retval.Phase = v.PomodoroDetails.Phase
+	retval.PhaseCount = v.PomodoroDetails.PhaseCount
+	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
+	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	return &retval, nil
+}
+
+type StartPomodoroInput struct {
+	WorkDurationSec      int    `json:"workDurationSec"`
+	BreakDurationSec     int    `json:"breakDurationSec"`
+	LongBreakDurationSec int    `json:"longBreakDurationSec"`
+	TaskId               string `json:"taskId"`
+}
+
+// GetWorkDurationSec returns StartPomodoroInput.WorkDurationSec, and is useful for accessing the field via an interface.
+func (v *StartPomodoroInput) GetWorkDurationSec() int { return v.WorkDurationSec }
+
+// GetBreakDurationSec returns StartPomodoroInput.BreakDurationSec, and is useful for accessing the field via an interface.
+func (v *StartPomodoroInput) GetBreakDurationSec() int { return v.BreakDurationSec }
+
+// GetLongBreakDurationSec returns StartPomodoroInput.LongBreakDurationSec, and is useful for accessing the field via an interface.
+func (v *StartPomodoroInput) GetLongBreakDurationSec() int { return v.LongBreakDurationSec }
+
+// GetTaskId returns StartPomodoroInput.TaskId, and is useful for accessing the field via an interface.
+func (v *StartPomodoroInput) GetTaskId() string { return v.TaskId }
+
+// StartPomodoroResponse is returned by StartPomodoro on success.
+type StartPomodoroResponse struct {
+	StartPomodoro StartPomodoroStartPomodoro `json:"startPomodoro"`
+}
+
+// GetStartPomodoro returns StartPomodoroResponse.StartPomodoro, and is useful for accessing the field via an interface.
+func (v *StartPomodoroResponse) GetStartPomodoro() StartPomodoroStartPomodoro { return v.StartPomodoro }
+
+// StartPomodoroStartPomodoro includes the requested fields of the GraphQL type Pomodoro.
+type StartPomodoroStartPomodoro struct {
+	PomodoroDetails `json:"-"`
+}
+
+// GetId returns StartPomodoroStartPomodoro.Id, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetId() string { return v.PomodoroDetails.Id }
+
+// GetState returns StartPomodoroStartPomodoro.State, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetState() PomodoroState { return v.PomodoroDetails.State }
+
+// GetTaskId returns StartPomodoroStartPomodoro.TaskId, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetTaskId() string { return v.PomodoroDetails.TaskId }
+
+// GetStartTime returns StartPomodoroStartPomodoro.StartTime, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetStartTime() time.Time { return v.PomodoroDetails.StartTime }
+
+// GetPhase returns StartPomodoroStartPomodoro.Phase, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetPhase() PomodoroPhase { return v.PomodoroDetails.Phase }
+
+// GetPhaseCount returns StartPomodoroStartPomodoro.PhaseCount, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
+
+// GetRemainingTimeSec returns StartPomodoroStartPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetRemainingTimeSec() int {
+	return v.PomodoroDetails.RemainingTimeSec
+}
+
+// GetElapsedTimeSec returns StartPomodoroStartPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+
+func (v *StartPomodoroStartPomodoro) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*StartPomodoroStartPomodoro
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.StartPomodoroStartPomodoro = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.PomodoroDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalStartPomodoroStartPomodoro struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTimeSec int `json:"remainingTimeSec"`
+
+	ElapsedTimeSec int `json:"elapsedTimeSec"`
+}
+
+func (v *StartPomodoroStartPomodoro) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *StartPomodoroStartPomodoro) __premarshalJSON() (*__premarshalStartPomodoroStartPomodoro, error) {
+	var retval __premarshalStartPomodoroStartPomodoro
+
+	retval.Id = v.PomodoroDetails.Id
+	retval.State = v.PomodoroDetails.State
+	retval.TaskId = v.PomodoroDetails.TaskId
+	retval.StartTime = v.PomodoroDetails.StartTime
+	retval.Phase = v.PomodoroDetails.Phase
+	retval.PhaseCount = v.PomodoroDetails.PhaseCount
+	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
+	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	return &retval, nil
+}
+
+// StopPomodoroResponse is returned by StopPomodoro on success.
+type StopPomodoroResponse struct {
+	StopPomodoro StopPomodoroStopPomodoro `json:"stopPomodoro"`
+}
+
+// GetStopPomodoro returns StopPomodoroResponse.StopPomodoro, and is useful for accessing the field via an interface.
+func (v *StopPomodoroResponse) GetStopPomodoro() StopPomodoroStopPomodoro { return v.StopPomodoro }
+
+// StopPomodoroStopPomodoro includes the requested fields of the GraphQL type Pomodoro.
+type StopPomodoroStopPomodoro struct {
+	PomodoroDetails `json:"-"`
+}
+
+// GetId returns StopPomodoroStopPomodoro.Id, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetId() string { return v.PomodoroDetails.Id }
+
+// GetState returns StopPomodoroStopPomodoro.State, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetState() PomodoroState { return v.PomodoroDetails.State }
+
+// GetTaskId returns StopPomodoroStopPomodoro.TaskId, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetTaskId() string { return v.PomodoroDetails.TaskId }
+
+// GetStartTime returns StopPomodoroStopPomodoro.StartTime, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetStartTime() time.Time { return v.PomodoroDetails.StartTime }
+
+// GetPhase returns StopPomodoroStopPomodoro.Phase, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetPhase() PomodoroPhase { return v.PomodoroDetails.Phase }
+
+// GetPhaseCount returns StopPomodoroStopPomodoro.PhaseCount, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
+
+// GetRemainingTimeSec returns StopPomodoroStopPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetRemainingTimeSec() int {
+	return v.PomodoroDetails.RemainingTimeSec
+}
+
+// GetElapsedTimeSec returns StopPomodoroStopPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+
+func (v *StopPomodoroStopPomodoro) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*StopPomodoroStopPomodoro
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.StopPomodoroStopPomodoro = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.PomodoroDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalStopPomodoroStopPomodoro struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTimeSec int `json:"remainingTimeSec"`
+
+	ElapsedTimeSec int `json:"elapsedTimeSec"`
+}
+
+func (v *StopPomodoroStopPomodoro) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *StopPomodoroStopPomodoro) __premarshalJSON() (*__premarshalStopPomodoroStopPomodoro, error) {
+	var retval __premarshalStopPomodoroStopPomodoro
+
+	retval.Id = v.PomodoroDetails.Id
+	retval.State = v.PomodoroDetails.State
+	retval.TaskId = v.PomodoroDetails.TaskId
+	retval.StartTime = v.PomodoroDetails.StartTime
+	retval.Phase = v.PomodoroDetails.Phase
+	retval.PhaseCount = v.PomodoroDetails.PhaseCount
+	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
+	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	return &retval, nil
 }
 
 // Task includes the GraphQL fields of Task requested by the fragment Task.
@@ -652,6 +1237,14 @@ type __OnEventReceivedInput struct {
 
 // GetInput returns __OnEventReceivedInput.Input, and is useful for accessing the field via an interface.
 func (v *__OnEventReceivedInput) GetInput() EventReceivedInput { return v.Input }
+
+// __StartPomodoroInput is used internally by genqlient
+type __StartPomodoroInput struct {
+	Input StartPomodoroInput `json:"input"`
+}
+
+// GetInput returns __StartPomodoroInput.Input, and is useful for accessing the field via an interface.
+func (v *__StartPomodoroInput) GetInput() StartPomodoroInput { return v.Input }
 
 // The mutation executed by CreateTask.
 const CreateTask_Operation = `
@@ -755,6 +1348,46 @@ func GetAllTasks(
 	}
 
 	data_ = &GetAllTasksResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetCurrentPomodoro.
+const GetCurrentPomodoro_Operation = `
+query GetCurrentPomodoro {
+	currentPomodoro {
+		... PomodoroDetails
+	}
+}
+fragment PomodoroDetails on Pomodoro {
+	id
+	state
+	taskId
+	startTime
+	phase
+	phaseCount
+	remainingTimeSec
+	elapsedTimeSec
+}
+`
+
+func GetCurrentPomodoro(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *GetCurrentPomodoroResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetCurrentPomodoro",
+		Query:  GetCurrentPomodoro_Operation,
+	}
+
+	data_ = &GetCurrentPomodoroResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -876,4 +1509,168 @@ func OnEventReceivedForwardData(interfaceChan interface{}, jsonRawMsg json.RawMe
 	}
 	dataChan_ <- wsResp
 	return nil
+}
+
+// The mutation executed by PausePomodoro.
+const PausePomodoro_Operation = `
+mutation PausePomodoro {
+	pausePomodoro {
+		... PomodoroDetails
+	}
+}
+fragment PomodoroDetails on Pomodoro {
+	id
+	state
+	taskId
+	startTime
+	phase
+	phaseCount
+	remainingTimeSec
+	elapsedTimeSec
+}
+`
+
+func PausePomodoro(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *PausePomodoroResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "PausePomodoro",
+		Query:  PausePomodoro_Operation,
+	}
+
+	data_ = &PausePomodoroResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ResumePomodoro.
+const ResumePomodoro_Operation = `
+mutation ResumePomodoro {
+	resumePomodoro {
+		... PomodoroDetails
+	}
+}
+fragment PomodoroDetails on Pomodoro {
+	id
+	state
+	taskId
+	startTime
+	phase
+	phaseCount
+	remainingTimeSec
+	elapsedTimeSec
+}
+`
+
+func ResumePomodoro(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *ResumePomodoroResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ResumePomodoro",
+		Query:  ResumePomodoro_Operation,
+	}
+
+	data_ = &ResumePomodoroResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by StartPomodoro.
+const StartPomodoro_Operation = `
+mutation StartPomodoro ($input: StartPomodoroInput!) {
+	startPomodoro(input: $input) {
+		... PomodoroDetails
+	}
+}
+fragment PomodoroDetails on Pomodoro {
+	id
+	state
+	taskId
+	startTime
+	phase
+	phaseCount
+	remainingTimeSec
+	elapsedTimeSec
+}
+`
+
+func StartPomodoro(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input StartPomodoroInput,
+) (data_ *StartPomodoroResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "StartPomodoro",
+		Query:  StartPomodoro_Operation,
+		Variables: &__StartPomodoroInput{
+			Input: input,
+		},
+	}
+
+	data_ = &StartPomodoroResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by StopPomodoro.
+const StopPomodoro_Operation = `
+mutation StopPomodoro {
+	stopPomodoro {
+		... PomodoroDetails
+	}
+}
+fragment PomodoroDetails on Pomodoro {
+	id
+	state
+	taskId
+	startTime
+	phase
+	phaseCount
+	remainingTimeSec
+	elapsedTimeSec
+}
+`
+
+func StopPomodoro(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *StopPomodoroResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "StopPomodoro",
+		Query:  StopPomodoro_Operation,
+	}
+
+	data_ = &StopPomodoroResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
 }

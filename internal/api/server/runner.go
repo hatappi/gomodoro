@@ -135,7 +135,7 @@ func (r *Runner) EnsureRunning(ctx context.Context) error {
 		}
 	}()
 
-	_, err := clientFactory.Pomodoro().GetCurrent(ctx)
+	_, err := clientFactory.GraphQLClient().GetCurrentPomodoro(ctx)
 	if err == nil {
 		logger.Info("API server is already running (checked via client)")
 		return nil

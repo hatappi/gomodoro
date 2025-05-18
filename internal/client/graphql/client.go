@@ -251,6 +251,66 @@ func (c *ClientWrapper) DeleteTask(ctx context.Context, id string) error {
 	return fmt.Errorf("failed to delete task")
 }
 
+// GetCurrentPomodoro retrieves the current active pomodoro session from the server.
+func (c *ClientWrapper) GetCurrentPomodoro(ctx context.Context) (*core.Pomodoro, error) {
+	res, err := gqlgen.GetCurrentPomodoro(ctx, c.queryClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current pomodoro: %w", err)
+	}
+
+	pomodoro := res.GetCurrentPomodoro()
+
+	return conv.ToCorePomodoro(pomodoro.PomodoroDetails)
+}
+
+// StartPomodoro starts a new pomodoro session on the server.
+func (c *ClientWrapper) StartPomodoro(ctx context.Context, input gqlgen.StartPomodoroInput) (*core.Pomodoro, error) {
+	res, err := gqlgen.StartPomodoro(ctx, c.queryClient, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start pomodoro: %w", err)
+	}
+
+	pomodoro := res.StartPomodoro.PomodoroDetails
+
+	return conv.ToCorePomodoro(pomodoro)
+}
+
+// PausePomodoro pauses the current active pomodoro session on the server.
+func (c *ClientWrapper) PausePomodoro(ctx context.Context) (*core.Pomodoro, error) {
+	res, err := gqlgen.PausePomodoro(ctx, c.queryClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pause pomodoro: %w", err)
+	}
+
+	pomodoro := res.PausePomodoro.PomodoroDetails
+
+	return conv.ToCorePomodoro(pomodoro)
+}
+
+// ResumePomodoro resumes a paused pomodoro session on the server.
+func (c *ClientWrapper) ResumePomodoro(ctx context.Context) (*core.Pomodoro, error) {
+	res, err := gqlgen.ResumePomodoro(ctx, c.queryClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resume pomodoro: %w", err)
+	}
+
+	pomodoro := res.ResumePomodoro.PomodoroDetails
+
+	return conv.ToCorePomodoro(pomodoro)
+}
+
+// StopPomodoro stops the current active pomodoro session on the server.
+func (c *ClientWrapper) StopPomodoro(ctx context.Context) (*core.Pomodoro, error) {
+	res, err := gqlgen.StopPomodoro(ctx, c.queryClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to stop pomodoro: %w", err)
+	}
+
+	pomodoro := res.StopPomodoro.PomodoroDetails
+
+	return conv.ToCorePomodoro(pomodoro)
+}
+
 func convertEventTypeToEvent(eventType gqlgen.EventType) (event.EventType, error) {
 	switch eventType {
 	case gqlgen.EventTypePomodoroStarted:
