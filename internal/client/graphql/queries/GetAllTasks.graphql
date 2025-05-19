@@ -3,7 +3,7 @@ query GetAllTasks {
     totalCount
     edges {
       node {
-        ...Task
+        ...TaskDetails
       }
     }
   }

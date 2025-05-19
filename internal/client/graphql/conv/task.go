@@ -7,7 +7,7 @@ import (
 )
 
 // ToCoreTask converts a GraphQL Task to a core Task.
-func ToCoreTask(task gqlgen.Task) *core.Task {
+func ToCoreTask(task gqlgen.TaskDetails) *core.Task {
 	return &core.Task{
 		ID:        task.Id,
 		Title:     task.Title,
