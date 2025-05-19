@@ -1,4 +1,4 @@
-fragment Task on Task {
+fragment TaskDetails on Task {
   id
   title
   createdAt

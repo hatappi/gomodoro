@@ -207,7 +207,7 @@ func (c *ClientWrapper) GetAllTasks(ctx context.Context) ([]*core.Task, error) {
 
 	result := make([]*core.Task, 0, len(tasks.GetEdges()))
 	for _, task := range tasks.GetEdges() {
-		result = append(result, conv.ToCoreTask(task.Node.Task))
+		result = append(result, conv.ToCoreTask(task.Node.TaskDetails))
 	}
 
 	return result, nil
@@ -222,7 +222,7 @@ func (c *ClientWrapper) GetTask(ctx context.Context, id string) (*core.Task, err
 
 	task := res.GetTask()
 
-	return conv.ToCoreTask(task.Task), nil
+	return conv.ToCoreTask(task.TaskDetails), nil
 }
 
 // CreateTask creates a new task on the server.
@@ -232,7 +232,7 @@ func (c *ClientWrapper) CreateTask(ctx context.Context, title string) (*core.Tas
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
 
-	task := res.CreateTask.Task
+	task := res.CreateTask.TaskDetails
 
 	return conv.ToCoreTask(task), nil
 }

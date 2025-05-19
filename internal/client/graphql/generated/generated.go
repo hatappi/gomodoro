@@ -14,20 +14,20 @@ import (
 
 // CreateTaskCreateTask includes the requested fields of the GraphQL type Task.
 type CreateTaskCreateTask struct {
-	Task `json:"-"`
+	TaskDetails `json:"-"`
 }
 
 // GetId returns CreateTaskCreateTask.Id, and is useful for accessing the field via an interface.
-func (v *CreateTaskCreateTask) GetId() string { return v.Task.Id }
+func (v *CreateTaskCreateTask) GetId() string { return v.TaskDetails.Id }
 
 // GetTitle returns CreateTaskCreateTask.Title, and is useful for accessing the field via an interface.
-func (v *CreateTaskCreateTask) GetTitle() string { return v.Task.Title }
+func (v *CreateTaskCreateTask) GetTitle() string { return v.TaskDetails.Title }
 
 // GetCreatedAt returns CreateTaskCreateTask.CreatedAt, and is useful for accessing the field via an interface.
-func (v *CreateTaskCreateTask) GetCreatedAt() time.Time { return v.Task.CreatedAt }
+func (v *CreateTaskCreateTask) GetCreatedAt() time.Time { return v.TaskDetails.CreatedAt }
 
 // GetCompleted returns CreateTaskCreateTask.Completed, and is useful for accessing the field via an interface.
-func (v *CreateTaskCreateTask) GetCompleted() bool { return v.Task.Completed }
+func (v *CreateTaskCreateTask) GetCompleted() bool { return v.TaskDetails.Completed }
 
 func (v *CreateTaskCreateTask) UnmarshalJSON(b []byte) error {
 
@@ -47,7 +47,7 @@ func (v *CreateTaskCreateTask) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.Task)
+		b, &v.TaskDetails)
 	if err != nil {
 		return err
 	}
@@ -75,10 +75,10 @@ func (v *CreateTaskCreateTask) MarshalJSON() ([]byte, error) {
 func (v *CreateTaskCreateTask) __premarshalJSON() (*__premarshalCreateTaskCreateTask, error) {
 	var retval __premarshalCreateTaskCreateTask
 
-	retval.Id = v.Task.Id
-	retval.Title = v.Task.Title
-	retval.CreatedAt = v.Task.CreatedAt
-	retval.Completed = v.Task.Completed
+	retval.Id = v.TaskDetails.Id
+	retval.Title = v.TaskDetails.Title
+	retval.CreatedAt = v.TaskDetails.CreatedAt
+	retval.Completed = v.TaskDetails.Completed
 	return &retval, nil
 }
 
@@ -179,23 +179,25 @@ func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdge) GetNode() GetAllTasksTasks
 
 // GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask includes the requested fields of the GraphQL type Task.
 type GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask struct {
-	Task `json:"-"`
+	TaskDetails `json:"-"`
 }
 
 // GetId returns GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask.Id, and is useful for accessing the field via an interface.
-func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetId() string { return v.Task.Id }
+func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetId() string { return v.TaskDetails.Id }
 
 // GetTitle returns GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask.Title, and is useful for accessing the field via an interface.
-func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetTitle() string { return v.Task.Title }
+func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetTitle() string {
+	return v.TaskDetails.Title
+}
 
 // GetCreatedAt returns GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask.CreatedAt, and is useful for accessing the field via an interface.
 func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetCreatedAt() time.Time {
-	return v.Task.CreatedAt
+	return v.TaskDetails.CreatedAt
 }
 
 // GetCompleted returns GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask.Completed, and is useful for accessing the field via an interface.
 func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) GetCompleted() bool {
-	return v.Task.Completed
+	return v.TaskDetails.Completed
 }
 
 func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) UnmarshalJSON(b []byte) error {
@@ -216,7 +218,7 @@ func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) UnmarshalJSON(b []
 	}
 
 	err = json.Unmarshal(
-		b, &v.Task)
+		b, &v.TaskDetails)
 	if err != nil {
 		return err
 	}
@@ -244,10 +246,10 @@ func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) MarshalJSON() ([]b
 func (v *GetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask) __premarshalJSON() (*__premarshalGetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask, error) {
 	var retval __premarshalGetAllTasksTasksTaskConnectionEdgesTaskEdgeNodeTask
 
-	retval.Id = v.Task.Id
-	retval.Title = v.Task.Title
-	retval.CreatedAt = v.Task.CreatedAt
-	retval.Completed = v.Task.Completed
+	retval.Id = v.TaskDetails.Id
+	retval.Title = v.TaskDetails.Title
+	retval.CreatedAt = v.TaskDetails.CreatedAt
+	retval.Completed = v.TaskDetails.Completed
 	return &retval, nil
 }
 
@@ -371,20 +373,20 @@ func (v *GetTaskResponse) GetTask() GetTaskTask { return v.Task }
 
 // GetTaskTask includes the requested fields of the GraphQL type Task.
 type GetTaskTask struct {
-	Task `json:"-"`
+	TaskDetails `json:"-"`
 }
 
 // GetId returns GetTaskTask.Id, and is useful for accessing the field via an interface.
-func (v *GetTaskTask) GetId() string { return v.Task.Id }
+func (v *GetTaskTask) GetId() string { return v.TaskDetails.Id }
 
 // GetTitle returns GetTaskTask.Title, and is useful for accessing the field via an interface.
-func (v *GetTaskTask) GetTitle() string { return v.Task.Title }
+func (v *GetTaskTask) GetTitle() string { return v.TaskDetails.Title }
 
 // GetCreatedAt returns GetTaskTask.CreatedAt, and is useful for accessing the field via an interface.
-func (v *GetTaskTask) GetCreatedAt() time.Time { return v.Task.CreatedAt }
+func (v *GetTaskTask) GetCreatedAt() time.Time { return v.TaskDetails.CreatedAt }
 
 // GetCompleted returns GetTaskTask.Completed, and is useful for accessing the field via an interface.
-func (v *GetTaskTask) GetCompleted() bool { return v.Task.Completed }
+func (v *GetTaskTask) GetCompleted() bool { return v.TaskDetails.Completed }
 
 func (v *GetTaskTask) UnmarshalJSON(b []byte) error {
 
@@ -404,7 +406,7 @@ func (v *GetTaskTask) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.Task)
+		b, &v.TaskDetails)
 	if err != nil {
 		return err
 	}
@@ -432,10 +434,10 @@ func (v *GetTaskTask) MarshalJSON() ([]byte, error) {
 func (v *GetTaskTask) __premarshalJSON() (*__premarshalGetTaskTask, error) {
 	var retval __premarshalGetTaskTask
 
-	retval.Id = v.Task.Id
-	retval.Title = v.Task.Title
-	retval.CreatedAt = v.Task.CreatedAt
-	retval.Completed = v.Task.Completed
+	retval.Id = v.TaskDetails.Id
+	retval.Title = v.TaskDetails.Title
+	retval.CreatedAt = v.TaskDetails.CreatedAt
+	retval.Completed = v.TaskDetails.Completed
 	return &retval, nil
 }
 
@@ -1186,25 +1188,25 @@ func (v *StopPomodoroStopPomodoro) __premarshalJSON() (*__premarshalStopPomodoro
 	return &retval, nil
 }
 
-// Task includes the GraphQL fields of Task requested by the fragment Task.
-type Task struct {
+// TaskDetails includes the GraphQL fields of Task requested by the fragment TaskDetails.
+type TaskDetails struct {
 	Id        string    `json:"id"`
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"createdAt"`
 	Completed bool      `json:"completed"`
 }
 
-// GetId returns Task.Id, and is useful for accessing the field via an interface.
-func (v *Task) GetId() string { return v.Id }
+// GetId returns TaskDetails.Id, and is useful for accessing the field via an interface.
+func (v *TaskDetails) GetId() string { return v.Id }
 
-// GetTitle returns Task.Title, and is useful for accessing the field via an interface.
-func (v *Task) GetTitle() string { return v.Title }
+// GetTitle returns TaskDetails.Title, and is useful for accessing the field via an interface.
+func (v *TaskDetails) GetTitle() string { return v.Title }
 
-// GetCreatedAt returns Task.CreatedAt, and is useful for accessing the field via an interface.
-func (v *Task) GetCreatedAt() time.Time { return v.CreatedAt }
+// GetCreatedAt returns TaskDetails.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TaskDetails) GetCreatedAt() time.Time { return v.CreatedAt }
 
-// GetCompleted returns Task.Completed, and is useful for accessing the field via an interface.
-func (v *Task) GetCompleted() bool { return v.Completed }
+// GetCompleted returns TaskDetails.Completed, and is useful for accessing the field via an interface.
+func (v *TaskDetails) GetCompleted() bool { return v.Completed }
 
 // __CreateTaskInput is used internally by genqlient
 type __CreateTaskInput struct {
@@ -1250,10 +1252,10 @@ func (v *__StartPomodoroInput) GetInput() StartPomodoroInput { return v.Input }
 const CreateTask_Operation = `
 mutation CreateTask ($title: String!) {
 	createTask(input: {title:$title}) {
-		... Task
+		... TaskDetails
 	}
 }
-fragment Task on Task {
+fragment TaskDetails on Task {
 	id
 	title
 	createdAt
@@ -1325,12 +1327,12 @@ query GetAllTasks {
 		totalCount
 		edges {
 			node {
-				... Task
+				... TaskDetails
 			}
 		}
 	}
 }
-fragment Task on Task {
+fragment TaskDetails on Task {
 	id
 	title
 	createdAt
@@ -1403,10 +1405,10 @@ func GetCurrentPomodoro(
 const GetTask_Operation = `
 query GetTask ($id: ID!) {
 	task(id: $id) {
-		... Task
+		... TaskDetails
 	}
 }
-fragment Task on Task {
+fragment TaskDetails on Task {
 	id
 	title
 	createdAt
