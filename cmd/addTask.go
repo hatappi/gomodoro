@@ -9,7 +9,7 @@ import (
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/api/server"
-	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/editor"
 )
@@ -46,15 +46,6 @@ And add a task using the editor.
 				}
 			}()
 
-			clientFactory := client.NewFactory(cfg.API)
-			defer func() {
-				if err := clientFactory.Close(); err != nil {
-					log.FromContext(ctx).Error(err, "Failed to close client factory")
-				}
-			}()
-
-			gqlClient := clientFactory.GraphQLClient()
-
 			var newTasks []string
 			if len(args) > 0 {
 				newTasks = append(newTasks, strings.Join(args, " "))
@@ -74,6 +65,8 @@ And add a task using the editor.
 					newTasks = append(newTasks, l)
 				}
 			}
+
+			gqlClient := graphql.NewClientWrapper(cfg.API)
 
 			for _, newTaskTitle := range newTasks {
 				task, err := gqlClient.CreateTask(ctx, newTaskTitle)

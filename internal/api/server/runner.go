@@ -8,7 +8,7 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 
-	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
@@ -128,14 +128,10 @@ func (r *Runner) IsRunning() bool {
 // It uses the client to perform health checks.
 func (r *Runner) EnsureRunning(ctx context.Context) error {
 	logger := log.FromContext(ctx)
-	clientFactory := client.NewFactory(r.config.API)
-	defer func() {
-		if err := clientFactory.Close(); err != nil {
-			logger.Error(err, "Failed to close client factory")
-		}
-	}()
 
-	_, err := clientFactory.GraphQLClient().GetCurrentPomodoro(ctx)
+	gqlClient := graphql.NewClientWrapper(r.config.API)
+
+	_, err := gqlClient.GetCurrentPomodoro(ctx)
 	if err == nil {
 		logger.Info("API server is already running (checked via client)")
 		return nil

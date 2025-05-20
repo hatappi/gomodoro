@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
@@ -30,14 +30,7 @@ func newRemainCmd() *cobra.Command {
 				return err
 			}
 
-			factory := client.NewFactory(cfg.API)
-			defer func() {
-				// Since remain.go command is often used in status bars,
-				// we don't want to print errors to stdout, so we just ignore the error here
-				_ = factory.Close()
-			}()
-
-			gqlClient := factory.GraphQLClient()
+			gqlClient := graphql.NewClientWrapper(cfg.API)
 
 			ctx := cmd.Context()
 			pomodoro, err := gqlClient.GetCurrentPomodoro(ctx)
