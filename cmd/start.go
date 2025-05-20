@@ -12,7 +12,7 @@ import (
 	"github.com/hatappi/go-kit/log"
 
 	"github.com/hatappi/gomodoro/internal/api/server"
-	"github.com/hatappi/gomodoro/internal/client"
+	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/pixela"
@@ -87,14 +87,14 @@ func runTUIApp(ctx context.Context, cfg *config.Config) error {
 		opts = append(opts, tui.WithRecordPixela(pixelaClient, cfg.Pixela.UserName, cfg.Pixela.GraphID))
 	}
 
-	clientFactory := client.NewFactory(cfg.API)
+	gqlClient := graphql.NewClientWrapper(cfg.API)
 	defer func() {
-		if err := clientFactory.Close(); err != nil {
-			logger.Error(err, "Failed to close client factory")
+		if err := gqlClient.DisconnectSubscription(); err != nil {
+			logger.Error(err, "Failed to disconnect subscription")
 		}
 	}()
 
-	app, err := tui.NewApp(cfg, clientFactory, opts...)
+	app, err := tui.NewApp(cfg, gqlClient, opts...)
 	if err != nil {
 		logger.Error(err, "Failed to create TUI App")
 		return err

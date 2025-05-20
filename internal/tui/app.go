@@ -9,7 +9,6 @@ import (
 
 	"github.com/hatappi/go-kit/log"
 
-	"github.com/hatappi/gomodoro/internal/client"
 	"github.com/hatappi/gomodoro/internal/client/graphql"
 	gqlgen "github.com/hatappi/gomodoro/internal/client/graphql/generated"
 	"github.com/hatappi/gomodoro/internal/config"
@@ -135,9 +134,7 @@ func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
 }
 
 // NewApp creates a new TUI application instance.
-func NewApp(cfg *config.Config, clientFactory *client.Factory, opts ...Option) (*App, error) {
-	gqlClient := clientFactory.GraphQLClient()
-
+func NewApp(cfg *config.Config, gqlClient *graphql.ClientWrapper, opts ...Option) (*App, error) {
 	terminalScreen, err := screen.NewScreen(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create screen: %w", err)

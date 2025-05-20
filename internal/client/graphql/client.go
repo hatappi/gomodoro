@@ -6,13 +6,16 @@ package graphql
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
 	gqllib "github.com/Khan/genqlient/graphql"
+	"github.com/gorilla/websocket"
 
 	"github.com/hatappi/gomodoro/internal/client/graphql/conv"
 	gqlgen "github.com/hatappi/gomodoro/internal/client/graphql/generated"
+	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
 )
@@ -20,6 +23,9 @@ import (
 const (
 	// defaultChannelBufferSize is the default buffer size for event and error channels.
 	defaultChannelBufferSize = 10
+
+	// defaultHandshakeTimeout is the default timeout for WebSocket handshaking.
+	defaultHandshakeTimeout = 45 * time.Second // Added constant
 )
 
 // ClientWrapper wraps the genqlient clients for query/mutation and subscriptions.
@@ -34,7 +40,20 @@ type ClientWrapper struct {
 }
 
 // NewClientWrapper creates a new GraphQL ClientWrapper.
-func NewClientWrapper(queryClient gqllib.Client, subscriptionClient gqllib.WebSocketClient) *ClientWrapper {
+func NewClientWrapper(apiConfig config.APIConfig) *ClientWrapper {
+	queryClient := gqllib.NewClient(fmt.Sprintf("http://%s/graphql/query", apiConfig.Addr), http.DefaultClient)
+
+	underlyingGorillaDialer := &websocket.Dialer{
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: defaultHandshakeTimeout,
+	}
+	wsDialerAdapter := NewGorillaWebSocketDialer(underlyingGorillaDialer)
+
+	subscriptionClient := gqllib.NewClientUsingWebSocket(
+		fmt.Sprintf("ws://%s/graphql/query", apiConfig.Addr),
+		wsDialerAdapter,
+	)
+
 	return &ClientWrapper{
 		queryClient:        queryClient,
 		subscriptionClient: subscriptionClient,
