@@ -40,7 +40,6 @@ type ClientWrapper struct {
 }
 
 // NewClientWrapper creates a new GraphQL ClientWrapper.
-// This function was previously NewFactory in internal/client/factory.go
 func NewClientWrapper(apiConfig config.APIConfig) *ClientWrapper {
 	queryClient := gqllib.NewClient(fmt.Sprintf("http://%s/graphql/query", apiConfig.Addr), http.DefaultClient)
 
