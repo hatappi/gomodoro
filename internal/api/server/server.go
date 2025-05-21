@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -33,6 +34,8 @@ type Server struct {
 	pomodoroService *core.PomodoroService
 	taskService     *core.TaskService
 	eventBus        event.EventBus
+
+	completeFuncs []func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime time.Duration) error
 }
 
 // NewServer creates a new API server instance.
@@ -42,6 +45,7 @@ func NewServer(
 	pomodoroService *core.PomodoroService,
 	taskService *core.TaskService,
 	eventBus event.EventBus,
+	opts ...Option,
 ) *Server {
 	router := chi.NewRouter()
 
@@ -52,6 +56,10 @@ func NewServer(
 		pomodoroService: pomodoroService,
 		taskService:     taskService,
 		eventBus:        eventBus,
+	}
+
+	for _, opt := range opts {
+		opt(server)
 	}
 
 	server.setupMiddleware()
@@ -140,11 +148,49 @@ func (s *Server) Listen() (net.Listener, error) {
 	return ln, nil
 }
 
-// Serve starts serving HTTP requests using the provided listener.
-func (s *Server) Serve(ln net.Listener) error {
+// Start the HTTP server and blocks until it is stopped.
+func (s *Server) Start(ln net.Listener, ctx context.Context) error {
+	go s.handlePomodoroCompletionEvents(ctx)
+
 	s.logger.Info("Serving API server")
 	if err := s.httpServer.Serve(ln); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("failed to serve: %w", err)
 	}
+
 	return nil
+}
+
+func (s *Server) handlePomodoroCompletionEvents(ctx context.Context) {
+	busCh, unsubscribe := s.eventBus.SubscribeChannel([]event.EventType{event.PomodoroStopped, event.PomodoroCompleted})
+	defer unsubscribe()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case e, ok := <-busCh:
+			if !ok {
+				return
+			}
+
+			pomodoroEvent, ok := e.(event.PomodoroEvent)
+			if !ok {
+				continue
+			}
+
+			task, err := s.taskService.GetTaskByID(pomodoroEvent.TaskID)
+			if err != nil {
+				s.logger.Error(err, "Failed to get task by ID", "taskID", pomodoroEvent.TaskID)
+				continue
+			}
+
+			isWorkTime := pomodoroEvent.Phase == event.PomodoroPhaseWork
+
+			for _, completeFunc := range s.completeFuncs {
+				if err := completeFunc(ctx, task.Title, isWorkTime, pomodoroEvent.ElapsedTime); err != nil {
+					s.logger.Error(err, "Failed to execute complete function")
+				}
+			}
+		}
+	}
 }

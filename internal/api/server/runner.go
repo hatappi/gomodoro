@@ -12,7 +12,9 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/core"
 	"github.com/hatappi/gomodoro/internal/core/event"
+	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/storage/file"
+	"github.com/hatappi/gomodoro/internal/toggl"
 )
 
 const (
@@ -56,12 +58,27 @@ func (r *Runner) Start(ctx context.Context) error {
 	taskService := core.NewTaskService(fileStorage, eventBus)
 	pomodoroService := core.NewPomodoroService(fileStorage, eventBus)
 
+	opts := []Option{
+		WithCompletionLogging(),
+	}
+
+	if r.config.Toggl.Enable {
+		togglClient := toggl.NewClient(r.config.Toggl.ProjectID, r.config.Toggl.WorkspaceID, r.config.Toggl.APIToken)
+		opts = append(opts, WithRecordToggl(togglClient))
+	}
+
+	if r.config.Pixela.Enable {
+		pixelaClient := pixela.NewClient(r.config.Pixela.Token)
+		opts = append(opts, WithRecordPixela(pixelaClient, r.config.Pixela.UserName, r.config.Pixela.GraphID))
+	}
+
 	r.server = NewServer(
 		&r.config.API,
 		logger,
 		pomodoroService,
 		taskService,
 		eventBus,
+		opts...,
 	)
 
 	ln, err := r.server.Listen()
@@ -82,7 +99,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	}
 
 	go func() {
-		if err := r.server.Serve(ln); err != nil {
+		if err := r.server.Start(ln, ctx); err != nil {
 			logger.Error(err, "Error serving API")
 		}
 	}()
