@@ -71,8 +71,9 @@ And add a task using the editor.
 			for _, newTaskTitle := range newTasks {
 				task, err := gqlClient.CreateTask(ctx, newTaskTitle)
 				if err != nil {
-					return fmt.Errorf("failed to create task '%s' via API: %w", newTaskTitle, err)
+					return fmt.Errorf("failed to create task '%s': %w", newTaskTitle, err)
 				}
+
 				fmt.Printf("added task '%s' with ID '%s'\n", task.Title, task.ID)
 			}
 
