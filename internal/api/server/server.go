@@ -149,7 +149,7 @@ func (s *Server) Listen() (net.Listener, error) {
 }
 
 // Start the HTTP server and blocks until it is stopped.
-func (s *Server) Start(ln net.Listener, ctx context.Context) error {
+func (s *Server) Start(ctx context.Context, ln net.Listener) error {
 	go s.handlePomodoroCompletionEvents(ctx)
 
 	s.logger.Info("Serving API server")

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hatappi/go-kit/log"
+
 	"github.com/hatappi/gomodoro/internal/pixela"
 	"github.com/hatappi/gomodoro/internal/toggl"
 )
@@ -63,7 +64,13 @@ func WithCompletionLogging() Option {
 		a.completeFuncs = append(
 			a.completeFuncs,
 			func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime time.Duration) error {
-				log.FromContext(ctx).Info("Pomodoro completed", "taskName", taskName, "isWorkTime", isWorkTime, "elapsedTimeSec", elapsedTime.Seconds())
+				log.FromContext(ctx).Info(
+					"Pomodoro completed",
+					"taskName", taskName,
+					"isWorkTime", isWorkTime,
+					"elapsedTimeSec", elapsedTime.Seconds(),
+				)
+
 				return nil
 			},
 		)

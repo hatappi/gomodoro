@@ -99,7 +99,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	}
 
 	go func() {
-		if err := r.server.Start(ln, ctx); err != nil {
+		if err := r.server.Start(ctx, ln); err != nil {
 			logger.Error(err, "Error serving API")
 		}
 	}()
