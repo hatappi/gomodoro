@@ -15,8 +15,6 @@ import (
 	"github.com/hatappi/gomodoro/internal/client/graphql"
 	"github.com/hatappi/gomodoro/internal/config"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
-	"github.com/hatappi/gomodoro/internal/pixela"
-	"github.com/hatappi/gomodoro/internal/toggl"
 	"github.com/hatappi/gomodoro/internal/tui"
 )
 
@@ -76,16 +74,6 @@ func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	opts = append(opts, tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
 	opts = append(opts, tui.WithLongBreakSec(cfg.Pomodoro.LongBreakSec))
 	opts = append(opts, tui.WithNotify())
-
-	if cfg.Toggl.Enable {
-		togglClient := toggl.NewClient(cfg.Toggl.ProjectID, cfg.Toggl.WorkspaceID, cfg.Toggl.APIToken)
-		opts = append(opts, tui.WithRecordToggl(togglClient))
-	}
-
-	if cfg.Pixela.Enable {
-		pixelaClient := pixela.NewClient(cfg.Pixela.Token)
-		opts = append(opts, tui.WithRecordPixela(pixelaClient, cfg.Pixela.UserName, cfg.Pixela.GraphID))
-	}
 
 	gqlClient := graphql.NewClientWrapper(cfg.API)
 	defer func() {

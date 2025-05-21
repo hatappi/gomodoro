@@ -16,8 +16,6 @@ import (
 	"github.com/hatappi/gomodoro/internal/core/event"
 	gomodoro_error "github.com/hatappi/gomodoro/internal/errors"
 	"github.com/hatappi/gomodoro/internal/notify"
-	"github.com/hatappi/gomodoro/internal/pixela"
-	"github.com/hatappi/gomodoro/internal/toggl"
 	"github.com/hatappi/gomodoro/internal/tui/constants"
 	"github.com/hatappi/gomodoro/internal/tui/screen"
 	"github.com/hatappi/gomodoro/internal/tui/view"
@@ -89,44 +87,6 @@ func WithNotify() Option {
 
 				if err := notify.Notify("gomodoro", taskName+":"+message); err != nil {
 					log.FromContext(ctx).Error(err, "failed to notify")
-				}
-			},
-		)
-	}
-}
-
-// WithRecordToggl adds Toggl time tracking functionality.
-func WithRecordToggl(togglClient *toggl.Client) Option {
-	return func(a *App) {
-		a.completeFuncs = append(
-			a.completeFuncs,
-			func(ctx context.Context, taskName string, isWorkTime bool, elapsedTime int) {
-				if !isWorkTime {
-					return
-				}
-
-				s := time.Now().Add(-time.Duration(elapsedTime) * time.Second)
-
-				if err := togglClient.PostTimeEntry(ctx, taskName, s, elapsedTime); err != nil {
-					log.FromContext(ctx).Error(err, "failed to record time to toggl")
-				}
-			},
-		)
-	}
-}
-
-// WithRecordPixela adds Pixela tracking functionality.
-func WithRecordPixela(client *pixela.Client, userName, graphID string) Option {
-	return func(a *App) {
-		a.completeFuncs = append(
-			a.completeFuncs,
-			func(ctx context.Context, _ string, isWorkTime bool, _ int) {
-				if !isWorkTime {
-					return
-				}
-
-				if err := client.IncrementPixel(ctx, userName, graphID); err != nil {
-					log.FromContext(ctx).Error(err, "failed to increment a pixel at Pixela")
 				}
 			},
 		)
