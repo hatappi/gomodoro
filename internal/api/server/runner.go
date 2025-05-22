@@ -46,8 +46,6 @@ func (r *Runner) Start(ctx context.Context) error {
 		return nil
 	}
 
-	logger := log.FromContext(ctx)
-
 	fileStorage, err := file.NewFileStorage("")
 	if err != nil {
 		return fmt.Errorf("failed to initialize file storage: %w", err)
@@ -74,7 +72,6 @@ func (r *Runner) Start(ctx context.Context) error {
 
 	r.server = NewServer(
 		&r.config.API,
-		logger,
 		pomodoroService,
 		taskService,
 		eventBus,
@@ -94,17 +91,18 @@ func (r *Runner) Start(ctx context.Context) error {
 	// If there's an active pomodoro, delete it to clean up the state
 	if latest != nil {
 		if err := pomodoroService.DeletePomodoro(ctx, latest.ID); err != nil {
-			logger.Error(err, "Failed to delete latest pomodoro")
+			log.FromContext(ctx).Error(err, "Failed to delete latest pomodoro")
 		}
 	}
 
 	go func() {
 		if err := r.server.Start(ctx, ln); err != nil {
-			logger.Error(err, "Error serving API")
+			log.FromContext(ctx).Error(err, "Error serving API")
 		}
 	}()
 
 	r.isRunning = true
+
 	return nil
 }
 
@@ -115,16 +113,12 @@ func (r *Runner) Stop(ctx context.Context) error {
 		r.mu.Unlock()
 		return nil
 	}
-	server := r.server
 	r.mu.Unlock()
-
-	logger := log.FromContext(ctx)
-	logger.Info("Stopping API server...")
 
 	stopCtx, cancel := context.WithTimeout(ctx, serverShutdownTimeout)
 	defer cancel()
 
-	err := server.Stop(stopCtx)
+	err := r.server.Stop(stopCtx)
 
 	r.mu.Lock()
 	r.isRunning = false
@@ -134,34 +128,19 @@ func (r *Runner) Stop(ctx context.Context) error {
 	return err
 }
 
-// IsRunning returns true if the server is running.
-func (r *Runner) IsRunning() bool {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.isRunning
-}
-
 // EnsureRunning checks if the API server is running and starts it if not.
 // It uses the client to perform health checks.
 func (r *Runner) EnsureRunning(ctx context.Context) error {
-	logger := log.FromContext(ctx)
-
 	gqlClient := graphql.NewClientWrapper(r.config.API)
 
 	_, err := gqlClient.GetCurrentPomodoro(ctx)
 	if err == nil {
-		logger.Info("API server is already running (checked via client)")
 		return nil
 	}
-	logger.Info("API server health check failed, attempting to start...", "error", err.Error())
 
 	if startErr := r.Start(ctx); startErr != nil {
-		logger.Error(startErr, "Failed to start API server via runner")
 		return fmt.Errorf("failed to start API server via runner: %w", startErr)
 	}
-	logger.Info("API server started successfully by this runner")
-
-	r.isRunning = true
 
 	return nil
 }

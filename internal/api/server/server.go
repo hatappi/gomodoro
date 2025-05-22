@@ -14,8 +14,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-logr/logr"
 	"github.com/gorilla/websocket"
+
+	"github.com/hatappi/go-kit/log"
 
 	servermiddleware "github.com/hatappi/gomodoro/internal/api/server/middleware"
 	"github.com/hatappi/gomodoro/internal/config"
@@ -30,7 +31,6 @@ type Server struct {
 	config          *config.APIConfig
 	router          *chi.Mux
 	httpServer      *http.Server
-	logger          logr.Logger
 	pomodoroService *core.PomodoroService
 	taskService     *core.TaskService
 	eventBus        event.EventBus
@@ -41,7 +41,6 @@ type Server struct {
 // NewServer creates a new API server instance.
 func NewServer(
 	config *config.APIConfig,
-	logger logr.Logger,
 	pomodoroService *core.PomodoroService,
 	taskService *core.TaskService,
 	eventBus event.EventBus,
@@ -52,7 +51,6 @@ func NewServer(
 	server := &Server{
 		config:          config,
 		router:          router,
-		logger:          logger,
 		pomodoroService: pomodoroService,
 		taskService:     taskService,
 		eventBus:        eventBus,
@@ -102,19 +100,6 @@ func (s *Server) setupGraphQL(eventBus event.EventBus) {
 	})
 }
 
-// Stop gracefully shuts down the HTTP server.
-func (s *Server) Stop(ctx context.Context) error {
-	s.logger.Info("Stopping API server")
-
-	if s.httpServer != nil {
-		if err := s.httpServer.Shutdown(ctx); err != nil {
-			return fmt.Errorf("failed to stop server: %w", err)
-		}
-	}
-
-	return nil
-}
-
 // Listen starts listening on the configured address and returns a net.Listener.
 func (s *Server) Listen() (net.Listener, error) {
 	s.httpServer = &http.Server{
@@ -123,8 +108,6 @@ func (s *Server) Listen() (net.Listener, error) {
 		ReadTimeout:  s.config.ReadTimeout,
 		WriteTimeout: s.config.WriteTimeout,
 	}
-
-	s.logger.Info("Listening API server", "addr", s.config.Addr)
 
 	ln, err := net.Listen("tcp", s.config.Addr)
 	if err != nil {
@@ -137,9 +120,22 @@ func (s *Server) Listen() (net.Listener, error) {
 func (s *Server) Start(ctx context.Context, ln net.Listener) error {
 	go s.handlePomodoroCompletionEvents(ctx)
 
-	s.logger.Info("Serving API server")
+	log.FromContext(ctx).V(1).Info("Serving API server", "addr", s.config.Addr)
 	if err := s.httpServer.Serve(ln); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("failed to serve: %w", err)
+	}
+
+	return nil
+}
+
+// Stop gracefully shuts down the HTTP server.
+func (s *Server) Stop(ctx context.Context) error {
+	log.FromContext(ctx).V(1).Info("Stopping API server...")
+
+	if s.httpServer != nil {
+		if err := s.httpServer.Shutdown(ctx); err != nil {
+			return fmt.Errorf("failed to stop server: %w", err)
+		}
 	}
 
 	return nil
@@ -165,7 +161,7 @@ func (s *Server) handlePomodoroCompletionEvents(ctx context.Context) {
 
 			task, err := s.taskService.GetTaskByID(pomodoroEvent.TaskID)
 			if err != nil {
-				s.logger.Error(err, "Failed to get task by ID", "taskID", pomodoroEvent.TaskID)
+				log.FromContext(ctx).Error(err, "Failed to get task by ID", "taskID", pomodoroEvent.TaskID)
 				continue
 			}
 
@@ -173,7 +169,7 @@ func (s *Server) handlePomodoroCompletionEvents(ctx context.Context) {
 
 			for _, completeFunc := range s.completeFuncs {
 				if err := completeFunc(ctx, task.Title, isWorkTime, pomodoroEvent.ElapsedTime); err != nil {
-					s.logger.Error(err, "Failed to execute complete function")
+					log.FromContext(ctx).Error(err, "Failed to execute complete function", "taskID", pomodoroEvent.TaskID)
 				}
 			}
 		}
