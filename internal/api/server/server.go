@@ -63,7 +63,6 @@ func NewServer(
 	}
 
 	server.setupMiddleware()
-	server.setupRoutes()
 	server.setupGraphQL(eventBus)
 
 	return server
@@ -75,20 +74,6 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(servermiddleware.ErrorHandler())
-}
-
-// setupRoutes configures the routes for the server.
-func (s *Server) setupRoutes() {
-	s.router.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write([]byte("OK")); err != nil {
-			s.logger.Error(err, "Failed to write health check response")
-		}
-	})
-
-	s.router.Route("/api", func(r chi.Router) {
-		r.Use(servermiddleware.JSONContentType)
-	})
 }
 
 // setupGraphQL initializes the GraphQL handler and routes.
