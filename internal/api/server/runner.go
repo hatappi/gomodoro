@@ -70,13 +70,7 @@ func (r *Runner) Start(ctx context.Context) error {
 		opts = append(opts, WithRecordPixela(pixelaClient, r.config.Pixela.UserName, r.config.Pixela.GraphID))
 	}
 
-	r.server = NewServer(
-		&r.config.API,
-		pomodoroService,
-		taskService,
-		eventBus,
-		opts...,
-	)
+	r.server = NewServer(r.config.API, pomodoroService, taskService, eventBus, opts...)
 
 	ln, err := r.server.Listen()
 	if err != nil {

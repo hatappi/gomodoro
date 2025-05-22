@@ -28,7 +28,7 @@ import (
 
 // Server represents the API server.
 type Server struct {
-	config          *config.APIConfig
+	config          config.APIConfig
 	router          *chi.Mux
 	httpServer      *http.Server
 	pomodoroService *core.PomodoroService
@@ -40,7 +40,7 @@ type Server struct {
 
 // NewServer creates a new API server instance.
 func NewServer(
-	config *config.APIConfig,
+	config config.APIConfig,
 	pomodoroService *core.PomodoroService,
 	taskService *core.TaskService,
 	eventBus event.EventBus,
