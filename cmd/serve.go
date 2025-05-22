@@ -11,8 +11,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hatappi/go-kit/log"
-
 	"github.com/hatappi/gomodoro/internal/api/server"
 	"github.com/hatappi/gomodoro/internal/config"
 )
@@ -37,7 +35,6 @@ func newServeCmd() *cobra.Command {
 			if err := serverRunner.Start(ctx); err != nil {
 				return fmt.Errorf("failed to start server runner: %w", err)
 			}
-			log.FromContext(ctx).Info("API server started via runner")
 
 			ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 			defer stop()
@@ -50,7 +47,6 @@ func newServeCmd() *cobra.Command {
 			if err := serverRunner.Stop(shutdownCtx); err != nil {
 				return fmt.Errorf("failed to stop server: %w", err)
 			}
-			log.FromContext(ctx).Info("API server stopped gracefully")
 
 			return nil
 		},
