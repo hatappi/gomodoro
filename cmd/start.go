@@ -29,24 +29,21 @@ please specify argument or config yaml.
 	`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
-			logger := log.FromContext(ctx)
 
 			cfg, err := config.GetConfig()
 			if err != nil {
-				logger.Error(err, "Failed to get config")
-				return err
+				return fmt.Errorf("failed to get config: %w", err)
 			}
 
 			serverRunner := server.NewRunner(cfg)
 
 			if err := serverRunner.EnsureRunning(ctx); err != nil {
-				logger.Error(err, "Failed to ensure API server is running")
 				return fmt.Errorf("failed to ensure API server is running: %w", err)
 			}
 
 			defer func() {
 				if err := serverRunner.Stop(ctx); err != nil {
-					logger.Error(err, "Failed to stop API server")
+					log.FromContext(ctx).Error(err, "Failed to stop API server")
 				}
 			}()
 
@@ -67,33 +64,30 @@ please specify argument or config yaml.
 }
 
 func runTUIApp(ctx context.Context, cfg *config.Config) error {
-	logger := log.FromContext(ctx)
-
-	var opts []tui.Option
-	opts = append(opts, tui.WithWorkSec(cfg.Pomodoro.WorkSec))
-	opts = append(opts, tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec))
-	opts = append(opts, tui.WithLongBreakSec(cfg.Pomodoro.LongBreakSec))
-	opts = append(opts, tui.WithNotify())
-
 	gqlClient := graphql.NewClientWrapper(cfg.API)
 	defer func() {
 		if err := gqlClient.DisconnectSubscription(); err != nil {
-			logger.Error(err, "Failed to disconnect subscription")
+			log.FromContext(ctx).Error(err, "Failed to disconnect subscription")
 		}
 	}()
 
+	opts := []tui.Option{
+		tui.WithWorkSec(cfg.Pomodoro.WorkSec),
+		tui.WithShortBreakSec(cfg.Pomodoro.ShortBreakSec),
+		tui.WithLongBreakSec(cfg.Pomodoro.LongBreakSec),
+		tui.WithNotify(),
+	}
+
 	app, err := tui.NewApp(cfg, gqlClient, opts...)
 	if err != nil {
-		logger.Error(err, "Failed to create TUI App")
-		return err
+		return fmt.Errorf("failed to create TUI App: %w", err)
 	}
 	defer app.Finish(ctx)
 
-	logger.Info("Starting Pomodoro session...")
 	startErr := app.Run(ctx)
 	if startErr != nil {
 		if errors.Is(startErr, gomodoro_error.ErrCancel) {
-			logger.Info("Pomodoro session canceled by user.")
+			log.FromContext(ctx).Info("Pomodoro session canceled by user.")
 			return nil
 		}
 
