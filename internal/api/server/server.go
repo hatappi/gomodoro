@@ -13,7 +13,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/websocket"
 
 	"github.com/hatappi/go-kit/log"
@@ -68,9 +67,6 @@ func NewServer(
 
 // setupMiddleware configures the middleware for the server.
 func (s *Server) setupMiddleware() {
-	s.router.Use(middleware.RequestID)
-	s.router.Use(middleware.RealIP)
-	s.router.Use(middleware.Recoverer)
 	s.router.Use(servermiddleware.ErrorHandler())
 }
 
