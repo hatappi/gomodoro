@@ -90,10 +90,6 @@ func (c *ClientWrapper) DisconnectSubscription() error {
 		return nil
 	}
 
-	if c.subscriptionClient == nil {
-		return fmt.Errorf("subscription client is not initialized, cannot disconnect")
-	}
-
 	err := c.subscriptionClient.Close()
 	if err != nil {
 		return fmt.Errorf("failed to close subscription client: %w", err)
@@ -115,10 +111,6 @@ func (c *ClientWrapper) SubscribeToEvents(
 
 	if !isStarted {
 		return nil, nil, "", fmt.Errorf("subscription client not started. Call ConnectSubscription first")
-	}
-
-	if c.subscriptionClient == nil {
-		return nil, nil, "", fmt.Errorf("subscription client is not initialized")
 	}
 
 	gqlEventChan, id, err := gqlgen.OnEventReceived(ctx, c.subscriptionClient, input)
@@ -160,10 +152,6 @@ func (c *ClientWrapper) Unsubscribe(subscriptionID string) error {
 
 	if !isStarted {
 		return fmt.Errorf("subscription client not started, cannot unsubscribe")
-	}
-
-	if c.subscriptionClient == nil {
-		return fmt.Errorf("subscription client is not initialized")
 	}
 
 	err := c.subscriptionClient.Unsubscribe(subscriptionID)
