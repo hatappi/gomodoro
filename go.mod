@@ -9,7 +9,6 @@ require (
 	github.com/Khan/genqlient v0.8.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/go-logr/logr v1.4.2
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golangci/golangci-lint v1.63.4
 	github.com/google/uuid v1.6.0
@@ -78,6 +77,7 @@ require (
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/ghostiam/protogetter v0.3.8 // indirect
 	github.com/go-critic/go-critic v0.11.5 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/zapr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

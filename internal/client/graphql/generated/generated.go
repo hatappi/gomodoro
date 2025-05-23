@@ -110,12 +110,410 @@ var AllEventCategory = []EventCategory{
 	EventCategoryTask,
 }
 
+// EventDetails includes the GraphQL fields of Event requested by the fragment EventDetails.
+type EventDetails struct {
+	EventCategory EventCategory                   `json:"eventCategory"`
+	EventType     EventType                       `json:"eventType"`
+	Payload       EventDetailsPayloadEventPayload `json:"-"`
+}
+
+// GetEventCategory returns EventDetails.EventCategory, and is useful for accessing the field via an interface.
+func (v *EventDetails) GetEventCategory() EventCategory { return v.EventCategory }
+
+// GetEventType returns EventDetails.EventType, and is useful for accessing the field via an interface.
+func (v *EventDetails) GetEventType() EventType { return v.EventType }
+
+// GetPayload returns EventDetails.Payload, and is useful for accessing the field via an interface.
+func (v *EventDetails) GetPayload() EventDetailsPayloadEventPayload { return v.Payload }
+
+func (v *EventDetails) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EventDetails
+		Payload json.RawMessage `json:"payload"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EventDetails = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Payload
+		src := firstPass.Payload
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalEventDetailsPayloadEventPayload(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal EventDetails.Payload: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalEventDetails struct {
+	EventCategory EventCategory `json:"eventCategory"`
+
+	EventType EventType `json:"eventType"`
+
+	Payload json.RawMessage `json:"payload"`
+}
+
+func (v *EventDetails) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EventDetails) __premarshalJSON() (*__premarshalEventDetails, error) {
+	var retval __premarshalEventDetails
+
+	retval.EventCategory = v.EventCategory
+	retval.EventType = v.EventType
+	{
+
+		dst := &retval.Payload
+		src := v.Payload
+		var err error
+		*dst, err = __marshalEventDetailsPayloadEventPayload(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal EventDetails.Payload: %w", err)
+		}
+	}
+	return &retval, nil
+}
+
+// EventDetailsPayloadEventPayload includes the requested fields of the GraphQL interface EventPayload.
+//
+// EventDetailsPayloadEventPayload is implemented by the following types:
+// EventDetailsPayloadEventPomodoroPayload
+// EventDetailsPayloadEventTaskPayload
+type EventDetailsPayloadEventPayload interface {
+	implementsGraphQLInterfaceEventDetailsPayloadEventPayload()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() string
+}
+
+func (v *EventDetailsPayloadEventPomodoroPayload) implementsGraphQLInterfaceEventDetailsPayloadEventPayload() {
+}
+func (v *EventDetailsPayloadEventTaskPayload) implementsGraphQLInterfaceEventDetailsPayloadEventPayload() {
+}
+
+func __unmarshalEventDetailsPayloadEventPayload(b []byte, v *EventDetailsPayloadEventPayload) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "EventPomodoroPayload":
+		*v = new(EventDetailsPayloadEventPomodoroPayload)
+		return json.Unmarshal(b, *v)
+	case "EventTaskPayload":
+		*v = new(EventDetailsPayloadEventTaskPayload)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing EventPayload.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for EventDetailsPayloadEventPayload: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalEventDetailsPayloadEventPayload(v *EventDetailsPayloadEventPayload) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *EventDetailsPayloadEventPomodoroPayload:
+		typename = "EventPomodoroPayload"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalEventDetailsPayloadEventPomodoroPayload
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *EventDetailsPayloadEventTaskPayload:
+		typename = "EventTaskPayload"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalEventDetailsPayloadEventTaskPayload
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for EventDetailsPayloadEventPayload: "%T"`, v)
+	}
+}
+
+// EventDetailsPayloadEventPomodoroPayload includes the requested fields of the GraphQL type EventPomodoroPayload.
+type EventDetailsPayloadEventPomodoroPayload struct {
+	Typename                    string `json:"__typename"`
+	EventPomodoroPayloadDetails `json:"-"`
+}
+
+// GetTypename returns EventDetailsPayloadEventPomodoroPayload.Typename, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetTypename() string { return v.Typename }
+
+// GetId returns EventDetailsPayloadEventPomodoroPayload.Id, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetId() string {
+	return v.EventPomodoroPayloadDetails.Id
+}
+
+// GetState returns EventDetailsPayloadEventPomodoroPayload.State, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetState() PomodoroState {
+	return v.EventPomodoroPayloadDetails.State
+}
+
+// GetRemainingTime returns EventDetailsPayloadEventPomodoroPayload.RemainingTime, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetRemainingTime() int {
+	return v.EventPomodoroPayloadDetails.RemainingTime
+}
+
+// GetElapsedTime returns EventDetailsPayloadEventPomodoroPayload.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetElapsedTime() int {
+	return v.EventPomodoroPayloadDetails.ElapsedTime
+}
+
+// GetTaskId returns EventDetailsPayloadEventPomodoroPayload.TaskId, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetTaskId() string {
+	return v.EventPomodoroPayloadDetails.TaskId
+}
+
+// GetPhase returns EventDetailsPayloadEventPomodoroPayload.Phase, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetPhase() PomodoroPhase {
+	return v.EventPomodoroPayloadDetails.Phase
+}
+
+// GetPhaseCount returns EventDetailsPayloadEventPomodoroPayload.PhaseCount, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventPomodoroPayload) GetPhaseCount() int {
+	return v.EventPomodoroPayloadDetails.PhaseCount
+}
+
+func (v *EventDetailsPayloadEventPomodoroPayload) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EventDetailsPayloadEventPomodoroPayload
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EventDetailsPayloadEventPomodoroPayload = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EventPomodoroPayloadDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalEventDetailsPayloadEventPomodoroPayload struct {
+	Typename string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	RemainingTime int `json:"remainingTime"`
+
+	ElapsedTime int `json:"elapsedTime"`
+
+	TaskId string `json:"taskId"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+}
+
+func (v *EventDetailsPayloadEventPomodoroPayload) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EventDetailsPayloadEventPomodoroPayload) __premarshalJSON() (*__premarshalEventDetailsPayloadEventPomodoroPayload, error) {
+	var retval __premarshalEventDetailsPayloadEventPomodoroPayload
+
+	retval.Typename = v.Typename
+	retval.Id = v.EventPomodoroPayloadDetails.Id
+	retval.State = v.EventPomodoroPayloadDetails.State
+	retval.RemainingTime = v.EventPomodoroPayloadDetails.RemainingTime
+	retval.ElapsedTime = v.EventPomodoroPayloadDetails.ElapsedTime
+	retval.TaskId = v.EventPomodoroPayloadDetails.TaskId
+	retval.Phase = v.EventPomodoroPayloadDetails.Phase
+	retval.PhaseCount = v.EventPomodoroPayloadDetails.PhaseCount
+	return &retval, nil
+}
+
+// EventDetailsPayloadEventTaskPayload includes the requested fields of the GraphQL type EventTaskPayload.
+type EventDetailsPayloadEventTaskPayload struct {
+	Typename                string `json:"__typename"`
+	EventTaskPayloadDetails `json:"-"`
+}
+
+// GetTypename returns EventDetailsPayloadEventTaskPayload.Typename, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventTaskPayload) GetTypename() string { return v.Typename }
+
+// GetId returns EventDetailsPayloadEventTaskPayload.Id, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventTaskPayload) GetId() string { return v.EventTaskPayloadDetails.Id }
+
+// GetTitle returns EventDetailsPayloadEventTaskPayload.Title, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventTaskPayload) GetTitle() string {
+	return v.EventTaskPayloadDetails.Title
+}
+
+// GetCompleted returns EventDetailsPayloadEventTaskPayload.Completed, and is useful for accessing the field via an interface.
+func (v *EventDetailsPayloadEventTaskPayload) GetCompleted() bool {
+	return v.EventTaskPayloadDetails.Completed
+}
+
+func (v *EventDetailsPayloadEventTaskPayload) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EventDetailsPayloadEventTaskPayload
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EventDetailsPayloadEventTaskPayload = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EventTaskPayloadDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalEventDetailsPayloadEventTaskPayload struct {
+	Typename string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Completed bool `json:"completed"`
+}
+
+func (v *EventDetailsPayloadEventTaskPayload) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EventDetailsPayloadEventTaskPayload) __premarshalJSON() (*__premarshalEventDetailsPayloadEventTaskPayload, error) {
+	var retval __premarshalEventDetailsPayloadEventTaskPayload
+
+	retval.Typename = v.Typename
+	retval.Id = v.EventTaskPayloadDetails.Id
+	retval.Title = v.EventTaskPayloadDetails.Title
+	retval.Completed = v.EventTaskPayloadDetails.Completed
+	return &retval, nil
+}
+
+// EventPomodoroPayloadDetails includes the GraphQL fields of EventPomodoroPayload requested by the fragment EventPomodoroPayloadDetails.
+type EventPomodoroPayloadDetails struct {
+	Id            string        `json:"id"`
+	State         PomodoroState `json:"state"`
+	RemainingTime int           `json:"remainingTime"`
+	ElapsedTime   int           `json:"elapsedTime"`
+	TaskId        string        `json:"taskId"`
+	Phase         PomodoroPhase `json:"phase"`
+	PhaseCount    int           `json:"phaseCount"`
+}
+
+// GetId returns EventPomodoroPayloadDetails.Id, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetId() string { return v.Id }
+
+// GetState returns EventPomodoroPayloadDetails.State, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetState() PomodoroState { return v.State }
+
+// GetRemainingTime returns EventPomodoroPayloadDetails.RemainingTime, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetRemainingTime() int { return v.RemainingTime }
+
+// GetElapsedTime returns EventPomodoroPayloadDetails.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetElapsedTime() int { return v.ElapsedTime }
+
+// GetTaskId returns EventPomodoroPayloadDetails.TaskId, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetTaskId() string { return v.TaskId }
+
+// GetPhase returns EventPomodoroPayloadDetails.Phase, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetPhase() PomodoroPhase { return v.Phase }
+
+// GetPhaseCount returns EventPomodoroPayloadDetails.PhaseCount, and is useful for accessing the field via an interface.
+func (v *EventPomodoroPayloadDetails) GetPhaseCount() int { return v.PhaseCount }
+
 type EventReceivedInput struct {
 	EventCategory []EventCategory `json:"eventCategory"`
 }
 
 // GetEventCategory returns EventReceivedInput.EventCategory, and is useful for accessing the field via an interface.
 func (v *EventReceivedInput) GetEventCategory() []EventCategory { return v.EventCategory }
+
+// EventTaskPayloadDetails includes the GraphQL fields of EventTaskPayload requested by the fragment EventTaskPayloadDetails.
+type EventTaskPayloadDetails struct {
+	Id        string `json:"id"`
+	Title     string `json:"title"`
+	Completed bool   `json:"completed"`
+}
+
+// GetId returns EventTaskPayloadDetails.Id, and is useful for accessing the field via an interface.
+func (v *EventTaskPayloadDetails) GetId() string { return v.Id }
+
+// GetTitle returns EventTaskPayloadDetails.Title, and is useful for accessing the field via an interface.
+func (v *EventTaskPayloadDetails) GetTitle() string { return v.Title }
+
+// GetCompleted returns EventTaskPayloadDetails.Completed, and is useful for accessing the field via an interface.
+func (v *EventTaskPayloadDetails) GetCompleted() bool { return v.Completed }
 
 type EventType string
 
@@ -443,20 +841,20 @@ func (v *GetTaskTask) __premarshalJSON() (*__premarshalGetTaskTask, error) {
 
 // OnEventReceivedEventReceivedEvent includes the requested fields of the GraphQL type Event.
 type OnEventReceivedEventReceivedEvent struct {
-	EventCategory EventCategory                            `json:"eventCategory"`
-	EventType     EventType                                `json:"eventType"`
-	Payload       OnEventReceivedEventReceivedEventPayload `json:"-"`
+	EventDetails `json:"-"`
 }
 
 // GetEventCategory returns OnEventReceivedEventReceivedEvent.EventCategory, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEvent) GetEventCategory() EventCategory { return v.EventCategory }
+func (v *OnEventReceivedEventReceivedEvent) GetEventCategory() EventCategory {
+	return v.EventDetails.EventCategory
+}
 
 // GetEventType returns OnEventReceivedEventReceivedEvent.EventType, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEvent) GetEventType() EventType { return v.EventType }
+func (v *OnEventReceivedEventReceivedEvent) GetEventType() EventType { return v.EventDetails.EventType }
 
 // GetPayload returns OnEventReceivedEventReceivedEvent.Payload, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEvent) GetPayload() OnEventReceivedEventReceivedEventPayload {
-	return v.Payload
+func (v *OnEventReceivedEventReceivedEvent) GetPayload() EventDetailsPayloadEventPayload {
+	return v.EventDetails.Payload
 }
 
 func (v *OnEventReceivedEventReceivedEvent) UnmarshalJSON(b []byte) error {
@@ -467,7 +865,6 @@ func (v *OnEventReceivedEventReceivedEvent) UnmarshalJSON(b []byte) error {
 
 	var firstPass struct {
 		*OnEventReceivedEventReceivedEvent
-		Payload json.RawMessage `json:"payload"`
 		graphql.NoUnmarshalJSON
 	}
 	firstPass.OnEventReceivedEventReceivedEvent = v
@@ -477,17 +874,10 @@ func (v *OnEventReceivedEventReceivedEvent) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	{
-		dst := &v.Payload
-		src := firstPass.Payload
-		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalOnEventReceivedEventReceivedEventPayload(
-				src, dst)
-			if err != nil {
-				return fmt.Errorf(
-					"unable to unmarshal OnEventReceivedEventReceivedEvent.Payload: %w", err)
-			}
-		}
+	err = json.Unmarshal(
+		b, &v.EventDetails)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -511,168 +901,21 @@ func (v *OnEventReceivedEventReceivedEvent) MarshalJSON() ([]byte, error) {
 func (v *OnEventReceivedEventReceivedEvent) __premarshalJSON() (*__premarshalOnEventReceivedEventReceivedEvent, error) {
 	var retval __premarshalOnEventReceivedEventReceivedEvent
 
-	retval.EventCategory = v.EventCategory
-	retval.EventType = v.EventType
+	retval.EventCategory = v.EventDetails.EventCategory
+	retval.EventType = v.EventDetails.EventType
 	{
 
 		dst := &retval.Payload
-		src := v.Payload
+		src := v.EventDetails.Payload
 		var err error
-		*dst, err = __marshalOnEventReceivedEventReceivedEventPayload(
+		*dst, err = __marshalEventDetailsPayloadEventPayload(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"unable to marshal OnEventReceivedEventReceivedEvent.Payload: %w", err)
+				"unable to marshal OnEventReceivedEventReceivedEvent.EventDetails.Payload: %w", err)
 		}
 	}
 	return &retval, nil
-}
-
-// OnEventReceivedEventReceivedEventPayload includes the requested fields of the GraphQL interface EventPayload.
-//
-// OnEventReceivedEventReceivedEventPayload is implemented by the following types:
-// OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload
-// OnEventReceivedEventReceivedEventPayloadEventTaskPayload
-type OnEventReceivedEventReceivedEventPayload interface {
-	implementsGraphQLInterfaceOnEventReceivedEventReceivedEventPayload()
-	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
-	GetTypename() string
-}
-
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) implementsGraphQLInterfaceOnEventReceivedEventReceivedEventPayload() {
-}
-func (v *OnEventReceivedEventReceivedEventPayloadEventTaskPayload) implementsGraphQLInterfaceOnEventReceivedEventReceivedEventPayload() {
-}
-
-func __unmarshalOnEventReceivedEventReceivedEventPayload(b []byte, v *OnEventReceivedEventReceivedEventPayload) error {
-	if string(b) == "null" {
-		return nil
-	}
-
-	var tn struct {
-		TypeName string `json:"__typename"`
-	}
-	err := json.Unmarshal(b, &tn)
-	if err != nil {
-		return err
-	}
-
-	switch tn.TypeName {
-	case "EventPomodoroPayload":
-		*v = new(OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload)
-		return json.Unmarshal(b, *v)
-	case "EventTaskPayload":
-		*v = new(OnEventReceivedEventReceivedEventPayloadEventTaskPayload)
-		return json.Unmarshal(b, *v)
-	case "":
-		return fmt.Errorf(
-			"response was missing EventPayload.__typename")
-	default:
-		return fmt.Errorf(
-			`unexpected concrete type for OnEventReceivedEventReceivedEventPayload: "%v"`, tn.TypeName)
-	}
-}
-
-func __marshalOnEventReceivedEventReceivedEventPayload(v *OnEventReceivedEventReceivedEventPayload) ([]byte, error) {
-
-	var typename string
-	switch v := (*v).(type) {
-	case *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload:
-		typename = "EventPomodoroPayload"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload
-		}{typename, v}
-		return json.Marshal(result)
-	case *OnEventReceivedEventReceivedEventPayloadEventTaskPayload:
-		typename = "EventTaskPayload"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*OnEventReceivedEventReceivedEventPayloadEventTaskPayload
-		}{typename, v}
-		return json.Marshal(result)
-	case nil:
-		return []byte("null"), nil
-	default:
-		return nil, fmt.Errorf(
-			`unexpected concrete type for OnEventReceivedEventReceivedEventPayload: "%T"`, v)
-	}
-}
-
-// OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload includes the requested fields of the GraphQL type EventPomodoroPayload.
-type OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload struct {
-	Typename      string        `json:"__typename"`
-	Id            string        `json:"id"`
-	State         PomodoroState `json:"state"`
-	RemainingTime int           `json:"remainingTime"`
-	ElapsedTime   int           `json:"elapsedTime"`
-	TaskId        string        `json:"taskId"`
-	Phase         PomodoroPhase `json:"phase"`
-	PhaseCount    int           `json:"phaseCount"`
-}
-
-// GetTypename returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.Typename, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetTypename() string {
-	return v.Typename
-}
-
-// GetId returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.Id, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetId() string { return v.Id }
-
-// GetState returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.State, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetState() PomodoroState {
-	return v.State
-}
-
-// GetRemainingTime returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.RemainingTime, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetRemainingTime() int {
-	return v.RemainingTime
-}
-
-// GetElapsedTime returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.ElapsedTime, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetElapsedTime() int {
-	return v.ElapsedTime
-}
-
-// GetTaskId returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.TaskId, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetTaskId() string {
-	return v.TaskId
-}
-
-// GetPhase returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.Phase, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetPhase() PomodoroPhase {
-	return v.Phase
-}
-
-// GetPhaseCount returns OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload.PhaseCount, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload) GetPhaseCount() int {
-	return v.PhaseCount
-}
-
-// OnEventReceivedEventReceivedEventPayloadEventTaskPayload includes the requested fields of the GraphQL type EventTaskPayload.
-type OnEventReceivedEventReceivedEventPayloadEventTaskPayload struct {
-	Typename  string `json:"__typename"`
-	Id        string `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
-}
-
-// GetTypename returns OnEventReceivedEventReceivedEventPayloadEventTaskPayload.Typename, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventTaskPayload) GetTypename() string {
-	return v.Typename
-}
-
-// GetId returns OnEventReceivedEventReceivedEventPayloadEventTaskPayload.Id, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventTaskPayload) GetId() string { return v.Id }
-
-// GetTitle returns OnEventReceivedEventReceivedEventPayloadEventTaskPayload.Title, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventTaskPayload) GetTitle() string { return v.Title }
-
-// GetCompleted returns OnEventReceivedEventReceivedEventPayloadEventTaskPayload.Completed, and is useful for accessing the field via an interface.
-func (v *OnEventReceivedEventReceivedEventPayloadEventTaskPayload) GetCompleted() bool {
-	return v.Completed
 }
 
 // OnEventReceivedResponse is returned by OnEventReceived on success.
@@ -1445,26 +1688,31 @@ func GetTask(
 const OnEventReceived_Operation = `
 subscription OnEventReceived ($input: EventReceivedInput!) {
 	eventReceived(input: $input) {
-		eventCategory
-		eventType
-		payload {
-			__typename
-			... on EventPomodoroPayload {
-				id
-				state
-				remainingTime
-				elapsedTime
-				taskId
-				phase
-				phaseCount
-			}
-			... on EventTaskPayload {
-				id
-				title
-				completed
-			}
-		}
+		... EventDetails
 	}
+}
+fragment EventDetails on Event {
+	eventCategory
+	eventType
+	payload {
+		__typename
+		... EventPomodoroPayloadDetails
+		... EventTaskPayloadDetails
+	}
+}
+fragment EventPomodoroPayloadDetails on EventPomodoroPayload {
+	id
+	state
+	remainingTime
+	elapsedTime
+	taskId
+	phase
+	phaseCount
+}
+fragment EventTaskPayloadDetails on EventTaskPayload {
+	id
+	title
+	completed
 }
 `
 

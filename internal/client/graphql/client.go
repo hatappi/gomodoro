@@ -43,15 +43,12 @@ type ClientWrapper struct {
 func NewClientWrapper(apiConfig config.APIConfig) *ClientWrapper {
 	queryClient := gqllib.NewClient(fmt.Sprintf("http://%s/graphql/query", apiConfig.Addr), http.DefaultClient)
 
-	underlyingGorillaDialer := &websocket.Dialer{
-		Proxy:            http.ProxyFromEnvironment,
-		HandshakeTimeout: defaultHandshakeTimeout,
-	}
-	wsDialerAdapter := NewGorillaWebSocketDialer(underlyingGorillaDialer)
-
 	subscriptionClient := gqllib.NewClientUsingWebSocket(
 		fmt.Sprintf("ws://%s/graphql/query", apiConfig.Addr),
-		wsDialerAdapter,
+		NewGorillaWebSocketDialer(&websocket.Dialer{
+			Proxy:            http.ProxyFromEnvironment,
+			HandshakeTimeout: defaultHandshakeTimeout,
+		}),
 	)
 
 	return &ClientWrapper{
@@ -80,6 +77,7 @@ func (c *ClientWrapper) ConnectSubscription(ctx context.Context) (<-chan error, 
 	}
 
 	c.isSubscriptionClientStarted = true
+
 	return errChan, nil
 }
 
@@ -123,8 +121,7 @@ func (c *ClientWrapper) SubscribeToEvents(
 		return nil, nil, "", fmt.Errorf("subscription client is not initialized")
 	}
 
-	// Get the raw WebSocket response channel
-	wsRespChan, id, err := gqlgen.OnEventReceived(ctx, c.subscriptionClient, input)
+	gqlEventChan, id, err := gqlgen.OnEventReceived(ctx, c.subscriptionClient, input)
 	if err != nil {
 		return nil, nil, "", fmt.Errorf("failed to subscribe to events: %w", err)
 	}
@@ -136,58 +133,19 @@ func (c *ClientWrapper) SubscribeToEvents(
 		defer close(eventChan)
 		defer close(errChan)
 
-		for wsResp := range wsRespChan {
-			if wsResp.Errors != nil {
-				errChan <- wsResp.Errors
+		for gqlEvent := range gqlEventChan {
+			if gqlEvent.Errors != nil {
+				errChan <- gqlEvent.Errors
 				return
 			}
 
-			evt := wsResp.Data.EventReceived
-
-			eventType, err := convertEventTypeToEvent(evt.EventType)
+			evt, err := conv.ToEventInfo(gqlEvent.Data.EventReceived.EventDetails)
 			if err != nil {
-				errChan <- err
+				errChan <- fmt.Errorf("failed to convert event: %w", err)
 				return
 			}
 
-			switch payload := evt.Payload.(type) {
-			case *gqlgen.OnEventReceivedEventReceivedEventPayloadEventPomodoroPayload:
-				state, err := convertPomodoroStateToEvent(payload.State)
-				if err != nil {
-					errChan <- err
-					return
-				}
-
-				phase, err := convertPomodoroPhaseToEvent(payload.Phase)
-				if err != nil {
-					errChan <- err
-					return
-				}
-
-				eventChan <- event.PomodoroEvent{
-					BaseEvent: event.BaseEvent{
-						Type:      eventType,
-						Timestamp: time.Now(),
-					},
-					ID:            payload.Id,
-					State:         state,
-					RemainingTime: time.Duration(payload.RemainingTime) * time.Second,
-					ElapsedTime:   time.Duration(payload.ElapsedTime) * time.Second,
-					TaskID:        payload.TaskId,
-					Phase:         phase,
-					PhaseCount:    payload.PhaseCount,
-				}
-			case *gqlgen.OnEventReceivedEventReceivedEventPayloadEventTaskPayload:
-				eventChan <- event.TaskEvent{
-					BaseEvent: event.BaseEvent{
-						Type:      eventType,
-						Timestamp: time.Now(),
-					},
-					ID:        payload.Id,
-					Title:     payload.Title,
-					Completed: payload.Completed,
-				}
-			}
+			eventChan <- evt
 		}
 	}()
 
@@ -328,57 +286,4 @@ func (c *ClientWrapper) StopPomodoro(ctx context.Context) (*core.Pomodoro, error
 	pomodoro := res.StopPomodoro.PomodoroDetails
 
 	return conv.ToCorePomodoro(pomodoro)
-}
-
-func convertEventTypeToEvent(eventType gqlgen.EventType) (event.EventType, error) {
-	switch eventType {
-	case gqlgen.EventTypePomodoroStarted:
-		return event.PomodoroStarted, nil
-	case gqlgen.EventTypePomodoroPaused:
-		return event.PomodoroPaused, nil
-	case gqlgen.EventTypePomodoroResumed:
-		return event.PomodoroResumed, nil
-	case gqlgen.EventTypePomodoroCompleted:
-		return event.PomodoroCompleted, nil
-	case gqlgen.EventTypePomodoroStopped:
-		return event.PomodoroStopped, nil
-	case gqlgen.EventTypePomodoroTick:
-		return event.PomodoroTick, nil
-	case gqlgen.EventTypeTaskCreated:
-		return event.TaskCreated, nil
-	case gqlgen.EventTypeTaskUpdated:
-		return event.TaskUpdated, nil
-	case gqlgen.EventTypeTaskDeleted:
-		return event.TaskDeleted, nil
-	case gqlgen.EventTypeTaskCompleted:
-		return event.TaskCompleted, nil
-	default:
-		return event.EventType(""), fmt.Errorf("unknown event type: %s", eventType)
-	}
-}
-
-func convertPomodoroStateToEvent(state gqlgen.PomodoroState) (event.PomodoroState, error) {
-	switch state {
-	case gqlgen.PomodoroStateActive:
-		return event.PomodoroStateActive, nil
-	case gqlgen.PomodoroStatePaused:
-		return event.PomodoroStatePaused, nil
-	case gqlgen.PomodoroStateFinished:
-		return event.PomodoroStateFinished, nil
-	default:
-		return event.PomodoroState(""), fmt.Errorf("unknown pomodoro state: %s", state)
-	}
-}
-
-func convertPomodoroPhaseToEvent(phase gqlgen.PomodoroPhase) (event.PomodoroPhase, error) {
-	switch phase {
-	case gqlgen.PomodoroPhaseWork:
-		return event.PomodoroPhaseWork, nil
-	case gqlgen.PomodoroPhaseShortBreak:
-		return event.PomodoroPhaseShortBreak, nil
-	case gqlgen.PomodoroPhaseLongBreak:
-		return event.PomodoroPhaseLongBreak, nil
-	default:
-		return event.PomodoroPhase(""), fmt.Errorf("unknown pomodoro phase: %s", phase)
-	}
 }
