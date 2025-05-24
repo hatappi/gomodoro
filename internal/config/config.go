@@ -41,10 +41,9 @@ type Config struct {
 
 // APIConfig contains configuration options for the API server.
 type APIConfig struct {
-	Addr           string        `mapstructure:"addr"`
-	ReadTimeout    time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout   time.Duration `mapstructure:"write_timeout"`
-	RequestTimeout time.Duration `mapstructure:"request_timeout"`
+	Addr         string        `mapstructure:"addr"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
 }
 
 // PomodoroConfig config for pomodoro.
@@ -108,9 +107,8 @@ func DefaultConfig() *Config {
 			Cursor:              tcell.ColorGreen,
 		},
 		API: APIConfig{
-			ReadTimeout:    time.Second * DefaultAPITimeout,
-			WriteTimeout:   time.Second * DefaultAPITimeout,
-			RequestTimeout: time.Second * DefaultAPITimeout,
+			ReadTimeout:  time.Second * DefaultAPITimeout,
+			WriteTimeout: time.Second * DefaultAPITimeout,
 		},
 	}
 }
