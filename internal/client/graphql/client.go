@@ -67,10 +67,6 @@ func (c *ClientWrapper) ConnectSubscription(ctx context.Context) (<-chan error, 
 		return nil, nil
 	}
 
-	if c.subscriptionClient == nil {
-		return nil, fmt.Errorf("subscription client is not initialized")
-	}
-
 	errChan, err := c.subscriptionClient.Start(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start subscription client: %w", err)
