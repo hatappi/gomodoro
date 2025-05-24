@@ -55,20 +55,19 @@ func (b *InMemoryBus) SubscribeMulti(eventTypes []EventType, handler Handler) []
 // SubscribeChannel returns the channel and an unsubscribe function.
 func (b *InMemoryBus) SubscribeChannel(eventTypes []EventType) (<-chan interface{}, func()) {
 	ch := make(chan interface{}, defaultChannelBufferSize)
-	subscriptionIDs := make([]string, 0, len(eventTypes))
 	handler := func(e interface{}) {
 		ch <- e
 	}
-	for _, eventType := range eventTypes {
-		id := b.Subscribe(eventType, handler)
-		subscriptionIDs = append(subscriptionIDs, id)
-	}
+
+	subscriptionIDs := b.SubscribeMulti(eventTypes, handler)
+
 	unsubscribe := func() {
 		for _, id := range subscriptionIDs {
 			b.Unsubscribe(id)
 		}
 		close(ch)
 	}
+
 	return ch, unsubscribe
 }
 
