@@ -49,7 +49,6 @@ type Task struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"created_at"`
-	Completed bool      `json:"completed"`
 }
 
 // PomodoroStorage defines the interface for pomodoro persistence operations.

@@ -37,7 +37,6 @@ func toTaskEvent(baseEvent event.BaseEvent, payload gqlgen.EventTaskPayloadDetai
 		BaseEvent: baseEvent,
 		ID:        payload.Id,
 		Title:     payload.Title,
-		Completed: payload.Completed,
 	}
 }
 
@@ -87,8 +86,6 @@ func toEventType(eventType gqlgen.EventType) (event.EventType, error) {
 		return event.TaskUpdated, nil
 	case gqlgen.EventTypeTaskDeleted:
 		return event.TaskDeleted, nil
-	case gqlgen.EventTypeTaskCompleted:
-		return event.TaskCompleted, nil
 	default:
 		return event.EventType(""), fmt.Errorf("unknown event type: %s", eventType)
 	}

@@ -15,6 +15,5 @@ func FromCoreTask(task *core.Task) *model.Task {
 		ID:        task.ID,
 		Title:     task.Title,
 		CreatedAt: task.CreatedAt,
-		Completed: task.Completed,
 	}
 }

@@ -68,9 +68,8 @@ type ComplexityRoot struct {
 	}
 
 	EventTaskPayload struct {
-		Completed func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Title     func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Title func(childComplexity int) int
 	}
 
 	HealthStatus struct {
@@ -121,7 +120,6 @@ type ComplexityRoot struct {
 	}
 
 	Task struct {
-		Completed func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Title     func(childComplexity int) int
@@ -249,13 +247,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.EventPomodoroPayload.TaskID(childComplexity), true
-
-	case "EventTaskPayload.completed":
-		if e.complexity.EventTaskPayload.Completed == nil {
-			break
-		}
-
-		return e.complexity.EventTaskPayload.Completed(childComplexity), true
 
 	case "EventTaskPayload.id":
 		if e.complexity.EventTaskPayload.ID == nil {
@@ -503,13 +494,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Subscription.Noop(childComplexity), true
-
-	case "Task.completed":
-		if e.complexity.Task.Completed == nil {
-			break
-		}
-
-		return e.complexity.Task.Completed(childComplexity), true
 
 	case "Task.createdAt":
 		if e.complexity.Task.CreatedAt == nil {
@@ -1502,50 +1486,6 @@ func (ec *executionContext) fieldContext_EventTaskPayload_title(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EventTaskPayload_completed(ctx context.Context, field graphql.CollectedField, obj *model.EventTaskPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EventTaskPayload_completed(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Completed, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EventTaskPayload_completed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EventTaskPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _HealthStatus_message(ctx context.Context, field graphql.CollectedField, obj *model.HealthStatus) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_HealthStatus_message(ctx, field)
 	if err != nil {
@@ -1964,8 +1904,6 @@ func (ec *executionContext) fieldContext_Mutation_createTask(ctx context.Context
 				return ec.fieldContext_Task_title(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Task_createdAt(ctx, field)
-			case "completed":
-				return ec.fieldContext_Task_completed(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 		},
@@ -2026,8 +1964,6 @@ func (ec *executionContext) fieldContext_Mutation_updateTask(ctx context.Context
 				return ec.fieldContext_Task_title(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Task_createdAt(ctx, field)
-			case "completed":
-				return ec.fieldContext_Task_completed(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 		},
@@ -2861,8 +2797,6 @@ func (ec *executionContext) fieldContext_Query_task(ctx context.Context, field g
 				return ec.fieldContext_Task_title(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Task_createdAt(ctx, field)
-			case "completed":
-				return ec.fieldContext_Task_completed(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 		},
@@ -3276,50 +3210,6 @@ func (ec *executionContext) fieldContext_Task_createdAt(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Task_completed(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Task_completed(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Completed, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Task_completed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Task",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _TaskConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.TaskConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TaskConnection_edges(ctx, field)
 	if err != nil {
@@ -3551,8 +3441,6 @@ func (ec *executionContext) fieldContext_TaskEdge_node(_ context.Context, field 
 				return ec.fieldContext_Task_title(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Task_createdAt(ctx, field)
-			case "completed":
-				return ec.fieldContext_Task_completed(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 		},
@@ -5620,7 +5508,7 @@ func (ec *executionContext) unmarshalInputUpdateTaskInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "title", "completed"}
+	fieldsInOrder := [...]string{"id", "title"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5641,13 +5529,6 @@ func (ec *executionContext) unmarshalInputUpdateTaskInput(ctx context.Context, o
 				return it, err
 			}
 			it.Title = data
-		case "completed":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("completed"))
-			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Completed = data
 		}
 	}
 
@@ -5818,11 +5699,6 @@ func (ec *executionContext) _EventTaskPayload(ctx context.Context, sel ast.Selec
 			}
 		case "title":
 			out.Values[i] = ec._EventTaskPayload_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "completed":
-			out.Values[i] = ec._EventTaskPayload_completed(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6282,11 +6158,6 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "createdAt":
 			out.Values[i] = ec._Task_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "completed":
-			out.Values[i] = ec._Task_completed(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

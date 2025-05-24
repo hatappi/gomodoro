@@ -2,7 +2,6 @@ type Task {
   id: ID!
   title: String!
   createdAt: Time!
-  completed: Boolean!
 }
 
 input CreateTaskInput {
@@ -12,7 +11,6 @@ input CreateTaskInput {
 input UpdateTaskInput {
   id: ID!
   title: String
-  completed: Boolean
 }
 
 extend type Query {

@@ -41,9 +41,8 @@ type EventReceivedInput struct {
 }
 
 type EventTaskPayload struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
 }
 
 func (EventTaskPayload) IsEventPayload() {}
@@ -91,7 +90,6 @@ type Task struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"createdAt"`
-	Completed bool      `json:"completed"`
 }
 
 type TaskConnection struct {
@@ -106,9 +104,8 @@ type TaskEdge struct {
 }
 
 type UpdateTaskInput struct {
-	ID        string  `json:"id"`
-	Title     *string `json:"title,omitempty"`
-	Completed *bool   `json:"completed,omitempty"`
+	ID    string  `json:"id"`
+	Title *string `json:"title,omitempty"`
 }
 
 type EventCategory string
@@ -178,7 +175,6 @@ const (
 	EventTypeTaskCreated       EventType = "TASK_CREATED"
 	EventTypeTaskUpdated       EventType = "TASK_UPDATED"
 	EventTypeTaskDeleted       EventType = "TASK_DELETED"
-	EventTypeTaskCompleted     EventType = "TASK_COMPLETED"
 )
 
 var AllEventType = []EventType{
@@ -191,12 +187,11 @@ var AllEventType = []EventType{
 	EventTypeTaskCreated,
 	EventTypeTaskUpdated,
 	EventTypeTaskDeleted,
-	EventTypeTaskCompleted,
 }
 
 func (e EventType) IsValid() bool {
 	switch e {
-	case EventTypePomodoroStarted, EventTypePomodoroPaused, EventTypePomodoroResumed, EventTypePomodoroCompleted, EventTypePomodoroStopped, EventTypePomodoroTick, EventTypeTaskCreated, EventTypeTaskUpdated, EventTypeTaskDeleted, EventTypeTaskCompleted:
+	case EventTypePomodoroStarted, EventTypePomodoroPaused, EventTypePomodoroResumed, EventTypePomodoroCompleted, EventTypePomodoroStopped, EventTypePomodoroTick, EventTypeTaskCreated, EventTypeTaskUpdated, EventTypeTaskDeleted:
 		return true
 	}
 	return false
