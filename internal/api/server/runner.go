@@ -77,14 +77,14 @@ func (r *Runner) Start(ctx context.Context) error {
 		return err
 	}
 
-	latest, err := pomodoroService.GetLatestPomodoro()
+	latest, err := pomodoroService.LatestPomodoro()
 	if err != nil {
 		return fmt.Errorf("failed to get latest pomodoro: %w", err)
 	}
 
 	// If there's an active pomodoro, delete it to clean up the state
 	if latest != nil {
-		if err := pomodoroService.DeletePomodoro(ctx, latest.ID); err != nil {
+		if err := pomodoroService.Delete(ctx, latest.ID); err != nil {
 			log.FromContext(ctx).Error(err, "Failed to delete latest pomodoro")
 		}
 	}
