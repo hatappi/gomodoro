@@ -13,7 +13,6 @@ enum EventType {
   TASK_CREATED
   TASK_UPDATED
   TASK_DELETED
-  TASK_COMPLETED
 }
 
 # Represents the state of a pomodoro session
@@ -43,7 +42,6 @@ type EventPomodoroPayload {
 type EventTaskPayload {
   id: ID! # Renamed from taskId
   title: String!
-  completed: Boolean!
 }
 
 union EventPayload = EventPomodoroPayload | EventTaskPayload

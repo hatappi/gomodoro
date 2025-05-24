@@ -23,7 +23,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTas
 
 // UpdateTask is the resolver for the updateTask field.
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTaskInput) (*model.Task, error) {
-	updatedTask, err := r.TaskService.UpdateTask(ctx, input.ID, *input.Title, *input.Completed)
+	updatedTask, err := r.TaskService.UpdateTask(ctx, input.ID, *input.Title)
 	if err != nil {
 		return nil, err
 	}

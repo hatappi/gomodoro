@@ -20,5 +20,4 @@ fragment EventPomodoroPayloadDetails on EventPomodoroPayload {
 fragment EventTaskPayloadDetails on EventTaskPayload {
   id
   title
-  completed
 }

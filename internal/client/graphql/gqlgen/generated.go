@@ -43,7 +43,6 @@ const (
 	EventTypeTaskCreated       EventType = "TASK_CREATED"
 	EventTypeTaskUpdated       EventType = "TASK_UPDATED"
 	EventTypeTaskDeleted       EventType = "TASK_DELETED"
-	EventTypeTaskCompleted     EventType = "TASK_COMPLETED"
 )
 
 var AllEventType = []EventType{
@@ -56,7 +55,6 @@ var AllEventType = []EventType{
 	EventTypeTaskCreated,
 	EventTypeTaskUpdated,
 	EventTypeTaskDeleted,
-	EventTypeTaskCompleted,
 }
 
 // GetAllTasksResponse is returned by GetAllTasks on success.

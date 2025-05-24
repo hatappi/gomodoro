@@ -16,7 +16,6 @@ type Task struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"created_at"`
-	Completed bool      `json:"completed"`
 }
 
 // TaskService provides operations for managing tasks.
@@ -43,7 +42,6 @@ func (s *TaskService) CreateTask(_ context.Context, title string) (*Task, error)
 		ID:        uuid.New().String(),
 		Title:     title,
 		CreatedAt: time.Now(),
-		Completed: false,
 	}
 
 	if err := s.storage.SaveTask(task); err != nil {
@@ -81,7 +79,7 @@ func (s *TaskService) GetTaskByID(id string) (*Task, error) {
 }
 
 // UpdateTask updates an existing task with the provided information.
-func (s *TaskService) UpdateTask(_ context.Context, id string, title string, completed bool) (*Task, error) {
+func (s *TaskService) UpdateTask(_ context.Context, id string, title string) (*Task, error) {
 	task, err := s.storage.GetTaskByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get task: %w", err)
@@ -89,14 +87,6 @@ func (s *TaskService) UpdateTask(_ context.Context, id string, title string, com
 
 	if title != "" {
 		task.Title = title
-	}
-
-	if task.Completed != completed {
-		task.Completed = completed
-
-		if completed {
-			s.publishTaskEvent(event.TaskCompleted, task)
-		}
 	}
 
 	if err := s.storage.UpdateTask(task); err != nil {
@@ -130,9 +120,8 @@ func (s *TaskService) publishTaskEvent(eventType event.EventType, t *storage.Tas
 			Type:      eventType,
 			Timestamp: time.Now(),
 		},
-		ID:        t.ID,
-		Title:     t.Title,
-		Completed: t.Completed,
+		ID:    t.ID,
+		Title: t.Title,
 	}
 
 	s.eventBus.Publish(e)
@@ -147,6 +136,5 @@ func (s *TaskService) storageTaskToCore(t *storage.Task) *Task {
 		ID:        t.ID,
 		Title:     t.Title,
 		CreatedAt: t.CreatedAt,
-		Completed: t.Completed,
 	}
 }

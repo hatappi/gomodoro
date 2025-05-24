@@ -69,9 +69,8 @@ func ConvertTaskEventToModelEvent(evt event.TaskEvent) (*model.Event, error) {
 	}
 
 	payload := &model.EventTaskPayload{
-		ID:        evt.ID,
-		Title:     evt.Title,
-		Completed: evt.Completed,
+		ID:    evt.ID,
+		Title: evt.Title,
 	}
 
 	return &model.Event{
@@ -90,7 +89,7 @@ func convertModelEventCategoryToEventTypes(mcat model.EventCategory) ([]event.Ev
 		}, nil
 	case model.EventCategoryTask:
 		return []event.EventType{
-			event.TaskCreated, event.TaskUpdated, event.TaskDeleted, event.TaskCompleted,
+			event.TaskCreated, event.TaskUpdated, event.TaskDeleted,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unknown event category: %s", mcat)
@@ -143,8 +142,6 @@ func convertEventTypeToModel(t event.EventType) (model.EventType, error) {
 		return model.EventTypeTaskUpdated, nil
 	case event.TaskDeleted:
 		return model.EventTypeTaskDeleted, nil
-	case event.TaskCompleted:
-		return model.EventTypeTaskCompleted, nil
 	default:
 		return "", fmt.Errorf("unknown event type: %s", t)
 	}

@@ -12,6 +12,5 @@ func ToCoreTask(task gqlgen.TaskDetails) *core.Task {
 		ID:        task.Id,
 		Title:     task.Title,
 		CreatedAt: task.CreatedAt,
-		Completed: task.Completed,
 	}
 }

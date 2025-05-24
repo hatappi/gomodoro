@@ -2,5 +2,4 @@ fragment TaskDetails on Task {
   id
   title
   createdAt
-  completed
 }

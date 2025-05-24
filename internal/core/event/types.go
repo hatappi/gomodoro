@@ -30,15 +30,13 @@ const (
 	TaskUpdated EventType = "task.updated"
 	// TaskDeleted event is emitted when a task is deleted.
 	TaskDeleted EventType = "task.deleted"
-	// TaskCompleted event is emitted when a task is marked as completed.
-	TaskCompleted EventType = "task.completed"
 )
 
 // AllEventTypes contains a list of all available event types in the system.
 var AllEventTypes = []EventType{
 	PomodoroStarted, PomodoroPaused, PomodoroResumed,
 	PomodoroCompleted, PomodoroStopped, PomodoroTick,
-	TaskCreated, TaskUpdated, TaskDeleted, TaskCompleted,
+	TaskCreated, TaskUpdated, TaskDeleted,
 }
 
 // BaseEvent contains common fields for all events.
@@ -91,9 +89,8 @@ func (e PomodoroEvent) GetEventType() EventType {
 // TaskEvent represents events related to tasks.
 type TaskEvent struct {
 	BaseEvent
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
 }
 
 // GetEventType returns the event type.
