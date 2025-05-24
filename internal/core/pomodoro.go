@@ -200,8 +200,7 @@ func (s *PomodoroService) ActivePomodoro() (*Pomodoro, error) {
 	}
 
 	if pomodoro == nil {
-		//nolint:nilnil
-		return nil, nil
+		return nil, fmt.Errorf("no active pomodoro found")
 	}
 
 	return s.storagePomodoroToCore(pomodoro), nil
