@@ -46,21 +46,21 @@ func NewPomodoroService(storage storage.PomodoroStorage, eventBus event.EventBus
 	}
 }
 
-// StartPomodoro begins a new pomodoro session.
-func (s *PomodoroService) StartPomodoro(
+// Start begins a new pomodoro session.
+func (s *PomodoroService) Start(
 	ctx context.Context,
 	workDuration,
 	breakDuration time.Duration,
 	longBreakDuration time.Duration,
 	taskID string,
 ) (*Pomodoro, error) {
-	latestPomodoro, err := s.GetLatestPomodoro()
+	latestPomodoro, err := s.LatestPomodoro()
 	if err != nil {
-		return nil, fmt.Errorf("failed to check for latest pomodoro: %w", err)
+		return nil, fmt.Errorf("failed to get latest pomodoro: %w", err)
 	}
 
 	if latestPomodoro != nil && latestPomodoro.State == event.PomodoroStateActive {
-		return nil, fmt.Errorf("latest pomodoro session already exists")
+		return nil, fmt.Errorf("active pomodoro session already exists")
 	}
 
 	phase, duration, phaseCount := s.determinePhaseAndDuration(
@@ -94,26 +94,25 @@ func (s *PomodoroService) StartPomodoro(
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// PausePomodoro pauses an active pomodoro session.
-func (s *PomodoroService) PausePomodoro(_ context.Context, id string) (*Pomodoro, error) {
+// Pause pauses an active pomodoro session.
+func (s *PomodoroService) Pause(_ context.Context, id string) (*Pomodoro, error) {
 	s.stopTimer()
 
-	active, err := s.storage.GetActivePomodoro()
+	activePomodoro, err := s.storage.GetActivePomodoro()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get active pomodoro: %w", err)
 	}
 
-	if active == nil || active.ID != id {
-		return nil, fmt.Errorf("no active pomodoro found with ID %s", id)
+	if activePomodoro == nil {
+		return nil, fmt.Errorf("no active pomodoro found")
 	}
 
-	if active.State != storage.PomodoroStateActive {
-		return nil, fmt.Errorf("pomodoro is not active")
-	}
-
-	remainingSecs := int(active.RemainingTime.Seconds())
-	elapsedSec := int(active.ElapsedTime.Seconds())
-	pomodoro, err := s.storage.UpdatePomodoroState(id, storage.PomodoroStatePaused, remainingSecs, elapsedSec)
+	pomodoro, err := s.storage.UpdatePomodoroState(
+		id,
+		storage.PomodoroStatePaused,
+		int(activePomodoro.RemainingTime.Seconds()),
+		int(activePomodoro.ElapsedTime.Seconds()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update pomodoro state: %w", err)
 	}
@@ -123,24 +122,27 @@ func (s *PomodoroService) PausePomodoro(_ context.Context, id string) (*Pomodoro
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// ResumePomodoro resumes a paused pomodoro session.
-func (s *PomodoroService) ResumePomodoro(ctx context.Context, id string) (*Pomodoro, error) {
-	active, err := s.storage.GetActivePomodoro()
+// Resume resumes a paused pomodoro session.
+func (s *PomodoroService) Resume(ctx context.Context, id string) (*Pomodoro, error) {
+	activePomodoro, err := s.storage.GetActivePomodoro()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get active pomodoro: %w", err)
 	}
 
-	if active == nil || active.ID != id {
-		return nil, fmt.Errorf("no paused pomodoro found with ID %s", id)
+	if activePomodoro == nil {
+		return nil, fmt.Errorf("no active pomodoro found")
 	}
 
-	if active.State != storage.PomodoroStatePaused {
+	if activePomodoro.State != storage.PomodoroStatePaused {
 		return nil, fmt.Errorf("pomodoro is not paused")
 	}
 
-	remainingSecs := int(active.RemainingTime.Seconds())
-	elapsedSec := int(active.ElapsedTime.Seconds())
-	pomodoro, err := s.storage.UpdatePomodoroState(id, storage.PomodoroStateActive, remainingSecs, elapsedSec)
+	pomodoro, err := s.storage.UpdatePomodoroState(
+		id,
+		storage.PomodoroStateActive,
+		int(activePomodoro.RemainingTime.Seconds()),
+		int(activePomodoro.ElapsedTime.Seconds()),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update pomodoro state: %w", err)
 	}
@@ -152,21 +154,25 @@ func (s *PomodoroService) ResumePomodoro(ctx context.Context, id string) (*Pomod
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// StopPomodoro stops the current pomodoro session.
-func (s *PomodoroService) StopPomodoro(_ context.Context, id string) error {
+// Stop stops the current pomodoro session.
+func (s *PomodoroService) Stop(_ context.Context, id string) error {
 	s.stopTimer()
 
-	active, err := s.storage.GetActivePomodoro()
+	activePomodoro, err := s.storage.GetActivePomodoro()
 	if err != nil {
 		return fmt.Errorf("failed to get active pomodoro: %w", err)
 	}
 
-	if active == nil || active.ID != id {
-		return fmt.Errorf("no active pomodoro found with ID %s", id)
+	if activePomodoro == nil {
+		return fmt.Errorf("no active pomodoro found")
 	}
 
-	elapsedSec := int(active.ElapsedTime.Seconds())
-	pomodoro, err := s.storage.UpdatePomodoroState(id, storage.PomodoroStateFinished, 0, elapsedSec)
+	pomodoro, err := s.storage.UpdatePomodoroState(
+		id,
+		storage.PomodoroStateFinished,
+		0,
+		int(activePomodoro.ElapsedTime.Seconds()),
+	)
 	if err != nil {
 		return fmt.Errorf("failed to update pomodoro state: %w", err)
 	}
@@ -176,17 +182,18 @@ func (s *PomodoroService) StopPomodoro(_ context.Context, id string) error {
 	return nil
 }
 
-// DeletePomodoro deletes a pomodoro session by ID.
-func (s *PomodoroService) DeletePomodoro(_ context.Context, id string) error {
+// Delete deletes a pomodoro session by ID.
+func (s *PomodoroService) Delete(_ context.Context, id string) error {
 	err := s.storage.DeletePomodoro(id)
 	if err != nil {
 		return fmt.Errorf("failed to delete pomodoro: %w", err)
 	}
+
 	return nil
 }
 
-// GetActivePomodoro retrieves the current active pomodoro session if any.
-func (s *PomodoroService) GetActivePomodoro() (*Pomodoro, error) {
+// ActivePomodoro retrieves the current active pomodoro session if any.
+func (s *PomodoroService) ActivePomodoro() (*Pomodoro, error) {
 	pomodoro, err := s.storage.GetActivePomodoro()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get active pomodoro: %w", err)
@@ -200,8 +207,8 @@ func (s *PomodoroService) GetActivePomodoro() (*Pomodoro, error) {
 	return s.storagePomodoroToCore(pomodoro), nil
 }
 
-// GetLatestPomodoro retrieves the most recent pomodoro session.
-func (s *PomodoroService) GetLatestPomodoro() (*Pomodoro, error) {
+// LatestPomodoro retrieves the most recent pomodoro session.
+func (s *PomodoroService) LatestPomodoro() (*Pomodoro, error) {
 	pomodoro, err := s.storage.GetLatestPomodoro()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get latest pomodoro: %w", err)

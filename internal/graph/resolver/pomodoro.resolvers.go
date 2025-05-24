@@ -15,7 +15,7 @@ import (
 
 // StartPomodoro is the resolver for the startPomodoro field.
 func (r *mutationResolver) StartPomodoro(ctx context.Context, input model.StartPomodoroInput) (*model.Pomodoro, error) {
-	pomodoro, err := r.PomodoroService.StartPomodoro(
+	pomodoro, err := r.PomodoroService.Start(
 		ctx,
 		time.Duration(input.WorkDurationSec)*time.Second,
 		time.Duration(input.BreakDurationSec)*time.Second,
@@ -31,12 +31,12 @@ func (r *mutationResolver) StartPomodoro(ctx context.Context, input model.StartP
 
 // PausePomodoro is the resolver for the pausePomodoro field.
 func (r *mutationResolver) PausePomodoro(ctx context.Context) (*model.Pomodoro, error) {
-	activePomodoro, err := r.PomodoroService.GetActivePomodoro()
+	activePomodoro, err := r.PomodoroService.ActivePomodoro()
 	if err != nil {
 		return nil, err
 	}
 
-	pomodoro, err := r.PomodoroService.PausePomodoro(ctx, activePomodoro.ID)
+	pomodoro, err := r.PomodoroService.Pause(ctx, activePomodoro.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +50,12 @@ func (r *mutationResolver) PausePomodoro(ctx context.Context) (*model.Pomodoro, 
 
 // ResumePomodoro is the resolver for the resumePomodoro field.
 func (r *mutationResolver) ResumePomodoro(ctx context.Context) (*model.Pomodoro, error) {
-	activePomodoro, err := r.PomodoroService.GetActivePomodoro()
+	activePomodoro, err := r.PomodoroService.ActivePomodoro()
 	if err != nil {
 		return nil, err
 	}
 
-	pomodoro, err := r.PomodoroService.ResumePomodoro(ctx, activePomodoro.ID)
+	pomodoro, err := r.PomodoroService.Resume(ctx, activePomodoro.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +69,12 @@ func (r *mutationResolver) ResumePomodoro(ctx context.Context) (*model.Pomodoro,
 
 // StopPomodoro is the resolver for the stopPomodoro field.
 func (r *mutationResolver) StopPomodoro(ctx context.Context) (*model.Pomodoro, error) {
-	activePomodoro, err := r.PomodoroService.GetActivePomodoro()
+	activePomodoro, err := r.PomodoroService.ActivePomodoro()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := r.PomodoroService.StopPomodoro(ctx, activePomodoro.ID); err != nil {
+	if err := r.PomodoroService.Stop(ctx, activePomodoro.ID); err != nil {
 		return nil, err
 	}
 
@@ -87,7 +87,7 @@ func (r *mutationResolver) StopPomodoro(ctx context.Context) (*model.Pomodoro, e
 
 // CurrentPomodoro is the resolver for the currentPomodoro field.
 func (r *queryResolver) CurrentPomodoro(ctx context.Context) (*model.Pomodoro, error) {
-	pomodoro, err := r.PomodoroService.GetLatestPomodoro()
+	pomodoro, err := r.PomodoroService.LatestPomodoro()
 	if err != nil {
 		return nil, err
 	}
