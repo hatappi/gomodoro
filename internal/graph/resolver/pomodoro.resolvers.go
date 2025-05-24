@@ -41,10 +41,6 @@ func (r *mutationResolver) PausePomodoro(ctx context.Context) (*model.Pomodoro, 
 		return nil, err
 	}
 
-	if pomodoro == nil {
-		return nil, fmt.Errorf("no active pomodoro to pause")
-	}
-
 	return conv.FromPomodoro(pomodoro)
 }
 
@@ -58,10 +54,6 @@ func (r *mutationResolver) ResumePomodoro(ctx context.Context) (*model.Pomodoro,
 	pomodoro, err := r.PomodoroService.Resume(ctx, activePomodoro.ID)
 	if err != nil {
 		return nil, err
-	}
-
-	if pomodoro == nil {
-		return nil, fmt.Errorf("no active pomodoro to pause")
 	}
 
 	return conv.FromPomodoro(pomodoro)
@@ -78,10 +70,6 @@ func (r *mutationResolver) StopPomodoro(ctx context.Context) (*model.Pomodoro, e
 		return nil, err
 	}
 
-	if activePomodoro == nil {
-		return nil, fmt.Errorf("no active pomodoro to pause")
-	}
-
 	return conv.FromPomodoro(activePomodoro)
 }
 
@@ -93,7 +81,7 @@ func (r *queryResolver) CurrentPomodoro(ctx context.Context) (*model.Pomodoro, e
 	}
 
 	if pomodoro == nil {
-		return nil, fmt.Errorf("no active pomodoro")
+		return nil, fmt.Errorf("no current pomodoro")
 	}
 
 	return conv.FromPomodoro(pomodoro)
