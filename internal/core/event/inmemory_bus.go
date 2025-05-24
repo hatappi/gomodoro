@@ -40,9 +40,6 @@ func (b *InMemoryBus) Publish(event EventInfo) {
 
 // SubscribeMulti registers a handler for multiple event types and returns subscription IDs.
 func (b *InMemoryBus) SubscribeMulti(eventTypes []EventType, handler Handler) []string {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
 	subscriptionIDs := make([]string, 0, len(eventTypes))
 	for _, eventType := range eventTypes {
 		id := b.Subscribe(eventType, handler)
