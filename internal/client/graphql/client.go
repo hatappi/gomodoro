@@ -154,6 +154,7 @@ func (c *ClientWrapper) Unsubscribe(subscriptionID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to unsubscribe (ID: %s): %w", subscriptionID, err)
 	}
+
 	return nil
 }
 
@@ -164,10 +165,10 @@ func (c *ClientWrapper) GetAllTasks(ctx context.Context) ([]*core.Task, error) {
 		return nil, fmt.Errorf("failed to get tasks: %w", err)
 	}
 
-	tasks := res.GetTasks()
+	tasks := res.Tasks.Edges
 
-	result := make([]*core.Task, 0, len(tasks.GetEdges()))
-	for _, task := range tasks.GetEdges() {
+	result := make([]*core.Task, 0, len(tasks))
+	for _, task := range tasks {
 		result = append(result, conv.ToCoreTask(task.Node.TaskDetails))
 	}
 
@@ -181,9 +182,7 @@ func (c *ClientWrapper) GetTask(ctx context.Context, id string) (*core.Task, err
 		return nil, fmt.Errorf("failed to get tasks: %w", err)
 	}
 
-	task := res.GetTask()
-
-	return conv.ToCoreTask(task.TaskDetails), nil
+	return conv.ToCoreTask(res.Task.TaskDetails), nil
 }
 
 // CreateTask creates a new task on the server.
@@ -193,9 +192,7 @@ func (c *ClientWrapper) CreateTask(ctx context.Context, title string) (*core.Tas
 		return nil, fmt.Errorf("failed to create task: %w", err)
 	}
 
-	task := res.CreateTask.TaskDetails
-
-	return conv.ToCoreTask(task), nil
+	return conv.ToCoreTask(res.CreateTask.TaskDetails), nil
 }
 
 // DeleteTask deletes a task on the server.
@@ -219,9 +216,7 @@ func (c *ClientWrapper) GetCurrentPomodoro(ctx context.Context) (*core.Pomodoro,
 		return nil, fmt.Errorf("failed to get current pomodoro: %w", err)
 	}
 
-	pomodoro := res.GetCurrentPomodoro()
-
-	return conv.ToCorePomodoro(pomodoro.PomodoroDetails)
+	return conv.ToCorePomodoro(res.GetCurrentPomodoro().PomodoroDetails)
 }
 
 // StartPomodoro starts a new pomodoro session on the server.
@@ -231,9 +226,7 @@ func (c *ClientWrapper) StartPomodoro(ctx context.Context, input gqlgen.StartPom
 		return nil, fmt.Errorf("failed to start pomodoro: %w", err)
 	}
 
-	pomodoro := res.StartPomodoro.PomodoroDetails
-
-	return conv.ToCorePomodoro(pomodoro)
+	return conv.ToCorePomodoro(res.StartPomodoro.PomodoroDetails)
 }
 
 // PausePomodoro pauses the current active pomodoro session on the server.
@@ -243,9 +236,7 @@ func (c *ClientWrapper) PausePomodoro(ctx context.Context) (*core.Pomodoro, erro
 		return nil, fmt.Errorf("failed to pause pomodoro: %w", err)
 	}
 
-	pomodoro := res.PausePomodoro.PomodoroDetails
-
-	return conv.ToCorePomodoro(pomodoro)
+	return conv.ToCorePomodoro(res.PausePomodoro.PomodoroDetails)
 }
 
 // ResumePomodoro resumes a paused pomodoro session on the server.
@@ -255,9 +246,7 @@ func (c *ClientWrapper) ResumePomodoro(ctx context.Context) (*core.Pomodoro, err
 		return nil, fmt.Errorf("failed to resume pomodoro: %w", err)
 	}
 
-	pomodoro := res.ResumePomodoro.PomodoroDetails
-
-	return conv.ToCorePomodoro(pomodoro)
+	return conv.ToCorePomodoro(res.ResumePomodoro.PomodoroDetails)
 }
 
 // StopPomodoro stops the current active pomodoro session on the server.
@@ -267,7 +256,5 @@ func (c *ClientWrapper) StopPomodoro(ctx context.Context) (*core.Pomodoro, error
 		return nil, fmt.Errorf("failed to stop pomodoro: %w", err)
 	}
 
-	pomodoro := res.StopPomodoro.PomodoroDetails
-
-	return conv.ToCorePomodoro(pomodoro)
+	return conv.ToCorePomodoro(res.StopPomodoro.PomodoroDetails)
 }
