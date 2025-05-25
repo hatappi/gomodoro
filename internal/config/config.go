@@ -24,6 +24,9 @@ const (
 	// DefaultLogFile default log file path.
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
 
+	// DefaultStorageDir is default storage directory.
+	DefaultStorageDir = "~/.gomodoro"
+
 	// DefaultAPITimeout default timeout for API operations in seconds.
 	DefaultAPITimeout = 10
 )
@@ -37,6 +40,12 @@ type Config struct {
 	LogFile  string         `mapstructure:"log_file"`
 	LogLevel zapcore.Level  `mapstructure:"log_level"`
 	API      APIConfig      `mapstructure:"api"`
+	Storage  StorageConfig  `mapstructure:"storage"`
+}
+
+// StorageConfig contains configuration options for storage.
+type StorageConfig struct {
+	Dir string `mapstructure:"dir"`
 }
 
 // APIConfig contains configuration options for the API server.
@@ -110,6 +119,9 @@ func DefaultConfig() *Config {
 			ReadTimeout:  time.Second * DefaultAPITimeout,
 			WriteTimeout: time.Second * DefaultAPITimeout,
 		},
+		Storage: StorageConfig{
+			Dir: DefaultStorageDir,
+		},
 	}
 }
 
@@ -138,6 +150,10 @@ func GetConfig() (*Config, error) {
 	// Expand each file
 
 	if c.LogFile, err = homedir.Expand(c.LogFile); err != nil {
+		return nil, err
+	}
+
+	if c.Storage.Dir, err = homedir.Expand(c.Storage.Dir); err != nil {
 		return nil, err
 	}
 

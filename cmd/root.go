@@ -17,6 +17,11 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
+const (
+	// Default permissions for directories.
+	dirPermissions = 0o750
+)
+
 var cfgFile string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -24,7 +29,7 @@ var cfgFile string
 func Execute() {
 	ctx := context.Background()
 
-	cobra.OnInitialize(initConfig, initLogger)
+	cobra.OnInitialize(initConfig, initLogger, initStorage)
 
 	rootCmd := newRootCmd()
 	rootCmd.AddCommand(
@@ -102,4 +107,17 @@ func initLogger() {
 	}
 
 	log.SetDefaultLogger(logger)
+}
+
+func initStorage() {
+	conf, err := config.GetConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load config. %s\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.MkdirAll(conf.Storage.Dir, dirPermissions); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create storage directory. %s\n", err)
+		os.Exit(1)
+	}
 }

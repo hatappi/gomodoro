@@ -9,14 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
-
+	"github.com/hatappi/gomodoro/internal/config"
 	"github.com/hatappi/gomodoro/internal/storage"
 )
 
 const (
-	// Default permissions for directories.
-	dirPermissions = 0o750
 	// Default permissions for files.
 	filePermissions = 0o600
 )
@@ -33,19 +30,8 @@ type FileStorage struct {
 }
 
 // NewFileStorage creates a new file storage instance.
-func NewFileStorage(baseDir string) (*FileStorage, error) {
-	if baseDir == "" {
-		home, err := homedir.Dir()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get home directory: %w", err)
-		}
-
-		baseDir = filepath.Join(home, ".gomodoro")
-	}
-
-	if err := os.MkdirAll(baseDir, dirPermissions); err != nil {
-		return nil, fmt.Errorf("failed to create directory: %w", err)
-	}
+func NewFileStorage(storageCfg config.StorageConfig) *FileStorage {
+	baseDir := storageCfg.Dir
 
 	pomodoroFile := filepath.Join(baseDir, "pomodoro.json")
 	tasksFile := filepath.Join(baseDir, "tasks.json")
@@ -55,7 +41,7 @@ func NewFileStorage(baseDir string) (*FileStorage, error) {
 		pomodoroFile: pomodoroFile,
 		tasksFile:    tasksFile,
 		lockFile:     lockFile,
-	}, nil
+	}
 }
 
 func (f *FileStorage) lock() error {

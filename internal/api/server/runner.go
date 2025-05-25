@@ -24,7 +24,11 @@ const (
 
 // Runner manages API server lifecycle.
 type Runner struct {
-	config    *config.Config
+	config          *config.Config
+	eventBus        event.EventBus
+	taskService     *core.TaskService
+	pomodoroService *core.PomodoroService
+
 	server    *Server
 	isRunning bool
 	mu        sync.Mutex
@@ -32,8 +36,18 @@ type Runner struct {
 
 // NewRunner creates a new server runner.
 func NewRunner(config *config.Config) *Runner {
+	fileStorage := file.NewFileStorage(config.Storage)
+
+	eventBus := event.NewInMemoryBus()
+
+	taskService := core.NewTaskService(fileStorage, eventBus)
+	pomodoroService := core.NewPomodoroService(fileStorage, eventBus)
+
 	return &Runner{
-		config: config,
+		config:          config,
+		eventBus:        eventBus,
+		taskService:     taskService,
+		pomodoroService: pomodoroService,
 	}
 }
 
@@ -45,16 +59,6 @@ func (r *Runner) Start(ctx context.Context) error {
 	if r.isRunning {
 		return nil
 	}
-
-	fileStorage, err := file.NewFileStorage("")
-	if err != nil {
-		return fmt.Errorf("failed to initialize file storage: %w", err)
-	}
-
-	eventBus := event.NewInMemoryBus()
-
-	taskService := core.NewTaskService(fileStorage, eventBus)
-	pomodoroService := core.NewPomodoroService(fileStorage, eventBus)
 
 	opts := []Option{
 		WithCompletionLogging(),
@@ -70,21 +74,21 @@ func (r *Runner) Start(ctx context.Context) error {
 		opts = append(opts, WithRecordPixela(pixelaClient, r.config.Pixela.UserName, r.config.Pixela.GraphID))
 	}
 
-	r.server = NewServer(r.config.API, pomodoroService, taskService, eventBus, opts...)
+	r.server = NewServer(r.config.API, r.pomodoroService, r.taskService, r.eventBus, opts...)
 
 	ln, err := r.server.Listen()
 	if err != nil {
 		return err
 	}
 
-	latest, err := pomodoroService.LatestPomodoro()
+	latest, err := r.pomodoroService.LatestPomodoro()
 	if err != nil {
 		return fmt.Errorf("failed to get latest pomodoro: %w", err)
 	}
 
 	// If there's an active pomodoro, delete it to clean up the state
 	if latest != nil {
-		if err := pomodoroService.Delete(ctx, latest.ID); err != nil {
+		if err := r.pomodoroService.Delete(ctx, latest.ID); err != nil {
 			log.FromContext(ctx).Error(err, "Failed to delete latest pomodoro")
 		}
 	}
