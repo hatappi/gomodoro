@@ -1,0 +1,5 @@
+subscription OnEventReceived($input: EventReceivedInput!) {
+  eventReceived(input: $input) {
+    ...EventDetails
+  }
+}

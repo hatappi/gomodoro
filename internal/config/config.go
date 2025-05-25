@@ -3,6 +3,7 @@ package config
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/go-playground/validator/v10"
@@ -22,22 +23,36 @@ const (
 
 	// DefaultLogFile default log file path.
 	DefaultLogFile = "~/.gomodoro/gomodoro.log"
-	// DefaultTaskFile default task file path.
-	DefaultTaskFile = "~/.gomodoro/tasks.yaml"
-	// DefaultUnixDomainScoketPath default unix domain socket file path.
-	DefaultUnixDomainScoketPath = "/tmp/gomodoro.sock"
+
+	// DefaultStorageDir is default storage directory.
+	DefaultStorageDir = "~/.gomodoro"
+
+	// DefaultAPITimeout default timeout for API operations in seconds.
+	DefaultAPITimeout = 10
 )
 
 // Config config for gomodoro.
 type Config struct {
-	Pomodoro             PomodoroConfig `mapstructure:"pomodoro"`
-	Toggl                TogglConfig    `mapstructure:"toggl"`
-	Color                ColorConfig    `mapstructure:"color"`
-	Pixela               PixelaConfig   `mapstructure:"pixela"`
-	LogFile              string         `mapstructure:"log_file"`
-	LogLevel             zapcore.Level  `mapstructure:"log_level"`
-	TaskFile             string         `mapstructure:"task_file"`
-	UnixDomainScoketPath string         `mapstructure:"unix_domain_socket_path"`
+	Pomodoro PomodoroConfig `mapstructure:"pomodoro"`
+	Toggl    TogglConfig    `mapstructure:"toggl"`
+	Color    ColorConfig    `mapstructure:"color"`
+	Pixela   PixelaConfig   `mapstructure:"pixela"`
+	LogFile  string         `mapstructure:"log_file"`
+	LogLevel zapcore.Level  `mapstructure:"log_level"`
+	API      APIConfig      `mapstructure:"api"`
+	Storage  StorageConfig  `mapstructure:"storage"`
+}
+
+// StorageConfig contains configuration options for storage.
+type StorageConfig struct {
+	Dir string `mapstructure:"dir"`
+}
+
+// APIConfig contains configuration options for the API server.
+type APIConfig struct {
+	Addr         string        `mapstructure:"addr"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
 }
 
 // PomodoroConfig config for pomodoro.
@@ -89,9 +104,7 @@ func DefaultConfig() *Config {
 			LongBreakSec:   DefaultLongBreakSec,
 			BreakFrequency: 2, //nolint:mnd
 		},
-		LogFile:              DefaultLogFile,
-		TaskFile:             DefaultTaskFile,
-		UnixDomainScoketPath: DefaultUnixDomainScoketPath,
+		LogFile: DefaultLogFile,
 		Color: ColorConfig{
 			Font:                tcell.ColorDarkSlateGray,
 			Background:          tcell.ColorWhite,
@@ -101,6 +114,13 @@ func DefaultConfig() *Config {
 			TimerWorkFont:       tcell.ColorGreen,
 			TimerBreakFont:      tcell.ColorBlue,
 			Cursor:              tcell.ColorGreen,
+		},
+		API: APIConfig{
+			ReadTimeout:  time.Second * DefaultAPITimeout,
+			WriteTimeout: time.Second * DefaultAPITimeout,
+		},
+		Storage: StorageConfig{
+			Dir: DefaultStorageDir,
 		},
 	}
 }
@@ -129,15 +149,11 @@ func GetConfig() (*Config, error) {
 
 	// Expand each file
 
-	if c.TaskFile, err = homedir.Expand(c.TaskFile); err != nil {
-		return nil, err
-	}
-
 	if c.LogFile, err = homedir.Expand(c.LogFile); err != nil {
 		return nil, err
 	}
 
-	if c.UnixDomainScoketPath, err = homedir.Expand(c.UnixDomainScoketPath); err != nil {
+	if c.Storage.Dir, err = homedir.Expand(c.Storage.Dir); err != nil {
 		return nil, err
 	}
 

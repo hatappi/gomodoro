@@ -1,0 +1,5 @@
+mutation StartPomodoro($input: StartPomodoroInput!) {
+  startPomodoro(input: $input) {
+    ...PomodoroDetails
+  }
+}

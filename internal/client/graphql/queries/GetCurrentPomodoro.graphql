@@ -1,0 +1,5 @@
+query GetCurrentPomodoro {
+  currentPomodoro {
+    ...PomodoroDetails
+  }
+}

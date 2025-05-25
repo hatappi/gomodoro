@@ -28,5 +28,10 @@ lint:
 lint-fix:
 	@${GOBIN}/golangci-lint run --fix ./...
 
+.PHONY: test
 test:
 	@go test ./...
+
+.PHONY: gen
+gen:
+	@go generate ./...

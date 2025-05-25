@@ -1,0 +1,61 @@
+enum EventCategory {
+  POMODORO
+  TASK
+}
+
+enum EventType {
+  POMODORO_STARTED
+  POMODORO_PAUSED
+  POMODORO_RESUMED
+  POMODORO_COMPLETED
+  POMODORO_STOPPED
+  POMODORO_TICK
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_DELETED
+}
+
+# Represents the state of a pomodoro session
+enum PomodoroState {
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+# Represents the phase of a pomodoro session
+enum PomodoroPhase {
+  WORK
+  SHORT_BREAK
+  LONG_BREAK
+}
+
+type EventPomodoroPayload {
+  id: ID!
+  state: PomodoroState!
+  remainingTime: Duration!
+  elapsedTime: Duration!
+  taskId: ID
+  phase: PomodoroPhase!
+  phaseCount: Int!
+}
+
+type EventTaskPayload {
+  id: ID!
+  title: String!
+}
+
+union EventPayload = EventPomodoroPayload | EventTaskPayload
+
+type Event {
+  eventCategory: EventCategory!
+  eventType: EventType!
+  payload: EventPayload!
+}
+
+input EventReceivedInput {
+  eventCategory: [EventCategory!]
+}
+
+extend type Subscription {
+  eventReceived(input: EventReceivedInput!): Event!
+}

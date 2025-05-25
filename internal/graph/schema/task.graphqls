@@ -1,0 +1,36 @@
+type Task {
+  id: ID!
+  title: String!
+  createdAt: Time!
+}
+
+input CreateTaskInput {
+  title: String!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  title: String
+}
+
+extend type Query {
+  tasks: TaskConnection
+  task(id: ID!): Task
+}
+
+extend type Mutation {
+  createTask(input: CreateTaskInput!): Task
+  updateTask(input: UpdateTaskInput!): Task
+  deleteTask(id: ID!): Boolean
+}
+
+type TaskEdge {
+  cursor: String!
+  node: Task
+}
+
+type TaskConnection {
+  edges: [TaskEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}

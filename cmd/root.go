@@ -17,6 +17,11 @@ import (
 	"github.com/hatappi/gomodoro/internal/config"
 )
 
+const (
+	// Default permissions for directories.
+	dirPermissions = 0o750
+)
+
 var cfgFile string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -24,7 +29,7 @@ var cfgFile string
 func Execute() {
 	ctx := context.Background()
 
-	cobra.OnInitialize(initConfig, initLogger)
+	cobra.OnInitialize(initConfig, initLogger, initStorage)
 
 	rootCmd := newRootCmd()
 	rootCmd.AddCommand(
@@ -33,6 +38,7 @@ func Execute() {
 		newRemainCmd(),
 		newInitCmd(),
 		newAddTaskCmd(),
+		newServeCmd(),
 	)
 
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
@@ -55,13 +61,6 @@ func newRootCmd() *cobra.Command {
 
 	rootCmd.PersistentFlags().String("log-level", "error", "log Level (default is error)")
 	cobra.CheckErr(viper.BindPFlag("log_level", rootCmd.PersistentFlags().Lookup("log-level")))
-
-	rootCmd.PersistentFlags().String(
-		"unix-domain-socket-path",
-		config.DefaultUnixDomainScoketPath,
-		"unix domain socket path",
-	)
-	cobra.CheckErr(viper.BindPFlag("unix_domain_socket_path", rootCmd.PersistentFlags().Lookup("unix-domain-socket-path")))
 
 	return rootCmd
 }
@@ -108,4 +107,17 @@ func initLogger() {
 	}
 
 	log.SetDefaultLogger(logger)
+}
+
+func initStorage() {
+	conf, err := config.GetConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load config. %s\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.MkdirAll(conf.Storage.Dir, dirPermissions); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create storage directory. %s\n", err)
+		os.Exit(1)
+	}
 }

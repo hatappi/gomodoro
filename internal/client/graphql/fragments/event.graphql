@@ -1,0 +1,23 @@
+fragment EventDetails on Event {
+  eventCategory
+  eventType
+  payload {
+    ...EventPomodoroPayloadDetails
+    ...EventTaskPayloadDetails
+  }
+}
+
+fragment EventPomodoroPayloadDetails on EventPomodoroPayload {
+  id
+  state
+  remainingTime
+  elapsedTime
+  taskId
+  phase
+  phaseCount
+}
+
+fragment EventTaskPayloadDetails on EventTaskPayload {
+  id
+  title
+}

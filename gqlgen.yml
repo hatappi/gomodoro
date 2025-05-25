@@ -1,0 +1,50 @@
+schema:
+  - internal/graph/schema/*.graphqls
+
+exec:
+  package: graph
+  layout: single-file
+  filename: internal/graph/generated.go
+
+model:
+  filename: internal/graph/model/models_gen.go
+  package: model
+
+resolver:
+  package: resolver
+  layout: follow-schema
+  dir: internal/graph/resolver
+  filename_template: "{name}.resolvers.go"
+
+# This enables argumment directives to not just mutate
+# argument values but to set them even if they're null.
+call_argument_directives_with_null: true
+
+local_prefix: github.com/hatappi/gomodoro
+
+# gqlgen will search for any type names in the schema in these go packages
+# if they match it will use them, otherwise it will generate them.
+autobind:
+#  - "github.com/hatappi/gomodoro/internal/graph/model"
+
+# This section declares type mapping between the GraphQL and go type systems
+#
+# The first line in each type will be used as defaults for resolver arguments and
+# modelgen, the others will be allowed when binding to fields. Configure them to
+# your liking
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  # gqlgen provides a default GraphQL UUID convenience wrapper for github.com/google/uuid 
+  # but you can override this to provide your own GraphQL UUID implementation
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+
+  Duration:
+    model:
+      - github.com/99designs/gqlgen/graphql.Duration

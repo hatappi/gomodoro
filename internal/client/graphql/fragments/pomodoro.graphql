@@ -1,0 +1,10 @@
+fragment PomodoroDetails on Pomodoro {
+  id
+  state
+  taskId
+  startTime
+  phase
+  phaseCount
+  remainingTime
+  elapsedTime
+}

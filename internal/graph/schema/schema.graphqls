@@ -1,0 +1,24 @@
+scalar Time
+scalar Duration
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# NOTE: noop operation of each type is required to create each resolver to specific resolver file.
+# related issue: https://github.com/99designs/gqlgen/issues/377
+
+type Query {
+  noop: String
+}
+
+type Mutation {
+  noop: String
+}
+
+type Subscription {
+  noop: String
+}

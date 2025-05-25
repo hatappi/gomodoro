@@ -1,0 +1,5 @@
+mutation PausePomodoro {
+  pausePomodoro {
+    ...PomodoroDetails
+  }
+}

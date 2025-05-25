@@ -1,0 +1,5 @@
+mutation ResumePomodoro {
+  resumePomodoro {
+    ...PomodoroDetails
+  }
+}
