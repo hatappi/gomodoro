@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/hatappi/go-kit/log"
 
@@ -142,7 +141,8 @@ func (a *App) Run(ctx context.Context) error {
 		}
 
 		for err := range connectionErrChan {
-			log.FromContext(ctx).Info("Subscription connection error", "error", err)
+			log.FromContext(ctx).Error(err, "Subscription connection error")
+
 			cancelCtx()
 			return
 		}
@@ -152,10 +152,6 @@ func (a *App) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
-	workDuration := time.Duration(a.workSec) * time.Second
-	breakDuration := time.Duration(a.shortBreakSec) * time.Second
-	longBreakDuration := time.Duration(a.longBreakSec) * time.Second
 
 	for {
 		type timerResult struct {
@@ -169,9 +165,9 @@ func (a *App) Run(ctx context.Context) error {
 		}()
 
 		pomodoro, err := a.graphqlClient.StartPomodoro(ctx, gqlgen.StartPomodoroInput{
-			WorkDurationSec:      int(workDuration.Seconds()),
-			BreakDurationSec:     int(breakDuration.Seconds()),
-			LongBreakDurationSec: int(longBreakDuration.Seconds()),
+			WorkDurationSec:      a.workSec,
+			BreakDurationSec:     a.shortBreakSec,
+			LongBreakDurationSec: a.longBreakSec,
 			TaskId:               task.ID,
 		})
 		if err != nil {
@@ -183,7 +179,7 @@ func (a *App) Run(ctx context.Context) error {
 			return res.err
 		}
 
-		log.FromContext(ctx).Info("Pomodoro finished", "elapsedTime", res.elapsedTime, "err", nil)
+		log.FromContext(ctx).V(1).Info("Pomodoro finished", "elapsedTime", res.elapsedTime, "err", nil)
 
 		// Execute completion functions
 		for _, cf := range a.completeFuncs {
@@ -215,7 +211,11 @@ func (a *App) Run(ctx context.Context) error {
 
 // Finish cleans up resources when the app is closed.
 func (a *App) Finish(ctx context.Context) {
-	_, _ = a.graphqlClient.StopPomodoro(ctx)
+	_, err := a.graphqlClient.StopPomodoro(ctx)
+	if err != nil {
+		log.FromContext(ctx).Error(err, "failed to stop pomodoro on finish")
+	}
+
 	a.screenClient.Finish()
 }
 
@@ -230,26 +230,18 @@ func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 		return a.handleNewTask(ctx)
 	}
 
-	task, action, err := a.taskView.SelectTaskName(ctx, tasks)
+	task, action, err := a.taskView.SelectTask(ctx, tasks)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.processTaskAction(ctx, task, action)
-}
-
-// processTaskAction handles the action selected by the user for a task.
-func (a *App) processTaskAction(ctx context.Context, task *core.Task, action constants.TaskAction) (*core.Task, error) {
 	switch action {
 	case constants.TaskActionCancel:
 		return nil, gomodoro_error.ErrCancel
-
 	case constants.TaskActionDelete:
 		return a.handleDeleteTask(ctx, task)
-
 	case constants.TaskActionNew:
 		return a.handleNewTask(ctx)
-
 	case constants.TaskActionNone:
 		// No action, return selected task
 		return task, nil
@@ -278,7 +270,7 @@ func (a *App) handleDeleteTask(ctx context.Context, task *core.Task) (*core.Task
 		return a.handleNewTask(ctx)
 	}
 
-	task, _, err = a.taskView.SelectTaskName(ctx, tasks)
+	task, _, err = a.taskView.SelectTask(ctx, tasks)
 	return task, err
 }
 
@@ -289,7 +281,7 @@ func (a *App) handleNewTask(ctx context.Context) (*core.Task, error) {
 		return nil, err
 	}
 
-	task, err := a.createTask(ctx, name)
+	task, err := a.graphqlClient.CreateTask(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -307,16 +299,6 @@ func (a *App) loadTasks(ctx context.Context) ([]*core.Task, error) {
 	return tasks, nil
 }
 
-// createTask creates a new task.
-func (a *App) createTask(ctx context.Context, name string) (*core.Task, error) {
-	task, err := a.graphqlClient.CreateTask(ctx, name)
-	if err != nil {
-		return nil, err
-	}
-
-	return task, nil
-}
-
 // runTimer handles the timer display and events.
 func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	eventChan, errChan, subID, err := a.graphqlClient.SubscribeToEvents(ctx, gqlgen.EventReceivedInput{
@@ -325,6 +307,7 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	defer func() {
 		if err := a.graphqlClient.Unsubscribe(subID); err != nil {
 			log.FromContext(ctx).Error(err, "failed to unsubscribe from events")
@@ -338,10 +321,10 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			if err != nil {
 				return elapsedTime, err
 			}
+
 			if elapsedTime != continueTimerSignal {
 				return elapsedTime, nil
 			}
-
 		case eventData, ok := <-eventChan:
 			if !ok {
 				continue
@@ -356,10 +339,10 @@ func (a *App) runTimer(ctx context.Context, taskName string) (int, error) {
 			if err != nil {
 				return elapsedTime, err
 			}
+
 			if elapsedTime != continueTimerSignal {
 				return elapsedTime, nil
 			}
-
 		case err := <-errChan:
 			return 0, err
 		}
@@ -388,6 +371,7 @@ func (a *App) handleScreenEvent(ctx context.Context, e interface{}) (int, error)
 			log.FromContext(ctx).Error(err, "failed to get current elapsed time")
 			return 0, gomodoro_error.ErrCancel
 		}
+
 		return elapsedTime, gomodoro_error.ErrCancel
 	case constants.TimerActionStop:
 		_, stopErr := a.graphqlClient.StopPomodoro(ctx)
@@ -406,7 +390,7 @@ func (a *App) handleScreenEvent(ctx context.Context, e interface{}) (int, error)
 
 // handlePomodoroEvent processes pomodoro events and handles UI rendering.
 func (a *App) handlePomodoroEvent(ctx context.Context, ev event.PomodoroEvent, taskName string) (int, error) {
-	log.FromContext(ctx).Info("event", "event", ev, "remainSec", ev.RemainingTime.Seconds())
+	log.FromContext(ctx).V(1).Info("event", "event", ev, "remainSec", ev.RemainingTime.Seconds())
 
 	remainSec := int(ev.RemainingTime.Seconds())
 
@@ -425,6 +409,7 @@ func (a *App) handlePomodoroEvent(ctx context.Context, ev event.PomodoroEvent, t
 			log.FromContext(ctx).Error(err, "failed to get current elapsed time")
 			return 0, err
 		}
+
 		return elapsedTime, nil
 	}
 
@@ -448,6 +433,7 @@ func (a *App) handleSmallScreen(ctx context.Context, taskName string) (int, erro
 				log.FromContext(ctx).Error(err, "failed to get current elapsed time")
 				return 0, gomodoro_error.ErrCancel
 			}
+
 			return elapsedTime, gomodoro_error.ErrCancel
 		case screen.EventScreenResize:
 			return a.runTimer(ctx, taskName)

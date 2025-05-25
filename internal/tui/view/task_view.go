@@ -62,8 +62,8 @@ func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition
 	)
 }
 
-// SelectTaskName displays a list of tasks and allows the user to select one.
-func (v *TaskView) SelectTaskName(_ context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
+// SelectTask displays the task selection UI and returns the selected task.
+func (v *TaskView) SelectTask(_ context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
 	offset := 0
 	cursorPosition := 0
 	for {
