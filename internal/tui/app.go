@@ -210,12 +210,7 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 // Finish cleans up resources when the app is closed.
-func (a *App) Finish(ctx context.Context) {
-	_, err := a.graphqlClient.StopPomodoro(ctx)
-	if err != nil {
-		log.FromContext(ctx).Error(err, "failed to stop pomodoro on finish")
-	}
-
+func (a *App) Finish(_ context.Context) {
 	a.screenClient.Finish()
 }
 
