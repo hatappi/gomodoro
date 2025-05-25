@@ -5,8 +5,8 @@ type Pomodoro {
   startTime: Time!
   phase: PomodoroPhase!
   phaseCount: Int!
-  remainingTimeSec: Int!
-  elapsedTimeSec: Int!
+  remainingTime: Duration!
+  elapsedTime: Duration!
 }
 
 input StartPomodoroInput {

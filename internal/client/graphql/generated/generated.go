@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/hatappi/gomodoro/internal/client/graphql/types"
 )
 
 // CreateTaskCreateTask includes the requested fields of the GraphQL type Task.
@@ -290,12 +291,12 @@ func (v *EventDetailsPayloadEventPomodoroPayload) GetState() PomodoroState {
 }
 
 // GetRemainingTime returns EventDetailsPayloadEventPomodoroPayload.RemainingTime, and is useful for accessing the field via an interface.
-func (v *EventDetailsPayloadEventPomodoroPayload) GetRemainingTime() int {
+func (v *EventDetailsPayloadEventPomodoroPayload) GetRemainingTime() time.Duration {
 	return v.EventPomodoroPayloadDetails.RemainingTime
 }
 
 // GetElapsedTime returns EventDetailsPayloadEventPomodoroPayload.ElapsedTime, and is useful for accessing the field via an interface.
-func (v *EventDetailsPayloadEventPomodoroPayload) GetElapsedTime() int {
+func (v *EventDetailsPayloadEventPomodoroPayload) GetElapsedTime() time.Duration {
 	return v.EventPomodoroPayloadDetails.ElapsedTime
 }
 
@@ -346,9 +347,9 @@ type __premarshalEventDetailsPayloadEventPomodoroPayload struct {
 
 	State PomodoroState `json:"state"`
 
-	RemainingTime int `json:"remainingTime"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTime int `json:"elapsedTime"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 
 	TaskId string `json:"taskId"`
 
@@ -371,8 +372,30 @@ func (v *EventDetailsPayloadEventPomodoroPayload) __premarshalJSON() (*__premars
 	retval.Typename = v.Typename
 	retval.Id = v.EventPomodoroPayloadDetails.Id
 	retval.State = v.EventPomodoroPayloadDetails.State
-	retval.RemainingTime = v.EventPomodoroPayloadDetails.RemainingTime
-	retval.ElapsedTime = v.EventPomodoroPayloadDetails.ElapsedTime
+	{
+
+		dst := &retval.RemainingTime
+		src := v.EventPomodoroPayloadDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal EventDetailsPayloadEventPomodoroPayload.EventPomodoroPayloadDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.EventPomodoroPayloadDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal EventDetailsPayloadEventPomodoroPayload.EventPomodoroPayloadDetails.ElapsedTime: %w", err)
+		}
+	}
 	retval.TaskId = v.EventPomodoroPayloadDetails.TaskId
 	retval.Phase = v.EventPomodoroPayloadDetails.Phase
 	retval.PhaseCount = v.EventPomodoroPayloadDetails.PhaseCount
@@ -450,8 +473,8 @@ func (v *EventDetailsPayloadEventTaskPayload) __premarshalJSON() (*__premarshalE
 type EventPomodoroPayloadDetails struct {
 	Id            string        `json:"id"`
 	State         PomodoroState `json:"state"`
-	RemainingTime int           `json:"remainingTime"`
-	ElapsedTime   int           `json:"elapsedTime"`
+	RemainingTime time.Duration `json:"-"`
+	ElapsedTime   time.Duration `json:"-"`
 	TaskId        string        `json:"taskId"`
 	Phase         PomodoroPhase `json:"phase"`
 	PhaseCount    int           `json:"phaseCount"`
@@ -464,10 +487,10 @@ func (v *EventPomodoroPayloadDetails) GetId() string { return v.Id }
 func (v *EventPomodoroPayloadDetails) GetState() PomodoroState { return v.State }
 
 // GetRemainingTime returns EventPomodoroPayloadDetails.RemainingTime, and is useful for accessing the field via an interface.
-func (v *EventPomodoroPayloadDetails) GetRemainingTime() int { return v.RemainingTime }
+func (v *EventPomodoroPayloadDetails) GetRemainingTime() time.Duration { return v.RemainingTime }
 
 // GetElapsedTime returns EventPomodoroPayloadDetails.ElapsedTime, and is useful for accessing the field via an interface.
-func (v *EventPomodoroPayloadDetails) GetElapsedTime() int { return v.ElapsedTime }
+func (v *EventPomodoroPayloadDetails) GetElapsedTime() time.Duration { return v.ElapsedTime }
 
 // GetTaskId returns EventPomodoroPayloadDetails.TaskId, and is useful for accessing the field via an interface.
 func (v *EventPomodoroPayloadDetails) GetTaskId() string { return v.TaskId }
@@ -477,6 +500,112 @@ func (v *EventPomodoroPayloadDetails) GetPhase() PomodoroPhase { return v.Phase 
 
 // GetPhaseCount returns EventPomodoroPayloadDetails.PhaseCount, and is useful for accessing the field via an interface.
 func (v *EventPomodoroPayloadDetails) GetPhaseCount() int { return v.PhaseCount }
+
+func (v *EventPomodoroPayloadDetails) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EventPomodoroPayloadDetails
+		RemainingTime json.RawMessage `json:"remainingTime"`
+		ElapsedTime   json.RawMessage `json:"elapsedTime"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EventPomodoroPayloadDetails = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.RemainingTime
+		src := firstPass.RemainingTime
+		if len(src) != 0 && string(src) != "null" {
+			err = types.UnmarshalDuration(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal EventPomodoroPayloadDetails.RemainingTime: %w", err)
+			}
+		}
+	}
+
+	{
+		dst := &v.ElapsedTime
+		src := firstPass.ElapsedTime
+		if len(src) != 0 && string(src) != "null" {
+			err = types.UnmarshalDuration(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal EventPomodoroPayloadDetails.ElapsedTime: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalEventPomodoroPayloadDetails struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	RemainingTime json.RawMessage `json:"remainingTime"`
+
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
+
+	TaskId string `json:"taskId"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+}
+
+func (v *EventPomodoroPayloadDetails) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EventPomodoroPayloadDetails) __premarshalJSON() (*__premarshalEventPomodoroPayloadDetails, error) {
+	var retval __premarshalEventPomodoroPayloadDetails
+
+	retval.Id = v.Id
+	retval.State = v.State
+	{
+
+		dst := &retval.RemainingTime
+		src := v.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal EventPomodoroPayloadDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal EventPomodoroPayloadDetails.ElapsedTime: %w", err)
+		}
+	}
+	retval.TaskId = v.TaskId
+	retval.Phase = v.Phase
+	retval.PhaseCount = v.PhaseCount
+	return &retval, nil
+}
 
 type EventReceivedInput struct {
 	EventCategory []EventCategory `json:"eventCategory"`
@@ -648,14 +777,14 @@ func (v *GetCurrentPomodoroCurrentPomodoro) GetPhase() PomodoroPhase { return v.
 // GetPhaseCount returns GetCurrentPomodoroCurrentPomodoro.PhaseCount, and is useful for accessing the field via an interface.
 func (v *GetCurrentPomodoroCurrentPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
 
-// GetRemainingTimeSec returns GetCurrentPomodoroCurrentPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *GetCurrentPomodoroCurrentPomodoro) GetRemainingTimeSec() int {
-	return v.PomodoroDetails.RemainingTimeSec
+// GetRemainingTime returns GetCurrentPomodoroCurrentPomodoro.RemainingTime, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetRemainingTime() time.Duration {
+	return v.PomodoroDetails.RemainingTime
 }
 
-// GetElapsedTimeSec returns GetCurrentPomodoroCurrentPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *GetCurrentPomodoroCurrentPomodoro) GetElapsedTimeSec() int {
-	return v.PomodoroDetails.ElapsedTimeSec
+// GetElapsedTime returns GetCurrentPomodoroCurrentPomodoro.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *GetCurrentPomodoroCurrentPomodoro) GetElapsedTime() time.Duration {
+	return v.PomodoroDetails.ElapsedTime
 }
 
 func (v *GetCurrentPomodoroCurrentPomodoro) UnmarshalJSON(b []byte) error {
@@ -696,9 +825,9 @@ type __premarshalGetCurrentPomodoroCurrentPomodoro struct {
 
 	PhaseCount int `json:"phaseCount"`
 
-	RemainingTimeSec int `json:"remainingTimeSec"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTimeSec int `json:"elapsedTimeSec"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 }
 
 func (v *GetCurrentPomodoroCurrentPomodoro) MarshalJSON() ([]byte, error) {
@@ -718,8 +847,30 @@ func (v *GetCurrentPomodoroCurrentPomodoro) __premarshalJSON() (*__premarshalGet
 	retval.StartTime = v.PomodoroDetails.StartTime
 	retval.Phase = v.PomodoroDetails.Phase
 	retval.PhaseCount = v.PomodoroDetails.PhaseCount
-	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
-	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	{
+
+		dst := &retval.RemainingTime
+		src := v.PomodoroDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal GetCurrentPomodoroCurrentPomodoro.PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.PomodoroDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal GetCurrentPomodoroCurrentPomodoro.PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
 	return &retval, nil
 }
 
@@ -917,13 +1068,15 @@ func (v *PausePomodoroPausePomodoro) GetPhase() PomodoroPhase { return v.Pomodor
 // GetPhaseCount returns PausePomodoroPausePomodoro.PhaseCount, and is useful for accessing the field via an interface.
 func (v *PausePomodoroPausePomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
 
-// GetRemainingTimeSec returns PausePomodoroPausePomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *PausePomodoroPausePomodoro) GetRemainingTimeSec() int {
-	return v.PomodoroDetails.RemainingTimeSec
+// GetRemainingTime returns PausePomodoroPausePomodoro.RemainingTime, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetRemainingTime() time.Duration {
+	return v.PomodoroDetails.RemainingTime
 }
 
-// GetElapsedTimeSec returns PausePomodoroPausePomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *PausePomodoroPausePomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+// GetElapsedTime returns PausePomodoroPausePomodoro.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *PausePomodoroPausePomodoro) GetElapsedTime() time.Duration {
+	return v.PomodoroDetails.ElapsedTime
+}
 
 func (v *PausePomodoroPausePomodoro) UnmarshalJSON(b []byte) error {
 
@@ -963,9 +1116,9 @@ type __premarshalPausePomodoroPausePomodoro struct {
 
 	PhaseCount int `json:"phaseCount"`
 
-	RemainingTimeSec int `json:"remainingTimeSec"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTimeSec int `json:"elapsedTimeSec"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 }
 
 func (v *PausePomodoroPausePomodoro) MarshalJSON() ([]byte, error) {
@@ -985,8 +1138,30 @@ func (v *PausePomodoroPausePomodoro) __premarshalJSON() (*__premarshalPausePomod
 	retval.StartTime = v.PomodoroDetails.StartTime
 	retval.Phase = v.PomodoroDetails.Phase
 	retval.PhaseCount = v.PomodoroDetails.PhaseCount
-	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
-	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	{
+
+		dst := &retval.RemainingTime
+		src := v.PomodoroDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PausePomodoroPausePomodoro.PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.PomodoroDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PausePomodoroPausePomodoro.PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
 	return &retval, nil
 }
 
@@ -1000,14 +1175,14 @@ func (v *PausePomodoroResponse) GetPausePomodoro() PausePomodoroPausePomodoro { 
 
 // PomodoroDetails includes the GraphQL fields of Pomodoro requested by the fragment PomodoroDetails.
 type PomodoroDetails struct {
-	Id               string        `json:"id"`
-	State            PomodoroState `json:"state"`
-	TaskId           string        `json:"taskId"`
-	StartTime        time.Time     `json:"startTime"`
-	Phase            PomodoroPhase `json:"phase"`
-	PhaseCount       int           `json:"phaseCount"`
-	RemainingTimeSec int           `json:"remainingTimeSec"`
-	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
+	Id            string        `json:"id"`
+	State         PomodoroState `json:"state"`
+	TaskId        string        `json:"taskId"`
+	StartTime     time.Time     `json:"startTime"`
+	Phase         PomodoroPhase `json:"phase"`
+	PhaseCount    int           `json:"phaseCount"`
+	RemainingTime time.Duration `json:"-"`
+	ElapsedTime   time.Duration `json:"-"`
 }
 
 // GetId returns PomodoroDetails.Id, and is useful for accessing the field via an interface.
@@ -1028,11 +1203,120 @@ func (v *PomodoroDetails) GetPhase() PomodoroPhase { return v.Phase }
 // GetPhaseCount returns PomodoroDetails.PhaseCount, and is useful for accessing the field via an interface.
 func (v *PomodoroDetails) GetPhaseCount() int { return v.PhaseCount }
 
-// GetRemainingTimeSec returns PomodoroDetails.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *PomodoroDetails) GetRemainingTimeSec() int { return v.RemainingTimeSec }
+// GetRemainingTime returns PomodoroDetails.RemainingTime, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetRemainingTime() time.Duration { return v.RemainingTime }
 
-// GetElapsedTimeSec returns PomodoroDetails.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *PomodoroDetails) GetElapsedTimeSec() int { return v.ElapsedTimeSec }
+// GetElapsedTime returns PomodoroDetails.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *PomodoroDetails) GetElapsedTime() time.Duration { return v.ElapsedTime }
+
+func (v *PomodoroDetails) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PomodoroDetails
+		RemainingTime json.RawMessage `json:"remainingTime"`
+		ElapsedTime   json.RawMessage `json:"elapsedTime"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PomodoroDetails = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.RemainingTime
+		src := firstPass.RemainingTime
+		if len(src) != 0 && string(src) != "null" {
+			err = types.UnmarshalDuration(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal PomodoroDetails.RemainingTime: %w", err)
+			}
+		}
+	}
+
+	{
+		dst := &v.ElapsedTime
+		src := firstPass.ElapsedTime
+		if len(src) != 0 && string(src) != "null" {
+			err = types.UnmarshalDuration(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"unable to unmarshal PomodoroDetails.ElapsedTime: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalPomodoroDetails struct {
+	Id string `json:"id"`
+
+	State PomodoroState `json:"state"`
+
+	TaskId string `json:"taskId"`
+
+	StartTime time.Time `json:"startTime"`
+
+	Phase PomodoroPhase `json:"phase"`
+
+	PhaseCount int `json:"phaseCount"`
+
+	RemainingTime json.RawMessage `json:"remainingTime"`
+
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
+}
+
+func (v *PomodoroDetails) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PomodoroDetails) __premarshalJSON() (*__premarshalPomodoroDetails, error) {
+	var retval __premarshalPomodoroDetails
+
+	retval.Id = v.Id
+	retval.State = v.State
+	retval.TaskId = v.TaskId
+	retval.StartTime = v.StartTime
+	retval.Phase = v.Phase
+	retval.PhaseCount = v.PhaseCount
+	{
+
+		dst := &retval.RemainingTime
+		src := v.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
+	return &retval, nil
+}
 
 type PomodoroPhase string
 
@@ -1095,14 +1379,14 @@ func (v *ResumePomodoroResumePomodoro) GetPhase() PomodoroPhase { return v.Pomod
 // GetPhaseCount returns ResumePomodoroResumePomodoro.PhaseCount, and is useful for accessing the field via an interface.
 func (v *ResumePomodoroResumePomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
 
-// GetRemainingTimeSec returns ResumePomodoroResumePomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *ResumePomodoroResumePomodoro) GetRemainingTimeSec() int {
-	return v.PomodoroDetails.RemainingTimeSec
+// GetRemainingTime returns ResumePomodoroResumePomodoro.RemainingTime, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetRemainingTime() time.Duration {
+	return v.PomodoroDetails.RemainingTime
 }
 
-// GetElapsedTimeSec returns ResumePomodoroResumePomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *ResumePomodoroResumePomodoro) GetElapsedTimeSec() int {
-	return v.PomodoroDetails.ElapsedTimeSec
+// GetElapsedTime returns ResumePomodoroResumePomodoro.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *ResumePomodoroResumePomodoro) GetElapsedTime() time.Duration {
+	return v.PomodoroDetails.ElapsedTime
 }
 
 func (v *ResumePomodoroResumePomodoro) UnmarshalJSON(b []byte) error {
@@ -1143,9 +1427,9 @@ type __premarshalResumePomodoroResumePomodoro struct {
 
 	PhaseCount int `json:"phaseCount"`
 
-	RemainingTimeSec int `json:"remainingTimeSec"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTimeSec int `json:"elapsedTimeSec"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 }
 
 func (v *ResumePomodoroResumePomodoro) MarshalJSON() ([]byte, error) {
@@ -1165,8 +1449,30 @@ func (v *ResumePomodoroResumePomodoro) __premarshalJSON() (*__premarshalResumePo
 	retval.StartTime = v.PomodoroDetails.StartTime
 	retval.Phase = v.PomodoroDetails.Phase
 	retval.PhaseCount = v.PomodoroDetails.PhaseCount
-	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
-	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	{
+
+		dst := &retval.RemainingTime
+		src := v.PomodoroDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal ResumePomodoroResumePomodoro.PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.PomodoroDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal ResumePomodoroResumePomodoro.PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
 	return &retval, nil
 }
 
@@ -1220,13 +1526,15 @@ func (v *StartPomodoroStartPomodoro) GetPhase() PomodoroPhase { return v.Pomodor
 // GetPhaseCount returns StartPomodoroStartPomodoro.PhaseCount, and is useful for accessing the field via an interface.
 func (v *StartPomodoroStartPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
 
-// GetRemainingTimeSec returns StartPomodoroStartPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *StartPomodoroStartPomodoro) GetRemainingTimeSec() int {
-	return v.PomodoroDetails.RemainingTimeSec
+// GetRemainingTime returns StartPomodoroStartPomodoro.RemainingTime, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetRemainingTime() time.Duration {
+	return v.PomodoroDetails.RemainingTime
 }
 
-// GetElapsedTimeSec returns StartPomodoroStartPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *StartPomodoroStartPomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+// GetElapsedTime returns StartPomodoroStartPomodoro.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *StartPomodoroStartPomodoro) GetElapsedTime() time.Duration {
+	return v.PomodoroDetails.ElapsedTime
+}
 
 func (v *StartPomodoroStartPomodoro) UnmarshalJSON(b []byte) error {
 
@@ -1266,9 +1574,9 @@ type __premarshalStartPomodoroStartPomodoro struct {
 
 	PhaseCount int `json:"phaseCount"`
 
-	RemainingTimeSec int `json:"remainingTimeSec"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTimeSec int `json:"elapsedTimeSec"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 }
 
 func (v *StartPomodoroStartPomodoro) MarshalJSON() ([]byte, error) {
@@ -1288,8 +1596,30 @@ func (v *StartPomodoroStartPomodoro) __premarshalJSON() (*__premarshalStartPomod
 	retval.StartTime = v.PomodoroDetails.StartTime
 	retval.Phase = v.PomodoroDetails.Phase
 	retval.PhaseCount = v.PomodoroDetails.PhaseCount
-	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
-	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	{
+
+		dst := &retval.RemainingTime
+		src := v.PomodoroDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal StartPomodoroStartPomodoro.PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.PomodoroDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal StartPomodoroStartPomodoro.PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
 	return &retval, nil
 }
 
@@ -1324,13 +1654,15 @@ func (v *StopPomodoroStopPomodoro) GetPhase() PomodoroPhase { return v.PomodoroD
 // GetPhaseCount returns StopPomodoroStopPomodoro.PhaseCount, and is useful for accessing the field via an interface.
 func (v *StopPomodoroStopPomodoro) GetPhaseCount() int { return v.PomodoroDetails.PhaseCount }
 
-// GetRemainingTimeSec returns StopPomodoroStopPomodoro.RemainingTimeSec, and is useful for accessing the field via an interface.
-func (v *StopPomodoroStopPomodoro) GetRemainingTimeSec() int {
-	return v.PomodoroDetails.RemainingTimeSec
+// GetRemainingTime returns StopPomodoroStopPomodoro.RemainingTime, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetRemainingTime() time.Duration {
+	return v.PomodoroDetails.RemainingTime
 }
 
-// GetElapsedTimeSec returns StopPomodoroStopPomodoro.ElapsedTimeSec, and is useful for accessing the field via an interface.
-func (v *StopPomodoroStopPomodoro) GetElapsedTimeSec() int { return v.PomodoroDetails.ElapsedTimeSec }
+// GetElapsedTime returns StopPomodoroStopPomodoro.ElapsedTime, and is useful for accessing the field via an interface.
+func (v *StopPomodoroStopPomodoro) GetElapsedTime() time.Duration {
+	return v.PomodoroDetails.ElapsedTime
+}
 
 func (v *StopPomodoroStopPomodoro) UnmarshalJSON(b []byte) error {
 
@@ -1370,9 +1702,9 @@ type __premarshalStopPomodoroStopPomodoro struct {
 
 	PhaseCount int `json:"phaseCount"`
 
-	RemainingTimeSec int `json:"remainingTimeSec"`
+	RemainingTime json.RawMessage `json:"remainingTime"`
 
-	ElapsedTimeSec int `json:"elapsedTimeSec"`
+	ElapsedTime json.RawMessage `json:"elapsedTime"`
 }
 
 func (v *StopPomodoroStopPomodoro) MarshalJSON() ([]byte, error) {
@@ -1392,8 +1724,30 @@ func (v *StopPomodoroStopPomodoro) __premarshalJSON() (*__premarshalStopPomodoro
 	retval.StartTime = v.PomodoroDetails.StartTime
 	retval.Phase = v.PomodoroDetails.Phase
 	retval.PhaseCount = v.PomodoroDetails.PhaseCount
-	retval.RemainingTimeSec = v.PomodoroDetails.RemainingTimeSec
-	retval.ElapsedTimeSec = v.PomodoroDetails.ElapsedTimeSec
+	{
+
+		dst := &retval.RemainingTime
+		src := v.PomodoroDetails.RemainingTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal StopPomodoroStopPomodoro.PomodoroDetails.RemainingTime: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.ElapsedTime
+		src := v.PomodoroDetails.ElapsedTime
+		var err error
+		*dst, err = types.MarshalDuration(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal StopPomodoroStopPomodoro.PomodoroDetails.ElapsedTime: %w", err)
+		}
+	}
 	return &retval, nil
 }
 
@@ -1578,8 +1932,8 @@ fragment PomodoroDetails on Pomodoro {
 	startTime
 	phase
 	phaseCount
-	remainingTimeSec
-	elapsedTimeSec
+	remainingTime
+	elapsedTime
 }
 `
 
@@ -1733,8 +2087,8 @@ fragment PomodoroDetails on Pomodoro {
 	startTime
 	phase
 	phaseCount
-	remainingTimeSec
-	elapsedTimeSec
+	remainingTime
+	elapsedTime
 }
 `
 
@@ -1773,8 +2127,8 @@ fragment PomodoroDetails on Pomodoro {
 	startTime
 	phase
 	phaseCount
-	remainingTimeSec
-	elapsedTimeSec
+	remainingTime
+	elapsedTime
 }
 `
 
@@ -1813,8 +2167,8 @@ fragment PomodoroDetails on Pomodoro {
 	startTime
 	phase
 	phaseCount
-	remainingTimeSec
-	elapsedTimeSec
+	remainingTime
+	elapsedTime
 }
 `
 
@@ -1857,8 +2211,8 @@ fragment PomodoroDetails on Pomodoro {
 	startTime
 	phase
 	phaseCount
-	remainingTimeSec
-	elapsedTimeSec
+	remainingTime
+	elapsedTime
 }
 `
 

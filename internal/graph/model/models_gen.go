@@ -27,8 +27,8 @@ type Event struct {
 type EventPomodoroPayload struct {
 	ID            string        `json:"id"`
 	State         PomodoroState `json:"state"`
-	RemainingTime int           `json:"remainingTime"`
-	ElapsedTime   int           `json:"elapsedTime"`
+	RemainingTime time.Duration `json:"remainingTime"`
+	ElapsedTime   time.Duration `json:"elapsedTime"`
 	TaskID        *string       `json:"taskId,omitempty"`
 	Phase         PomodoroPhase `json:"phase"`
 	PhaseCount    int           `json:"phaseCount"`
@@ -63,14 +63,14 @@ type PageInfo struct {
 }
 
 type Pomodoro struct {
-	ID               string        `json:"id"`
-	State            PomodoroState `json:"state"`
-	TaskID           string        `json:"taskId"`
-	StartTime        time.Time     `json:"startTime"`
-	Phase            PomodoroPhase `json:"phase"`
-	PhaseCount       int           `json:"phaseCount"`
-	RemainingTimeSec int           `json:"remainingTimeSec"`
-	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
+	ID            string        `json:"id"`
+	State         PomodoroState `json:"state"`
+	TaskID        string        `json:"taskId"`
+	StartTime     time.Time     `json:"startTime"`
+	Phase         PomodoroPhase `json:"phase"`
+	PhaseCount    int           `json:"phaseCount"`
+	RemainingTime time.Duration `json:"remainingTime"`
+	ElapsedTime   time.Duration `json:"elapsedTime"`
 }
 
 type Query struct {

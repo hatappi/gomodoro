@@ -32,8 +32,8 @@ enum PomodoroPhase {
 type EventPomodoroPayload {
   id: ID! # Renamed from pomodoroId
   state: PomodoroState!
-  remainingTime: Int! # in seconds
-  elapsedTime: Int!   # in seconds
+  remainingTime: Duration!
+  elapsedTime: Duration!
   taskId: ID          # Optional
   phase: PomodoroPhase!
   phaseCount: Int!
