@@ -47,8 +47,8 @@ func ConvertPomodoroEventToModelEvent(evt event.PomodoroEvent) (*model.Event, er
 	payload := &model.EventPomodoroPayload{
 		ID:            evt.ID,
 		State:         state,
-		RemainingTime: int(evt.RemainingTime.Seconds()),
-		ElapsedTime:   int(evt.ElapsedTime.Seconds()),
+		RemainingTime: evt.RemainingTime,
+		ElapsedTime:   evt.ElapsedTime,
 		TaskID:        &evt.TaskID,
 		Phase:         phase,
 		PhaseCount:    evt.PhaseCount,

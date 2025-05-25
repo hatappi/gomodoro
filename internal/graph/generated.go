@@ -96,14 +96,14 @@ type ComplexityRoot struct {
 	}
 
 	Pomodoro struct {
-		ElapsedTimeSec   func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Phase            func(childComplexity int) int
-		PhaseCount       func(childComplexity int) int
-		RemainingTimeSec func(childComplexity int) int
-		StartTime        func(childComplexity int) int
-		State            func(childComplexity int) int
-		TaskID           func(childComplexity int) int
+		ElapsedTime   func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Phase         func(childComplexity int) int
+		PhaseCount    func(childComplexity int) int
+		RemainingTime func(childComplexity int) int
+		StartTime     func(childComplexity int) int
+		State         func(childComplexity int) int
+		TaskID        func(childComplexity int) int
 	}
 
 	Query struct {
@@ -380,12 +380,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
-	case "Pomodoro.elapsedTimeSec":
-		if e.complexity.Pomodoro.ElapsedTimeSec == nil {
+	case "Pomodoro.elapsedTime":
+		if e.complexity.Pomodoro.ElapsedTime == nil {
 			break
 		}
 
-		return e.complexity.Pomodoro.ElapsedTimeSec(childComplexity), true
+		return e.complexity.Pomodoro.ElapsedTime(childComplexity), true
 
 	case "Pomodoro.id":
 		if e.complexity.Pomodoro.ID == nil {
@@ -408,12 +408,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Pomodoro.PhaseCount(childComplexity), true
 
-	case "Pomodoro.remainingTimeSec":
-		if e.complexity.Pomodoro.RemainingTimeSec == nil {
+	case "Pomodoro.remainingTime":
+		if e.complexity.Pomodoro.RemainingTime == nil {
 			break
 		}
 
-		return e.complexity.Pomodoro.RemainingTimeSec(childComplexity), true
+		return e.complexity.Pomodoro.RemainingTime(childComplexity), true
 
 	case "Pomodoro.startTime":
 		if e.complexity.Pomodoro.StartTime == nil {
@@ -1207,9 +1207,9 @@ func (ec *executionContext) _EventPomodoroPayload_remainingTime(ctx context.Cont
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(time.Duration)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNDuration2timeᚐDuration(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_remainingTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1219,7 +1219,7 @@ func (ec *executionContext) fieldContext_EventPomodoroPayload_remainingTime(_ co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Duration does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1251,9 +1251,9 @@ func (ec *executionContext) _EventPomodoroPayload_elapsedTime(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(time.Duration)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNDuration2timeᚐDuration(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_EventPomodoroPayload_elapsedTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1263,7 +1263,7 @@ func (ec *executionContext) fieldContext_EventPomodoroPayload_elapsedTime(_ cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Duration does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1663,10 +1663,10 @@ func (ec *executionContext) fieldContext_Mutation_startPomodoro(ctx context.Cont
 				return ec.fieldContext_Pomodoro_phase(ctx, field)
 			case "phaseCount":
 				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
-			case "remainingTimeSec":
-				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
-			case "elapsedTimeSec":
-				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "remainingTime":
+				return ec.fieldContext_Pomodoro_remainingTime(ctx, field)
+			case "elapsedTime":
+				return ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
 		},
@@ -1733,10 +1733,10 @@ func (ec *executionContext) fieldContext_Mutation_pausePomodoro(_ context.Contex
 				return ec.fieldContext_Pomodoro_phase(ctx, field)
 			case "phaseCount":
 				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
-			case "remainingTimeSec":
-				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
-			case "elapsedTimeSec":
-				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "remainingTime":
+				return ec.fieldContext_Pomodoro_remainingTime(ctx, field)
+			case "elapsedTime":
+				return ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
 		},
@@ -1792,10 +1792,10 @@ func (ec *executionContext) fieldContext_Mutation_resumePomodoro(_ context.Conte
 				return ec.fieldContext_Pomodoro_phase(ctx, field)
 			case "phaseCount":
 				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
-			case "remainingTimeSec":
-				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
-			case "elapsedTimeSec":
-				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "remainingTime":
+				return ec.fieldContext_Pomodoro_remainingTime(ctx, field)
+			case "elapsedTime":
+				return ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
 		},
@@ -1851,10 +1851,10 @@ func (ec *executionContext) fieldContext_Mutation_stopPomodoro(_ context.Context
 				return ec.fieldContext_Pomodoro_phase(ctx, field)
 			case "phaseCount":
 				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
-			case "remainingTimeSec":
-				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
-			case "elapsedTimeSec":
-				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "remainingTime":
+				return ec.fieldContext_Pomodoro_remainingTime(ctx, field)
+			case "elapsedTime":
+				return ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
 		},
@@ -2468,8 +2468,8 @@ func (ec *executionContext) fieldContext_Pomodoro_phaseCount(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Pomodoro_remainingTimeSec(ctx context.Context, field graphql.CollectedField, obj *model.Pomodoro) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
+func (ec *executionContext) _Pomodoro_remainingTime(ctx context.Context, field graphql.CollectedField, obj *model.Pomodoro) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Pomodoro_remainingTime(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2482,7 +2482,7 @@ func (ec *executionContext) _Pomodoro_remainingTimeSec(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RemainingTimeSec, nil
+		return obj.RemainingTime, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2494,26 +2494,26 @@ func (ec *executionContext) _Pomodoro_remainingTimeSec(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(time.Duration)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNDuration2timeᚐDuration(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Pomodoro_remainingTimeSec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Pomodoro_remainingTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Pomodoro",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Duration does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Pomodoro_elapsedTimeSec(ctx context.Context, field graphql.CollectedField, obj *model.Pomodoro) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+func (ec *executionContext) _Pomodoro_elapsedTime(ctx context.Context, field graphql.CollectedField, obj *model.Pomodoro) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2526,7 +2526,7 @@ func (ec *executionContext) _Pomodoro_elapsedTimeSec(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ElapsedTimeSec, nil
+		return obj.ElapsedTime, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2538,19 +2538,19 @@ func (ec *executionContext) _Pomodoro_elapsedTimeSec(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(time.Duration)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNDuration2timeᚐDuration(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Pomodoro_elapsedTimeSec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Pomodoro_elapsedTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Pomodoro",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Duration does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2695,10 +2695,10 @@ func (ec *executionContext) fieldContext_Query_currentPomodoro(_ context.Context
 				return ec.fieldContext_Pomodoro_phase(ctx, field)
 			case "phaseCount":
 				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
-			case "remainingTimeSec":
-				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
-			case "elapsedTimeSec":
-				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "remainingTime":
+				return ec.fieldContext_Pomodoro_remainingTime(ctx, field)
+			case "elapsedTime":
+				return ec.fieldContext_Pomodoro_elapsedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
 		},
@@ -5932,13 +5932,13 @@ func (ec *executionContext) _Pomodoro(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "remainingTimeSec":
-			out.Values[i] = ec._Pomodoro_remainingTimeSec(ctx, field, obj)
+		case "remainingTime":
+			out.Values[i] = ec._Pomodoro_remainingTime(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "elapsedTimeSec":
-			out.Values[i] = ec._Pomodoro_elapsedTimeSec(ctx, field, obj)
+		case "elapsedTime":
+			out.Values[i] = ec._Pomodoro_elapsedTime(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6625,6 +6625,22 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 func (ec *executionContext) unmarshalNCreateTaskInput2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐCreateTaskInput(ctx context.Context, v any) (model.CreateTaskInput, error) {
 	res, err := ec.unmarshalInputCreateTaskInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDuration2timeᚐDuration(ctx context.Context, v any) (time.Duration, error) {
+	res, err := graphql.UnmarshalDuration(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDuration2timeᚐDuration(ctx context.Context, sel ast.SelectionSet, v time.Duration) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalDuration(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {

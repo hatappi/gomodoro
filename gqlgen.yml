@@ -44,3 +44,7 @@ models:
   UUID:
     model:
       - github.com/99designs/gqlgen/graphql.UUID
+
+  Duration:
+    model:
+      - github.com/99designs/gqlgen/graphql.Duration
