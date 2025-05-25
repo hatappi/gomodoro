@@ -87,7 +87,7 @@ func runTUIApp(ctx context.Context, cfg *config.Config) error {
 	startErr := app.Run(ctx)
 	if startErr != nil {
 		if errors.Is(startErr, gomodoro_error.ErrCancel) {
-			log.FromContext(ctx).Info("Pomodoro session canceled by user.")
+			log.FromContext(ctx).V(1).Info("Pomodoro session canceled by user.")
 			return nil
 		}
 

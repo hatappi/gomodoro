@@ -5,6 +5,7 @@ package graphql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -87,7 +88,10 @@ func (c *ClientWrapper) DisconnectSubscription() error {
 	}
 
 	err := c.subscriptionClient.Close()
-	if err != nil {
+
+	// This error indicates that the client was already closed.
+	// It's safe to ignore this error.
+	if err != nil && !errors.Is(err, websocket.ErrCloseSent) {
 		return fmt.Errorf("failed to close subscription client: %w", err)
 	}
 
