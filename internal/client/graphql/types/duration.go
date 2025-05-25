@@ -3,6 +3,7 @@ package types
 
 import (
 	"bytes"
+	"errors"
 	"strconv"
 	"time"
 
@@ -11,6 +12,10 @@ import (
 
 // MarshalDuration serializes a time.Duration to a byte slice in ISO8601 format.
 func MarshalDuration(t *time.Duration) ([]byte, error) {
+	if t == nil {
+		return nil, errors.New("duration pointer is nil")
+	}
+
 	var buf bytes.Buffer
 
 	graphql.MarshalDuration(*t).MarshalGQL(&buf)
