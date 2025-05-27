@@ -57,15 +57,20 @@ func (r *queryResolver) Tasks(ctx context.Context) (*model.TaskConnection, error
 		})
 	}
 
+	pageInfo := &model.PageInfo{
+		HasNextPage:     false,
+		HasPreviousPage: false,
+	}
+
+	if len(tasks) > 0 {
+		pageInfo.StartCursor = conv.ToPointer(edges[0].Cursor)
+		pageInfo.EndCursor = conv.ToPointer(edges[len(edges)-1].Cursor)
+	}
+
 	return &model.TaskConnection{
 		Edges:      edges,
 		TotalCount: len(tasks),
-		PageInfo: &model.PageInfo{
-			StartCursor:     conv.ToPointer(edges[0].Cursor),
-			EndCursor:       conv.ToPointer(edges[len(edges)-1].Cursor),
-			HasNextPage:     false,
-			HasPreviousPage: false,
-		},
+		PageInfo:   pageInfo,
 	}, nil
 }
 
