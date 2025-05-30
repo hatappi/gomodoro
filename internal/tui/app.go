@@ -148,7 +148,7 @@ func (a *App) Run(ctx context.Context) error {
 		}
 	}()
 
-	task, err := a.selectTask(ctx)
+	task, err := a.selectTask(ctx, true)
 	if err != nil {
 		return err
 	}
@@ -198,7 +198,7 @@ func (a *App) Run(ctx context.Context) error {
 			// Continue with the same task
 		case constants.PomodoroActionChange:
 			// Change task
-			newTask, err := a.selectTask(ctx)
+			newTask, err := a.selectTask(ctx, true)
 			if err != nil {
 				return err
 			}
@@ -215,7 +215,7 @@ func (a *App) Finish(_ context.Context) {
 }
 
 // selectTask handles task selection and creation.
-func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
+func (a *App) selectTask(ctx context.Context, resetCursorPosition bool) (*core.Task, error) {
 	tasks, err := a.loadTasks(ctx)
 	if err != nil {
 		return nil, err
@@ -225,7 +225,7 @@ func (a *App) selectTask(ctx context.Context) (*core.Task, error) {
 		return a.handleNewTask(ctx)
 	}
 
-	task, action, err := a.taskView.SelectTask(ctx, tasks)
+	task, action, err := a.taskView.SelectTask(ctx, tasks, resetCursorPosition)
 	if err != nil {
 		return nil, err
 	}
@@ -265,8 +265,7 @@ func (a *App) handleDeleteTask(ctx context.Context, task *core.Task) (*core.Task
 		return a.handleNewTask(ctx)
 	}
 
-	task, _, err = a.taskView.SelectTask(ctx, tasks)
-	return task, err
+	return a.selectTask(ctx, false)
 }
 
 // handleNewTask creates a new task.
