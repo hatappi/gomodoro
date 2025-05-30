@@ -4,7 +4,6 @@ package view
 import (
 	"context"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -22,6 +21,9 @@ import (
 type TaskView struct {
 	config       *config.Config
 	screenClient screen.Client
+
+	selectCursor int
+	selectOffset int
 }
 
 // NewTaskView creates a new task view instance.
@@ -32,76 +34,56 @@ func NewTaskView(cfg *config.Config, sc screen.Client) *TaskView {
 	}
 }
 
-// RenderTasks displays the task list.
-func (v *TaskView) RenderTasks(tasks []*core.Task, offset, limit, cursorPosition int) {
-	w, h := v.screenClient.ScreenSize()
+// SelectTask displays the task selection UI and returns the selected task.
+func (v *TaskView) SelectTask(
+	_ context.Context,
+	tasks []*core.Task,
+	resetCursorPosition bool,
+) (*core.Task, constants.TaskAction, error) {
+	v.screenClient.Clear()
 
-	for y, t := range tasks[offset:limit] {
-		name := fmt.Sprintf("%3d: %s", offset+y+1, t.Title)
-		opts := []draw.Option{}
-		if y == cursorPosition {
-			opts = []draw.Option{
-				draw.WithBackgroundColor(v.config.Color.SelectedLine),
-			}
-		}
-		tw := runewidth.StringWidth(name)
-		if d := w - tw; d > 0 {
-			name += strings.Repeat(" ", d)
-		}
-		_ = draw.Sentence(v.screenClient.GetScreen(), 0, y, w, name, true, opts...)
+	if resetCursorPosition || len(tasks) == 0 {
+		v.selectOffset = 0
+		v.selectCursor = 0
 	}
 
-	draw.Sentence(
-		v.screenClient.GetScreen(),
-		0,
-		h-1,
-		w,
-		"(n): add new task / (d): delete task",
-		true,
-		draw.WithBackgroundColor(v.config.Color.StatusBarBackground),
-	)
-}
-
-// SelectTask displays the task selection UI and returns the selected task.
-func (v *TaskView) SelectTask(_ context.Context, tasks []*core.Task) (*core.Task, constants.TaskAction, error) {
-	offset := 0
-	cursorPosition := 0
 	for {
-		_, h := v.screenClient.ScreenSize()
-		selectedHeight := h - 1
-		limit := int(math.Min(float64(offset+selectedHeight), float64(len(tasks))))
+		renderableHeight := v.getSelectRenderableHeight()
 
-		v.RenderTasks(tasks, offset, limit, cursorPosition)
+		renderedTasks := v.renderTasks(tasks, v.selectOffset, renderableHeight, v.selectCursor)
 
 		e := <-v.screenClient.GetEventChan()
 		switch e := e.(type) {
 		case screen.EventCancel:
 			return nil, constants.TaskActionCancel, gomodoro_error.ErrCancel
 		case screen.EventEnter:
-			return tasks[offset+cursorPosition], constants.TaskActionNone, nil
+			return renderedTasks[v.selectCursor], constants.TaskActionNone, nil
 		case screen.EventKeyDown:
-			cursorPosition++
+			v.selectCursor++
 
-			if offset+cursorPosition >= len(tasks) {
-				cursorPosition = len(tasks) - offset - 1
-				continue
-			}
+			renderedTaskNum := len(renderedTasks)
 
-			if cursorPosition >= selectedHeight {
+			if v.selectCursor >= renderedTaskNum {
+				if (v.selectOffset + renderedTaskNum) >= len(tasks) {
+					v.selectCursor = renderedTaskNum - 1
+					continue
+				}
+
+				v.selectOffset += renderedTaskNum
+				v.selectCursor = 0
 				v.screenClient.Clear()
-				offset += selectedHeight
-				cursorPosition = 0
 			}
 		case screen.EventKeyUp:
-			cursorPosition--
+			v.selectCursor--
 
-			if offset <= 0 && cursorPosition <= 0 {
-				cursorPosition = 0
-				continue
-			} else if cursorPosition < 0 {
-				v.screenClient.Clear()
-				offset -= selectedHeight
-				cursorPosition = selectedHeight - 1
+			if v.selectCursor < 0 {
+				if v.selectOffset == 0 {
+					v.selectCursor = 0
+					continue
+				}
+
+				v.selectOffset = max(v.selectOffset-renderableHeight, 0)
+				v.selectCursor = renderableHeight - 1
 			}
 		case screen.EventRune:
 			s := v.screenClient.GetScreen()
@@ -118,12 +100,14 @@ func (v *TaskView) SelectTask(_ context.Context, tasks []*core.Task) (*core.Task
 				v.screenClient.Clear()
 				return nil, constants.TaskActionNew, nil
 			case "d":
-				si := offset + cursorPosition
-				return tasks[si], constants.TaskActionDelete, nil
+				return renderedTasks[v.selectCursor], constants.TaskActionDelete, nil
 			}
 		case screen.EventScreenResize:
-			cursorPosition = 0
-			offset = 0
+			renderableHeight := v.getSelectRenderableHeight()
+
+			v.selectCursor = min(v.selectCursor, renderableHeight-1)
+
+			v.screenClient.Clear()
 		}
 	}
 }
@@ -161,4 +145,50 @@ func (v *TaskView) CreateTaskName(_ context.Context) (string, error) {
 			newTaskName = append(newTaskName, rune(e))
 		}
 	}
+}
+
+// renderTasks displays the task list.
+func (v *TaskView) renderTasks(tasks []*core.Task, offset, renderbleNum, cursorPosition int) []*core.Task {
+	w, h := v.screenClient.ScreenSize()
+
+	limit := min(v.selectOffset+renderbleNum, len(tasks))
+
+	renderedTasks := make([]*core.Task, 0, limit-offset)
+	for y, t := range tasks[offset:limit] {
+		name := fmt.Sprintf("%3d: %s", offset+y+1, t.Title)
+		opts := []draw.Option{}
+		if y == cursorPosition {
+			opts = []draw.Option{
+				draw.WithBackgroundColor(v.config.Color.SelectedLine),
+			}
+		}
+		tw := runewidth.StringWidth(name)
+		if d := w - tw; d > 0 {
+			name += strings.Repeat(" ", d)
+		}
+		_ = draw.Sentence(v.screenClient.GetScreen(), 0, y, w, name, true, opts...)
+
+		renderedTasks = append(renderedTasks, t)
+	}
+
+	draw.Sentence(
+		v.screenClient.GetScreen(),
+		0,
+		h-1,
+		w,
+		"(n): add new task / (d): delete task",
+		true,
+		draw.WithBackgroundColor(v.config.Color.StatusBarBackground),
+	)
+
+	return renderedTasks
+}
+
+func (v *TaskView) getSelectRenderableHeight() int {
+	_, h := v.screenClient.ScreenSize()
+	if h <= 1 {
+		return 0
+	}
+
+	return h - 1 // Subtract 1 for the footer
 }
