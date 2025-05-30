@@ -116,6 +116,7 @@ func DefaultConfig() *Config {
 			Cursor:              tcell.ColorGreen,
 		},
 		API: APIConfig{
+			Addr:         "localhost:8080",
 			ReadTimeout:  time.Second * DefaultAPITimeout,
 			WriteTimeout: time.Second * DefaultAPITimeout,
 		},
