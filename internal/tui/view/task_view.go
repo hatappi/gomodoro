@@ -160,6 +160,7 @@ func (v *TaskView) renderTasks(tasks []*core.Task, offset, renderbleNum, cursorP
 		if y == cursorPosition {
 			opts = []draw.Option{
 				draw.WithBackgroundColor(v.config.Color.SelectedLine),
+				draw.WithForegroundColor(v.config.Color.Font),
 			}
 		}
 		tw := runewidth.StringWidth(name)
