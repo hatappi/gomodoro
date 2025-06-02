@@ -11,7 +11,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golangci/golangci-lint v1.63.4
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/hatappi/go-kit v0.0.14
