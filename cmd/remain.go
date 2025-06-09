@@ -50,8 +50,9 @@ func newRemainCmd() *cobra.Command {
 
 			var remainingStr string
 			if slices.Contains([]event.PomodoroState{event.PomodoroStateActive, event.PomodoroStatePaused}, pomodoro.State) {
-				minutes := pomodoro.RemainingTime / secondsPerMinute
-				seconds := pomodoro.RemainingTime % secondsPerMinute
+				sec := int(pomodoro.RemainingTime.Seconds())
+				minutes := sec / secondsPerMinute
+				seconds := sec % secondsPerMinute
 
 				remainingStr = fmt.Sprintf("%02d:%02d", minutes, seconds)
 			} else {
