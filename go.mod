@@ -8,7 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.17.73
 	github.com/Khan/genqlient v0.8.0
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golangci/golangci-lint v1.63.4
 	github.com/google/go-cmp v0.6.0
