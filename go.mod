@@ -9,7 +9,7 @@ require (
 	github.com/Khan/genqlient v0.8.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/go-playground/validator/v10 v10.23.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golangci/golangci-lint v1.63.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
@@ -74,7 +74,7 @@ require (
 	github.com/firefart/nonamedreturns v1.0.5 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/ghostiam/protogetter v0.3.8 // indirect
 	github.com/go-critic/go-critic v0.11.5 // indirect
