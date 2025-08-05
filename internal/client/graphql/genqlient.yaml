@@ -11,7 +11,3 @@ bindings:
   Time:
     type: time.Time
 
-  Duration:
-    type: time.Duration
-    marshaler: github.com/hatappi/gomodoro/internal/client/graphql/types.MarshalDuration
-    unmarshaler: github.com/hatappi/gomodoro/internal/client/graphql/types.UnmarshalDuration

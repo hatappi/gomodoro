@@ -63,14 +63,14 @@ type PageInfo struct {
 }
 
 type Pomodoro struct {
-	ID            string        `json:"id"`
-	State         PomodoroState `json:"state"`
-	TaskID        string        `json:"taskId"`
-	StartTime     time.Time     `json:"startTime"`
-	Phase         PomodoroPhase `json:"phase"`
-	PhaseCount    int           `json:"phaseCount"`
-	RemainingTime time.Duration `json:"remainingTime"`
-	ElapsedTime   time.Duration `json:"elapsedTime"`
+	ID               string        `json:"id"`
+	State            PomodoroState `json:"state"`
+	TaskID           string        `json:"taskId"`
+	StartTime        time.Time     `json:"startTime"`
+	Phase            PomodoroPhase `json:"phase"`
+	PhaseCount       int           `json:"phaseCount"`
+	RemainingTimeSec int           `json:"remainingTimeSec"`
+	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
 }
 
 type Query struct {
