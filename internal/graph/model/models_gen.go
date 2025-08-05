@@ -25,13 +25,13 @@ type Event struct {
 }
 
 type EventPomodoroPayload struct {
-	ID            string        `json:"id"`
-	State         PomodoroState `json:"state"`
-	RemainingTime time.Duration `json:"remainingTime"`
-	ElapsedTime   time.Duration `json:"elapsedTime"`
-	TaskID        *string       `json:"taskId,omitempty"`
-	Phase         PomodoroPhase `json:"phase"`
-	PhaseCount    int           `json:"phaseCount"`
+	ID               string        `json:"id"`
+	State            PomodoroState `json:"state"`
+	RemainingTimeSec int           `json:"remainingTimeSec"`
+	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
+	TaskID           *string       `json:"taskId,omitempty"`
+	Phase            PomodoroPhase `json:"phase"`
+	PhaseCount       int           `json:"phaseCount"`
 }
 
 func (EventPomodoroPayload) IsEventPayload() {}
