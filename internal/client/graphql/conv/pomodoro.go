@@ -3,6 +3,7 @@ package conv
 
 import (
 	"fmt"
+	"time"
 
 	gqlgen "github.com/hatappi/gomodoro/internal/client/graphql/generated"
 	"github.com/hatappi/gomodoro/internal/core"
@@ -28,8 +29,8 @@ func ToCorePomodoro(pomodoro gqlgen.PomodoroDetails) (*core.Pomodoro, error) {
 		TaskID:        pomodoro.TaskId,
 		Phase:         phase,
 		PhaseCount:    pomodoro.PhaseCount,
-		RemainingTime: pomodoro.RemainingTime,
-		ElapsedTime:   pomodoro.ElapsedTime,
+		RemainingTime: time.Duration(pomodoro.RemainingTimeSec) * time.Second,
+		ElapsedTime:   time.Duration(pomodoro.ElapsedTimeSec) * time.Second,
 	}, nil
 }
 

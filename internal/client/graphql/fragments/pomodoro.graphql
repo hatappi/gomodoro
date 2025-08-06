@@ -5,6 +5,6 @@ fragment PomodoroDetails on Pomodoro {
   startTime
   phase
   phaseCount
-  remainingTime
-  elapsedTime
+  remainingTimeSec
+  elapsedTimeSec
 }

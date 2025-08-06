@@ -10,8 +10,8 @@ fragment EventDetails on Event {
 fragment EventPomodoroPayloadDetails on EventPomodoroPayload {
   id
   state
-  remainingTime
-  elapsedTime
+  remainingTimeSec
+  elapsedTimeSec
   taskId
   phase
   phaseCount

@@ -30,7 +30,7 @@ func FromPomodoro(pomodoro *core.Pomodoro) (*model.Pomodoro, error) {
 		Phase:     phase,
 
 		PhaseCount:    pomodoro.PhaseCount,
-		RemainingTime: pomodoro.RemainingTime,
-		ElapsedTime:   pomodoro.ElapsedTime,
+		RemainingTimeSec: int(pomodoro.RemainingTime.Seconds()),
+		ElapsedTimeSec:   int(pomodoro.ElapsedTime.Seconds()),
 	}, nil
 }

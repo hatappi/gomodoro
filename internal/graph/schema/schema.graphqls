@@ -1,5 +1,4 @@
 scalar Time
-scalar Duration
 
 type PageInfo {
   hasNextPage: Boolean!
