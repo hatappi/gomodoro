@@ -37,6 +37,7 @@ type EventPomodoroPayload {
   taskId: ID
   phase: PomodoroPhase!
   phaseCount: Int!
+  phaseDurationSec: Int!
 }
 
 type EventTaskPayload {

@@ -32,6 +32,7 @@ type EventPomodoroPayload struct {
 	TaskID           *string       `json:"taskId,omitempty"`
 	Phase            PomodoroPhase `json:"phase"`
 	PhaseCount       int           `json:"phaseCount"`
+	PhaseDurationSec int           `json:"phaseDurationSec"`
 }
 
 func (EventPomodoroPayload) IsEventPayload() {}
@@ -71,6 +72,7 @@ type Pomodoro struct {
 	PhaseCount       int           `json:"phaseCount"`
 	RemainingTimeSec int           `json:"remainingTimeSec"`
 	ElapsedTimeSec   int           `json:"elapsedTimeSec"`
+	PhaseDurationSec int           `json:"phaseDurationSec"`
 }
 
 type Query struct {

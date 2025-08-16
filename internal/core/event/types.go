@@ -79,6 +79,7 @@ type PomodoroEvent struct {
 	TaskID        string        `json:"task_id,omitempty"`
 	Phase         PomodoroPhase `json:"phase"`
 	PhaseCount    int           `json:"phase_count"`
+	PhaseDuration time.Duration `json:"phase_duration"`
 }
 
 // GetEventType returns the event type.
