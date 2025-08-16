@@ -40,6 +40,7 @@ type Pomodoro struct {
 	RemainingTime     time.Duration `json:"remaining_time"`
 	ElapsedTime       time.Duration `json:"elapsed_time"`
 	Phase             PomodoroPhase `json:"phase"`
+	PhaseDuration     time.Duration `json:"phase_duration"`
 	PhaseCount        int           `json:"phase_count"`
 	TaskID            string        `json:"task_id,omitempty"`
 }

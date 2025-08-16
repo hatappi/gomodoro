@@ -26,6 +26,7 @@ type Pomodoro struct {
 	ElapsedTime   time.Duration       `json:"elapsed_time"`
 	Phase         event.PomodoroPhase `json:"phase"`
 	PhaseCount    int                 `json:"phase_count"`
+	PhaseDuration time.Duration       `json:"phase_duration"`
 	TaskID        string              `json:"task_id,omitempty"`
 }
 
@@ -70,6 +71,16 @@ func (s *PomodoroService) Start(
 		longBreakDuration,
 	)
 
+	var phaseDuration time.Duration
+	switch phase {
+	case storage.PomodoroPhaseLongBreak:
+		phaseDuration = longBreakDuration
+	case storage.PomodoroPhaseShortBreak:
+		phaseDuration = breakDuration
+	default:
+		phaseDuration = workDuration
+	}
+
 	pomodoro := &storage.Pomodoro{
 		ID:                uuid.New().String(),
 		State:             storage.PomodoroStateActive,
@@ -79,6 +90,7 @@ func (s *PomodoroService) Start(
 		LongBreakDuration: longBreakDuration,
 		RemainingTime:     duration,
 		Phase:             phase,
+		PhaseDuration:     phaseDuration,
 		PhaseCount:        phaseCount,
 		TaskID:            taskID,
 	}
@@ -300,6 +312,7 @@ func (s *PomodoroService) publishPomodoroEvent(eventType event.EventType, p *sto
 		TaskID:        p.TaskID,
 		Phase:         event.PomodoroPhase(p.Phase),
 		PhaseCount:    p.PhaseCount,
+		PhaseDuration: p.PhaseDuration,
 	}
 
 	s.eventBus.Publish(e)
@@ -320,6 +333,7 @@ func (s *PomodoroService) storagePomodoroToCore(p *storage.Pomodoro) *Pomodoro {
 		RemainingTime: p.RemainingTime,
 		ElapsedTime:   p.ElapsedTime,
 		Phase:         event.PomodoroPhase(p.Phase),
+		PhaseDuration: p.PhaseDuration,
 		PhaseCount:    p.PhaseCount,
 		TaskID:        p.TaskID,
 	}

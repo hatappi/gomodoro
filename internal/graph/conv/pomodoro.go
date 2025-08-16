@@ -23,14 +23,14 @@ func FromPomodoro(pomodoro *core.Pomodoro) (*model.Pomodoro, error) {
 	}
 
 	return &model.Pomodoro{
-		ID:        pomodoro.ID,
-		State:     state,
-		TaskID:    pomodoro.TaskID,
-		StartTime: pomodoro.StartTime,
-		Phase:     phase,
-
-		PhaseCount:    pomodoro.PhaseCount,
+		ID:               pomodoro.ID,
+		State:            state,
+		TaskID:           pomodoro.TaskID,
+		StartTime:        pomodoro.StartTime,
+		Phase:            phase,
+		PhaseCount:       pomodoro.PhaseCount,
 		RemainingTimeSec: int(pomodoro.RemainingTime.Seconds()),
 		ElapsedTimeSec:   int(pomodoro.ElapsedTime.Seconds()),
+		PhaseDurationSec: int(pomodoro.PhaseDuration.Seconds()),
 	}, nil
 }

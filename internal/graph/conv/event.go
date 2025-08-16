@@ -52,6 +52,7 @@ func ConvertPomodoroEventToModelEvent(evt event.PomodoroEvent) (*model.Event, er
 		TaskID:           &evt.TaskID,
 		Phase:            phase,
 		PhaseCount:       evt.PhaseCount,
+		PhaseDurationSec: int(evt.PhaseDuration.Seconds()),
 	}
 
 	return &model.Event{
