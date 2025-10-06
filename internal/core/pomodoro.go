@@ -194,7 +194,40 @@ func (s *PomodoroService) Stop(_ context.Context, id string) error {
 	return nil
 }
 
-// Delete deletes a pomodoro session by ID.
+// Reset resets the current pomodoro session and clears the phase count.
+func (s *PomodoroService) Reset(_ context.Context) (*Pomodoro, error) {
+	s.stopTimer()
+
+	latestPomodoro, err := s.storage.GetLatestPomodoro()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest pomodoro: %w", err)
+	}
+
+	if latestPomodoro == nil {
+		return nil, fmt.Errorf("no pomodoro found")
+	}
+
+	pomodoro, err := s.storage.UpdatePomodoroState(
+		latestPomodoro.ID,
+		storage.PomodoroStateFinished,
+		0,
+		int(latestPomodoro.ElapsedTime.Seconds()),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update pomodoro state: %w", err)
+	}
+
+	err = s.storage.DeletePomodoro(latestPomodoro.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete pomodoro: %w", err)
+	}
+
+	s.publishPomodoroEvent(event.PomodoroReset, pomodoro)
+
+	return s.storagePomodoroToCore(pomodoro), nil
+}
+
+// actvePomooro.IDa pomodoro session by ID.
 func (s *PomodoroService) Delete(_ context.Context, id string) error {
 	err := s.storage.DeletePomodoro(id)
 	if err != nil {

@@ -26,4 +26,5 @@ extend type Mutation {
   pausePomodoro: Pomodoro
   resumePomodoro: Pomodoro
   stopPomodoro: Pomodoro
+  resetPomodoro: Pomodoro
 }

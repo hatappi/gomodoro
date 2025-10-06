@@ -73,6 +73,16 @@ func (r *mutationResolver) StopPomodoro(ctx context.Context) (*model.Pomodoro, e
 	return conv.FromPomodoro(activePomodoro)
 }
 
+// ResetPomodoro is the resolver for the resetPomodoro field.
+func (r *mutationResolver) ResetPomodoro(ctx context.Context) (*model.Pomodoro, error) {
+	pomodoro, err := r.PomodoroService.Reset(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return conv.FromPomodoro(pomodoro)
+}
+
 // CurrentPomodoro is the resolver for the currentPomodoro field.
 func (r *queryResolver) CurrentPomodoro(ctx context.Context) (*model.Pomodoro, error) {
 	pomodoro, err := r.PomodoroService.LatestPomodoro()

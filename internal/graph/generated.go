@@ -83,6 +83,7 @@ type ComplexityRoot struct {
 		DeleteTask     func(childComplexity int, id string) int
 		Noop           func(childComplexity int) int
 		PausePomodoro  func(childComplexity int) int
+		ResetPomodoro  func(childComplexity int) int
 		ResumePomodoro func(childComplexity int) int
 		StartPomodoro  func(childComplexity int, input model.StartPomodoroInput) int
 		StopPomodoro   func(childComplexity int) int
@@ -145,6 +146,7 @@ type MutationResolver interface {
 	PausePomodoro(ctx context.Context) (*model.Pomodoro, error)
 	ResumePomodoro(ctx context.Context) (*model.Pomodoro, error)
 	StopPomodoro(ctx context.Context) (*model.Pomodoro, error)
+	ResetPomodoro(ctx context.Context) (*model.Pomodoro, error)
 	CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.Task, error)
 	UpdateTask(ctx context.Context, input model.UpdateTaskInput) (*model.Task, error)
 	DeleteTask(ctx context.Context, id string) (*bool, error)
@@ -322,6 +324,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.PausePomodoro(childComplexity), true
+
+	case "Mutation.resetPomodoro":
+		if e.complexity.Mutation.ResetPomodoro == nil {
+			break
+		}
+
+		return e.complexity.Mutation.ResetPomodoro(childComplexity), true
 
 	case "Mutation.resumePomodoro":
 		if e.complexity.Mutation.ResumePomodoro == nil {
@@ -1898,6 +1907,67 @@ func (ec *executionContext) _Mutation_stopPomodoro(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_Mutation_stopPomodoro(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Pomodoro_id(ctx, field)
+			case "state":
+				return ec.fieldContext_Pomodoro_state(ctx, field)
+			case "taskId":
+				return ec.fieldContext_Pomodoro_taskId(ctx, field)
+			case "startTime":
+				return ec.fieldContext_Pomodoro_startTime(ctx, field)
+			case "phase":
+				return ec.fieldContext_Pomodoro_phase(ctx, field)
+			case "phaseCount":
+				return ec.fieldContext_Pomodoro_phaseCount(ctx, field)
+			case "remainingTimeSec":
+				return ec.fieldContext_Pomodoro_remainingTimeSec(ctx, field)
+			case "elapsedTimeSec":
+				return ec.fieldContext_Pomodoro_elapsedTimeSec(ctx, field)
+			case "phaseDurationSec":
+				return ec.fieldContext_Pomodoro_phaseDurationSec(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Pomodoro", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_resetPomodoro(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_resetPomodoro(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetPomodoro(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Pomodoro)
+	fc.Result = res
+	return ec.marshalOPomodoro2ᚖgithubᚗcomᚋhatappiᚋgomodoroᚋinternalᚋgraphᚋmodelᚐPomodoro(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_resetPomodoro(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -5926,6 +5996,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "stopPomodoro":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_stopPomodoro(ctx, field)
+			})
+		case "resetPomodoro":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_resetPomodoro(ctx, field)
 			})
 		case "createTask":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {

@@ -262,3 +262,13 @@ func (c *ClientWrapper) StopPomodoro(ctx context.Context) (*core.Pomodoro, error
 
 	return conv.ToCorePomodoro(res.StopPomodoro.PomodoroDetails)
 }
+
+// ResetPomodoro resets the current pomodoro session on the server.
+func (c *ClientWrapper) ResetPomodoro(ctx context.Context) (*core.Pomodoro, error) {
+	res, err := gqlgen.ResetPomodoro(ctx, c.queryClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reset pomodoro: %w", err)
+	}
+
+	return conv.ToCorePomodoro(res.ResetPomodoro.PomodoroDetails)
+}
