@@ -33,7 +33,7 @@ func (v *PomodoroView) SelectNextTask(_ context.Context) (constants.PomodoroActi
 		0,
 		h-1,
 		w,
-		"(Enter): continue / (c): change task",
+		"(Enter): continue / (c): change task / (r): reset",
 		true,
 		draw.WithBackgroundColor(v.config.Color.StatusBarBackground),
 	)
@@ -46,9 +46,13 @@ func (v *PomodoroView) SelectNextTask(_ context.Context) (constants.PomodoroActi
 		case screen.EventCancel:
 			return constants.PomodoroActionCancel, errors.ErrCancel
 		case screen.EventRune:
-			if string(e) == "c" {
+			switch string(e) {
+			case "c":
 				v.screenClient.Clear()
 				return constants.PomodoroActionChange, nil
+			case "r":
+				v.screenClient.Clear()
+				return constants.PomodoroActionReset, nil
 			}
 		}
 	}

@@ -41,4 +41,6 @@ const (
 	PomodoroActionContinue PomodoroAction = "pomodoro:continue"
 	// PomodoroActionChange indicates the pomodoro should change to a new task.
 	PomodoroActionChange PomodoroAction = "pomodoro:change"
+	// PomodoroActionReset indicates the pomodoro should be reset.
+	PomodoroActionReset PomodoroAction = "pomodoro:reset"
 )

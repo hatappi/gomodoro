@@ -203,6 +203,19 @@ func (a *App) Run(ctx context.Context) error {
 				return err
 			}
 			task = newTask
+		case constants.PomodoroActionReset:
+			// Reset pomodoro
+			_, err := a.graphqlClient.ResetPomodoro(ctx)
+			if err != nil {
+				log.FromContext(ctx).Error(err, "failed to reset pomodoro")
+				return err
+			}
+			// Select task after reset
+			newTask, err := a.selectTask(ctx, true)
+			if err != nil {
+				return err
+			}
+			task = newTask
 		case constants.PomodoroActionNone:
 			// no action
 		}

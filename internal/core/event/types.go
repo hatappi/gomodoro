@@ -21,6 +21,8 @@ const (
 	PomodoroCompleted EventType = "pomodoro.completed"
 	// PomodoroStopped event is emitted when a pomodoro session is manually stopped.
 	PomodoroStopped EventType = "pomodoro.stopped"
+	// PomodoroReset event is emitted when a pomodoro session is reset.
+	PomodoroReset EventType = "pomodoro.reset"
 	// PomodoroTick event is emitted on each second during an active pomodoro.
 	PomodoroTick EventType = "pomodoro.tick"
 
@@ -35,7 +37,7 @@ const (
 // AllEventTypes contains a list of all available event types in the system.
 var AllEventTypes = []EventType{
 	PomodoroStarted, PomodoroPaused, PomodoroResumed,
-	PomodoroCompleted, PomodoroStopped, PomodoroTick,
+	PomodoroCompleted, PomodoroStopped, PomodoroReset, PomodoroTick,
 	TaskCreated, TaskUpdated, TaskDeleted,
 }
 
